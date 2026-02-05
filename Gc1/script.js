@@ -1,5 +1,5 @@
 // ==========================================
-// WORK SCHEDULE MANAGER - LOADING ISSUE FIXED
+// WORK SCHEDULE MANAGER
 // All features: Rotation, Shift-based availability, Auto-status, Toggles
 // ==========================================
 
@@ -137,15 +137,15 @@ function getWorkingHoursDisplay() {
 let availabilityOverrides = JSON.parse(localStorage.getItem("availabilityOverrides")) || {};
 // ---------- TEAM DATA ----------
 let teamData = JSON.parse(localStorage.getItem("teamData")) || {
-    SAs: [ "Selva", "Naveen", "Kannan", "Midhun", "Prem", "Logesh", "Linith"],
-    apprentices: [ "Sanjay", "Vishal", "Subash"],
+    SAs: [ "Gayathiri", "Ajay", "Jana", "Malini", "Raja Ganesan", "Keerthana" ],
+    apprentices: [ "Deva", "Rokita", "Soban"],
     responsibilities: {
-        Selva: "Vishal",
-        Naveen: "Vishal",
-        Kannan: "Karl / Subash",
-        Midhun: "Sanjay",
-        Prem: "Karl / Subash",
-        Idris: "All Apprentice"
+        Gayathiri: "Rokita",
+        Ajay: "Rokita",
+        Jana: "Karl / Soban",
+        Malini: "Deva",
+        Raja Ganesan: "Karl / Soban",
+        
     }
 };
 
@@ -296,7 +296,7 @@ function addMemberFromAvailability(role) {
     teamData[category].push(name.trim());
     
     if (role === "SA") {
-        const responsibilities = prompt(`Enter responsibilities for ${name.trim()} (e.g., "Karl / Subash"):`);
+        const responsibilities = prompt(`Enter responsibilities for ${name.trim()} (e.g., "Karl / Soban"):`);
         if (responsibilities) {
             teamData.responsibilities[name.trim()] = responsibilities.trim();
         }
@@ -341,18 +341,18 @@ function addMemberFromAvailability(role) {
 let memberAvailabilitySettings = JSON.parse(localStorage.getItem('memberAvailabilitySettings')) || {
     SAs: {
         "Idris": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], isPOC: true },
-        "Selva": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Naveen": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Kannan": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Midhun": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Prem": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Logesh": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
+        "Gayathiri": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Ajay": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Jana": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Malini": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Raja Ganesan": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Keerthana": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
     },
     apprentices: {
         "Linith": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Sanjay": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Vishal": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Subash": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] }
+        "Deva": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Rokita": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Soban": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] }
     }
 };
 
