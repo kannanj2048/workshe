@@ -137,7 +137,7 @@ function getWorkingHoursDisplay() {
 let availabilityOverrides = JSON.parse(localStorage.getItem("availabilityOverrides")) || {};
 // ---------- TEAM DATA ----------
 let teamData = JSON.parse(localStorage.getItem("teamData")) || {
-    SAs: [ "Gayathiri", "Ajay", "Jana", "Malini", "RajaGanesan", "Keerthana" ],
+    SAs: [ "Gayathiri", "Ajay", "Jana", "Malini", "Raja Ganesan", "Keerthana" ],
     apprentices: [ "Deva", "Rokita", "Soban"],
     responsibilities: {
         Gayathiri: "Rokita",
@@ -340,16 +340,14 @@ function addMemberFromAvailability(role) {
 // ========== CENTRALIZED AVAILABILITY MANAGEMENT SYSTEM ==========
 let memberAvailabilitySettings = JSON.parse(localStorage.getItem('memberAvailabilitySettings')) || {
     SAs: {
-        "Idris": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], isPOC: true },
         "Gayathiri": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
         "Ajay": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Jana": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
         "Malini": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "RajaGanesan": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Raja Ganesan": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
         "Keerthana": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
     },
     apprentices: {
-        "Linith": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Deva": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Rokita": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Soban": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] }
