@@ -137,14 +137,14 @@ function getWorkingHoursDisplay() {
 let availabilityOverrides = JSON.parse(localStorage.getItem("availabilityOverrides")) || {};
 // ---------- TEAM DATA ----------
 let teamData = JSON.parse(localStorage.getItem("teamData")) || {
-    SAs: [ "Gayathiri", "Ajay", "Jana", "Malini", "Raja Ganesan", "Keerthana" ],
+    SAs: [ "Gayathiri", "Ajay", "Jana", "Malini", "RajaG", "Keerthana" ],
     apprentices: [ "Deva", "Rokita", "Soban"],
     responsibilities: {
         Gayathiri: "Rokita",
         Ajay: "Rokita",
         Jana: "Karl / Soban",
         Malini: "Deva",
-        RajaGanesan: "Karl / Soban",
+        RajaG: "Karl / Soban",
         
     }
 };
@@ -344,7 +344,7 @@ let memberAvailabilitySettings = JSON.parse(localStorage.getItem('memberAvailabi
         "Ajay": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Jana": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
         "Malini": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Raja Ganesan": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "RajaG": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
         "Keerthana": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
     },
     apprentices: {
