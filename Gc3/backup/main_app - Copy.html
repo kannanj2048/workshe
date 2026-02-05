@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligent Work Assignment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Georgia', serif;
+        }
+        
+        #main-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Navigation */
+        nav {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 20;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 0;
+        }
+        
+        .nav-container {
+            display: flex;
+            gap: 2rem;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(12px);
+            padding: 1rem 2rem;
+            border-radius: 9999px;
+            border: 2.1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-link {
+            font-size: 1.125rem;
+            font-weight: 500;
+            color: #9ca3af;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .nav-link:hover {
+            color: #ffffff;
+        }
+        
+        .nav-link.active {
+            background: linear-gradient(to right, #a855f7, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Spline container with crop */
+        #spline-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 110vh;
+            transform: translateY(-5vh);
+            clip-path: inset(0 0 80px 0);
+        }
+        
+        spline-viewer {
+            width: 100%;
+            height: 100%;
+        }
+        
+        spline-viewer img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* Gradient overlay to fade bottom */
+        .gradient-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 120px;
+            background: linear-gradient(to top, rgba(0,0,0,1) 20%, transparent);
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        /* Content overlay - centered */
+        .content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 80vh;
+            text-align: center;
+            padding: 0 20px;
+        }
+        
+        h1 {
+            font-size: clamp(2rem, 5vw, 4.5rem);
+            line-height: 1;
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+        }
+
+        
+        .white-text {
+            padding-top: 400px;
+            color: #2596be;
+            font-size: 75%;
+            background: linear-gradient(
+                270deg,
+                #ffffff,
+                #60a5fa,
+                #ffffff,
+                #22d3ee
+            );
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientMove 8s ease infinite;
+            }
+
+            @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+            }
+
+        
+        
+        .gradient-text {
+            background: linear-gradient(to right, #a855f7, #ec4899, #ffffff, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            font-size: 75%;
+        }
+        
+        p {
+            color: #9ca3af;
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            max-width: 900px;
+            line-height: 1.6;
+            font-size: 98%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+        }
+        
+        /* Hide Spline watermark */
+        a[href*="spline.design"],
+        #spline-watermark,
+        [class*="watermark"] {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+        }
+
+        /* Loading indicator */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 15;
+            color: #9ca3af;
+            font-size: 1.2rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .nav-container {
+                gap: 1rem;
+                padding: 0.75rem 1.5rem;
+            }
+            
+            .nav-link {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="main-container">
+        <!-- Navigation -->
+        <nav>
+            <div class="nav-container">
+                <a href="#group1" class="nav-link" data-group="1">Group 1</a>
+                <a href="#group2" class="nav-link" data-group="2">Group 2</a>
+                <a href="Gc3/app.html" class="nav-link" data-group="3">Group 3</a>
+            </div>
+        </nav>
+        <!-- Loading indicator -->
+        <!--<div class="loading" id="loading">Loading 3D Scene...</div> -->
+
+        <!-- 3D Scenes -->
+        <div id="spline-container">
+            <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.46/build/spline-viewer.js" async></script>
+            <spline-viewer url="https://prod.spline.design/5wgElQtwRbHDk-KI/scene.splinecode">
+                <img src="data:image/png;base64,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" alt="Spline preview" style="width: 100%; height: 100%;"/>
+            </spline-viewer>
+        </div>
+        
+        <!-- Gradient overlay to fade bottom -->
+        <div class="gradient-overlay"></div>
+        
+        <!-- Content overlay - centered -->
+        <div class="content">
+            <h1>
+                <span class="white-text">Intelligent. Work Assignment. </span>
+                <span class="gradient-text">Fully <br>Automated.</br></span>
+            </h1>
+            
+            <p>
+                A smart platform that securely analyzes real-time availability, skills, workload, and rules to
+                automatically assign the right work to the right team and platform with maximum efficiency.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Navigation functionality
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Only prevent default for Group 1 and Group 2 (hash links)
+                // Let Group 3 navigate normally
+                const group = this.getAttribute('data-group');
+                
+                if (group === "3") {
+                    // Don't prevent default - let it navigate to Gc3/app.html
+                    return;
+                }
+                
+                // For Group 1 and 2, prevent default and handle with JavaScript
+                e.preventDefault();
+                
+                // Remove active class from all links
+                navLinks.forEach(l => l.classList.remove('active'));
+                
+                // Add active class to clicked link
+                this.classList.add('active');
+                
+                console.log('Navigating to Group', group);
+                
+                // Add your navigation logic here for Group 1 and 2
+                // Example: loadGroupContent(group);
+            });
+        });
+
+        // Hide loading indicator when Spline loads
+        setTimeout(() => {
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.style.opacity = '0';
+                loading.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => loading.style.display = 'none', 500);
+            }
+        }, 3000);
+
+        // Hide watermark functionality
+        window.addEventListener('load', function() {
+            function hideWatermark() {
+                const watermarkSelectors = [
+                    'a[href*="spline.design"]',
+                    '#spline-watermark',
+                    '[class*="watermark"]',
+                    '[id*="watermark"]'
+                ];
+
+                watermarkSelectors.forEach(selector => {
+                    const elements = document.querySelectorAll(selector);
+                    elements.forEach(el => {
+                        el.style.display = 'none';
+                        el.style.visibility = 'hidden';
+                        el.style.opacity = '0';
+                    });
+                });
+            }
+
+            // Run multiple times to catch dynamically loaded elements
+            setTimeout(hideWatermark, 500);
+            setTimeout(hideWatermark, 1000);
+            setTimeout(hideWatermark, 2000);
+            setTimeout(hideWatermark, 3000);
+            
+            // Keep checking periodically
+            setInterval(hideWatermark, 1000);
+        });
+
+        // Optional: Add smooth scroll behavior
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+            });
+        });
+    </script>
+</body>
+</html>

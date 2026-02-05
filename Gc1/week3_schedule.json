@@ -1,0 +1,2728 @@
+{
+  "metadata": {
+    "total_records": 336,
+    "weeks_covered": 3,
+    "days_per_week": 7,
+    "records_per_week": 112,
+    "records_per_day": 16,
+    "platforms": [
+      "SIEM",
+      "XDR",
+      "Forti EDR",
+      "CrowdStrike EDR",
+      "Netskope",
+      "NDR",
+      "Acronis EDR",
+      "Sophos XDR",
+      "Trend Vision One",
+      "Cloudflare"
+    ],
+    "additional_tasks": [
+      "Email Handle",
+      "Follow Up Remainder",
+      "SIEM Device Status",
+      "HO PPT Update",
+      "Handover Presentation",
+      "Handover Summary"
+    ],
+    "days_of_week": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ]
+  },
+  "training_data": [
+    {
+      "Week": "Week 1",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Siva bharathi",
+      "Responsibility": "Rokita"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": "Soban"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Ajay",
+      "Responsibility": "Deva"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "Gayathiri",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "Gayathiri",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "Malini",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "Malini",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "           Jana",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "           Jana",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "           Jana",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Monday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Keerthana/Deva",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Monday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Malini",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Monday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "keerthana/Soban",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Monday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Monday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Keerthana",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Monday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Deva",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Jana",
+      "Responsibility": "Deva"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Keerthana",
+      "Responsibility": "Rokita"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Malini",
+      "Responsibility": "Soban"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "Ajay",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "Ajay",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "Gayathiri",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "Gayathiri",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "           Raja Ganesh",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "           Raja Ganesh",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "           Raja Ganesh",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Tuesday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Gayathiri / Malini",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Tuesday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Malini",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Tuesday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "Siva bharathi/Deva",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Tuesday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Tuesday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Siva bharathi",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Tuesday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Rokita",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Gayathiri",
+      "Responsibility": "soban"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Ajay",
+      "Responsibility": "Deva"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": "Rokita"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "Malini",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "Malini",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "Keerthana",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "Keerthana",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "        Jana",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "        Jana",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "         Jana",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Wednesday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Raja Ganesh/soban",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Wednesday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Siva bharathi",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Wednesday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "Malini/Rokita",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Wednesday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Wednesday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Siva bharathi",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Wednesday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Soban",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Malini",
+      "Responsibility": "Rokita"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Gayathiri",
+      "Responsibility": "soban"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Keerthana",
+      "Responsibility": "Deva"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": " All SA's",
+      "Responsibility": " All apprentices"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "All SA's ",
+      "Responsibility": " All apprentices"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": " All apprentices"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "All SA's ",
+      "Responsibility": " All apprentices"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": " All apprentices"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "All SA's ",
+      "Responsibility": " All apprentices"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "All SA's ",
+      "Responsibility": " All apprentices"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Thursday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Keerthana / Deva",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Thursday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Soban",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Thursday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "Gayathiri / Rokita",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Thursday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Thursday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Malini",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Thursday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Soban",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Keerthana",
+      "Responsibility": "Soban"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Malini",
+      "Responsibility": "Deva"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Gayathiri",
+      "Responsibility": "Rokita"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "All",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Friday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Keerthana / Rokita",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Friday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Rokita",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Friday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "Malini / Soban",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Friday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Friday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Gayathiri",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Friday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Deva",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Ajay",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Siva bharathi",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Jana",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Saturday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Raja Ganesh/siva bharathi",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Saturday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Jana",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Saturday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": " Ajay / Raja Ganesh",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Saturday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All SA's ",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Saturday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Saturday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Siva bharathi",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Jana",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Siva bharathi",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "Ajay",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "Ajay",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "All SA's",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "All SA's",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "All SA's",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "All SA's",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "All SA's",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Sunday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Ajay / Jana",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Sunday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Sunday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "Siva bharathi / Ajay",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Sunday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All SA's",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Sunday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Ajay",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 1",
+      "Day": "Sunday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Jana",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Gayathiri",
+      "Responsibility": "Deva"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": "Rokita"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Malini",
+      "Responsibility": "Soban"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "Jana",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "Jana",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "     Siva Bharathi",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "         Siva Barathi",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "Ajay",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "Ajay",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "Ajay",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Monday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Keerthana / soban",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Monday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Deva",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Monday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "Keerthana / Jana",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Monday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Monday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Kerethana",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Monday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Rokita",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Jana",
+      "Responsibility": "Rokita"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Ajay",
+      "Responsibility": "Soban"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Keerthana",
+      "Responsibility": "Deva"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "Siva Bharathi",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "Siva Bharathi",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "Malini",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "             Malini",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "Gayathiri",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "Gayathiri",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "Gayathiri",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Tuesday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Raja Ganesh / Deva",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Tuesday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Soban",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Tuesday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "Siva Bharathi / Rokita",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Tuesday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Tuesday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Raja Ganesh ",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Tuesday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Deva",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Ajay",
+      "Responsibility": "Soban"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Keerthana",
+      "Responsibility": "Deva"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Siva barathi",
+      "Responsibility": "Rokita"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "Gayathiri",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "           Gayathiri",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "           Jana",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "           Jana",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "           Jana",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Wednesday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Malini / Rokita",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Wednesday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Rokita",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Wednesday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "Jana / Soban",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Wednesday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Wednesday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Gayathiri",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Wednesday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Deva",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Malini",
+      "Responsibility": "Soban"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Gayathiri",
+      "Responsibility": "Deva"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Keerthana",
+      "Responsibility": "Rokita"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Thursday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Malini / Soban",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Thursday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Deva",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Thursday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "Keerthana / Rokita",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Thursday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Thursday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Keerthana",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Thursday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Rokita",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Keerthana",
+      "Responsibility": "Rokita"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Malini",
+      "Responsibility": "Deva"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Gayathiri",
+      "Responsibility": "Soban"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Friday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Gayathiri / Deva",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Friday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Soban",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Friday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "Malini / Rokita",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Friday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Friday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Malini",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Friday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Soban",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Jana",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Siva barathi",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "Ajay",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "Ajay",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Saturday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": " Ajay / Raja Ganesh",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Saturday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Jana",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Saturday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "Siva Bharathi / Jana",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Saturday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All SA's ",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Saturday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Ajay",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Saturday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Siva Bharathi",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Siva Bharathi",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Ajay",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Jana",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Sunday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Jana / Siva Bharathi",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Sunday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Sunday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "Ajay / Jana",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Sunday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All SA's ",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Sunday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Jana",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 2",
+      "Day": "Sunday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Ajay",
+      "Responsibility": "Rokita"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Malini",
+      "Responsibility": "Soban"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": "Deva"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "Siva Bharathi",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "Siva Bharathi",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "Keerthana",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "Keerthana",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "           Gayathiri",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "           Gayathiri",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Monday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "           Gayathiri",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Monday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Jana / Soban",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Monday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Rokita",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Monday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "Keerthana / Deva",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Monday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Monday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Jana",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Monday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Deva",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Malini",
+      "Responsibility": "Soban"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Siva Bharathi",
+      "Responsibility": "Deva"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Jana",
+      "Responsibility": "Rokita"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "Gayathiri ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "Gayathiri ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "Ajay",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "Ajay",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "         Raja Ganesh",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "         Raja Ganesh",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Tuesday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "         Raja Ganesh",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Tuesday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Keerthana / Rokita",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Tuesday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Soban",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Tuesday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "Raja Ganesh / rokita",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Tuesday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Tuesday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Ajay",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Tuesday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Deva",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Siva Bharathi",
+      "Responsibility": "Deva"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Malini",
+      "Responsibility": "Rokita"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": "Soban"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "Siva Bharathi",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "Siva Bharathi",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "Ajay",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "Ajay",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "                  Jana",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "                  Jana",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Wednesday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "                  Jana",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Wednesday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Malini / Soban",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Wednesday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Deva",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Wednesday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "Jana / Rokita",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Wednesday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Wednesday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Keerthana",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Wednesday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Soban",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Keerthana",
+      "Responsibility": "Rokita"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Malini",
+      "Responsibility": "Soban"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Gayathiri",
+      "Responsibility": "Deva"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Thursday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Thursday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Gayathiri / Deva",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Thursday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Deva",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Thursday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "Keerthana / Rokita",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Thursday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Thursday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Gayathiri",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Thursday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Soban",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Gayathiri",
+      "Responsibility": "Soban"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Malini",
+      "Responsibility": "Rokita"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Keerthana",
+      "Responsibility": "Deva"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Friday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All Apprentice"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Friday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Keerthana / Rokita",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Friday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Soban",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Friday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "Malini / Deva",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Friday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Friday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Keerthana",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Friday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Deva",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Jana",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Siva Bharathi",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Ajay",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Saturday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Saturday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Raja Ganesh / Jana",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Saturday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": "Siva Bharathi",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Saturday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "Ajay / Siva Bharathi",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Saturday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All SA's ",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Saturday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Saturday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Jana",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "SIEM",
+      "In_Charge": "Raja Ganesh",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "XDR",
+      "In_Charge": "Jana",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "Forti EDR",
+      "In_Charge": "Siva Bharathi",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "CrowdStrike EDR",
+      "In_Charge": "Ajay",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "Netskope",
+      "In_Charge": "Ajay",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "NDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "Acronis EDR​",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "Sophos XDR",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": " Trend Vision One",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Sunday",
+      "Category": "Platform",
+      "Task": "Cloudflare",
+      "In_Charge": "All SA's ",
+      "Responsibility": "All"
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Sunday",
+      "Category": "Additional Task",
+      "Task": "Email Handle",
+      "In_Charge": "Ajay / Siva Bharathi",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Sunday",
+      "Category": "Additional Task",
+      "Task": "Follow Up Remainder",
+      "In_Charge": " Jana",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Sunday",
+      "Category": "Additional Task",
+      "Task": "SIEM Device Status",
+      "In_Charge": "Raja Ganesh / Jana",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Sunday",
+      "Category": "Additional Task",
+      "Task": "HO PPT Update",
+      "In_Charge": "All",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Sunday",
+      "Category": "Additional Task",
+      "Task": "Handover Presentation",
+      "In_Charge": "Siva Bharathi",
+      "Responsibility": NaN
+    },
+    {
+      "Week": "Week 3",
+      "Day": "Sunday",
+      "Category": "Additional Task",
+      "Task": "Handover Summary",
+      "In_Charge": "Siva Bharathi",
+      "Responsibility": NaN
+    }
+  ]
+}

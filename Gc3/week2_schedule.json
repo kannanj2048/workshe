@@ -1,0 +1,373 @@
+{
+  "Monday": {
+    "team": "Team1 & Team2",
+    "platforms": {
+      "SIEM": {
+        "inCharge": "Logesh",
+        "responsibility": "Sanjay / Vishal"
+      },
+      "XDR": {
+        "inCharge": "Naveen",
+        "responsibility": "Linith / Subash"
+      },
+      "Forti EDR": {
+        "inCharge": "Kannan",
+        "responsibility": "Karl"
+      },
+      "CrowdStrike EDR": {
+        "inCharge": "Midhun",
+        "responsibility": "All Apprentice"
+      },
+      "Netskope": {
+        "inCharge": "Midhun",
+        "responsibility": "All Apprentice"
+      },
+      "NDR": {
+        "inCharge": "Prem",
+        "responsibility": "All Apprentice"
+      },
+      "Acronis EDR": {
+        "inCharge": "Prem",
+        "responsibility": "All Apprentice"
+      },
+      "Sophos XDR": {
+        "inCharge": "Selva",
+        "responsibility": "All Apprentice"
+      },
+      "Trend Vision One": {
+        "inCharge": "TBD",
+        "responsibility": "All Apprentice"
+      },
+      "Cloudflare": {
+        "inCharge": "TBD",
+        "responsibility": "All Apprentice"
+      }
+    },
+    "tasks": {
+      "Email Handle": "Naveen / Sanjay",
+      "Follow Up Remainder": "Subash",
+      "SIEM Device Status": "Logesh / Vishal",
+      "HO PPT Update": "Selva / Logesh / Sanjay",
+      "Handover Presentation": "Selva",
+      "Handover Summary": "Subash"
+    }
+  },
+  "Tuesday": {
+    "team": "Team1 & Team2",
+    "platforms": {
+      "SIEM": {
+        "inCharge": "Prem",
+        "responsibility": "Linith / Subash"
+      },
+      "XDR": {
+        "inCharge": "Selva",
+        "responsibility": "Karl / Sanjay"
+      },
+      "Forti EDR": {
+        "inCharge": "Naveen",
+        "responsibility": "Vishal"
+      },
+      "CrowdStrike EDR": {
+        "inCharge": "Logesh",
+        "responsibility": "All Apprentice"
+      },
+      "Netskope": {
+        "inCharge": "Logesh",
+        "responsibility": "All Apprentice"
+      },
+      "NDR": {
+        "inCharge": "Kannan",
+        "responsibility": "All Apprentice"
+      },
+      "Acronis EDR": {
+        "inCharge": "Kannan",
+        "responsibility": "All Apprentice"
+      },
+      "Sophos XDR": {
+        "inCharge": "Midhun",
+        "responsibility": "All Apprentice"
+      },
+      "Trend Vision One": {
+        "inCharge": "TBD",
+        "responsibility": "All Apprentice"
+      },
+      "Cloudflare": {
+        "inCharge": "TBD",
+        "responsibility": "All Apprentice"
+      }
+    },
+    "tasks": {
+      "Email Handle": "Midhun / Vishal",
+      "Follow Up Remainder": "Vishal",
+      "SIEM Device Status": "TBD",
+      "HO PPT Update": "Kannan / Linith / Vishal",
+      "Handover Presentation": "Naveen",
+      "Handover Summary": "Karl"
+    }
+  },
+  "Wednesday": {
+    "team": "Team1 & Team2",
+    "platforms": {
+      "SIEM": {
+        "inCharge": "Midhun",
+        "responsibility": "Karl / Sanjay"
+      },
+      "XDR": {
+        "inCharge": "Kannan",
+        "responsibility": "Subash / Vishal"
+      },
+      "Forti EDR": {
+        "inCharge": "Logesh",
+        "responsibility": "Linith"
+      },
+      "CrowdStrike EDR": {
+        "inCharge": "Naveen",
+        "responsibility": "All Apprentice"
+      },
+      "Netskope": {
+        "inCharge": "Naveen",
+        "responsibility": "All Apprentice"
+      },
+      "NDR": {
+        "inCharge": "Selva",
+        "responsibility": "All Apprentice"
+      },
+      "Acronis EDR": {
+        "inCharge": "Selva",
+        "responsibility": "All Apprentice"
+      },
+      "Sophos XDR": {
+        "inCharge": "Prem",
+        "responsibility": "All Apprentice"
+      },
+      "Trend Vision One": {
+        "inCharge": "TBD",
+        "responsibility": "All Apprentice"
+      },
+      "Cloudflare": {
+        "inCharge": "TBD",
+        "responsibility": "All Apprentice"
+      }
+    },
+    "tasks": {
+      "Email Handle": "Prem / Subash",
+      "Follow Up Remainder": "Karl",
+      "SIEM Device Status": "TBD",
+      "HO PPT Update": "Midhun / Naveen / Subash / Vishal",
+      "Handover Presentation": "Prem",
+      "Handover Summary": "Linith"
+    }
+  },
+  "Thursday": {
+    "team": "Team2",
+    "platforms": {
+      "SIEM": {
+        "inCharge": "Naveen",
+        "responsibility": "Linith"
+      },
+      "XDR": {
+        "inCharge": "Midhun",
+        "responsibility": "Sanjay"
+      },
+      "Forti EDR": {
+        "inCharge": "Logesh",
+        "responsibility": "Vishal"
+      },
+      "CrowdStrike EDR": {
+        "inCharge": "All SA's",
+        "responsibility": "All Apprentice"
+      },
+      "Netskope": {
+        "inCharge": "All SA's",
+        "responsibility": "All Apprentice"
+      },
+      "NDR": {
+        "inCharge": "All SA's",
+        "responsibility": "All Apprentice"
+      },
+      "Acronis EDR": {
+        "inCharge": "All SA's",
+        "responsibility": "All Apprentice"
+      },
+      "Sophos XDR": {
+        "inCharge": "TBD",
+        "responsibility": "All Apprentice"
+      },
+      "Trend Vision One": {
+        "inCharge": "TBD",
+        "responsibility": "All Apprentice"
+      },
+      "Cloudflare": {
+        "inCharge": "TBD",
+        "responsibility": "All Apprentice"
+      }
+    },
+    "tasks": {
+      "Email Handle": "Midhun / Naveen",
+      "Follow Up Remainder": "Linith",
+      "SIEM Device Status": "Naveen / Linith",
+      "HO PPT Update": "Naveen / Linith / Vishal",
+      "Handover Presentation": "Midhun",
+      "Handover Summary": "Vishal"
+    }
+  },
+  "Friday": {
+    "team": "Team2",
+    "platforms": {
+      "SIEM": {
+        "inCharge": "Logesh",
+        "responsibility": "Vishal"
+      },
+      "XDR": {
+        "inCharge": "Naveen",
+        "responsibility": "Linith"
+      },
+      "Forti EDR": {
+        "inCharge": "Midhun",
+        "responsibility": "Sanjay"
+      },
+      "CrowdStrike EDR": {
+        "inCharge": "All SA's",
+        "responsibility": "All Apprentice"
+      },
+      "Netskope": {
+        "inCharge": "All SA's",
+        "responsibility": "All Apprentice"
+      },
+      "NDR": {
+        "inCharge": "All SA's",
+        "responsibility": "All Apprentice"
+      },
+      "Acronis EDR": {
+        "inCharge": "All SA's",
+        "responsibility": "All Apprentice"
+      },
+      "Sophos XDR": {
+        "inCharge": "TBD",
+        "responsibility": "All Apprentice"
+      },
+      "Trend Vision One": {
+        "inCharge": "TBD",
+        "responsibility": "All Apprentice"
+      },
+      "Cloudflare": {
+        "inCharge": "TBD",
+        "responsibility": "All Apprentice"
+      }
+    },
+    "tasks": {
+      "Email Handle": "Logesh / Naveen",
+      "Follow Up Remainder": "Vishal",
+      "SIEM Device Status": "Midhun / Logesh",
+      "HO PPT Update": "Midhun / Logesh / Sanjay",
+      "Handover Presentation": "Naveen",
+      "Handover Summary": "Sanjay"
+    }
+  },
+  "Saturday": {
+    "team": "Team1",
+    "platforms": {
+      "SIEM": {
+        "inCharge": "Selva",
+        "responsibility": "All Apprentice"
+      },
+      "XDR": {
+        "inCharge": "Prem",
+        "responsibility": "All Apprentice"
+      },
+      "Forti EDR": {
+        "inCharge": "Kannan",
+        "responsibility": "All Apprentice"
+      },
+      "CrowdStrike EDR": {
+        "inCharge": "All SA's",
+        "responsibility": "All Apprentice"
+      },
+      "Netskope": {
+        "inCharge": "All SA's",
+        "responsibility": "All Apprentice"
+      },
+      "NDR": {
+        "inCharge": "All SA's",
+        "responsibility": "All Apprentice"
+      },
+      "Acronis EDR": {
+        "inCharge": "All SA's",
+        "responsibility": "All Apprentice"
+      },
+      "Sophos XDR": {
+        "inCharge": "TBD",
+        "responsibility": "All Apprentice"
+      },
+      "Trend Vision One": {
+        "inCharge": "TBD",
+        "responsibility": "All Apprentice"
+      },
+      "Cloudflare": {
+        "inCharge": "TBD",
+        "responsibility": "All Apprentice"
+      }
+    },
+    "tasks": {
+      "Email Handle": "Kannan",
+      "Follow Up Remainder": "Karl",
+      "SIEM Device Status": "Kannan",
+      "HO PPT Update": "Kannan / Karl / Subash",
+      "Handover Presentation": "Prem",
+      "Handover Summary": "Karl"
+    }
+  },
+  "Sunday": {
+    "team": "Team1",
+    "platforms": {
+      "SIEM": {
+        "inCharge": "Kannan",
+        "responsibility": "All Apprentice"
+      },
+      "XDR": {
+        "inCharge": "Selva",
+        "responsibility": "All Apprentice"
+      },
+      "Forti EDR": {
+        "inCharge": "Prem",
+        "responsibility": "All Apprentice"
+      },
+      "CrowdStrike EDR": {
+        "inCharge": "All SA's",
+        "responsibility": "All Apprentice"
+      },
+      "Netskope": {
+        "inCharge": "All SA's",
+        "responsibility": "All Apprentice"
+      },
+      "NDR": {
+        "inCharge": "All SA's",
+        "responsibility": "All Apprentice"
+      },
+      "Acronis EDR": {
+        "inCharge": "All SA's",
+        "responsibility": "All Apprentice"
+      },
+      "Sophos XDR": {
+        "inCharge": "TBD",
+        "responsibility": "All Apprentice"
+      },
+      "Trend Vision One": {
+        "inCharge": "TBD",
+        "responsibility": "All Apprentice"
+      },
+      "Cloudflare": {
+        "inCharge": "TBD",
+        "responsibility": "All Apprentice"
+      }
+    },
+    "tasks": {
+      "Email Handle": "Prem",
+      "Follow Up Remainder": "Subash",
+      "SIEM Device Status": "Prem",
+      "HO PPT Update": "Selva / Subash / Prem",
+      "Handover Presentation": "Kannan",
+      "Handover Summary": "Subash"
+    }
+  }
+}

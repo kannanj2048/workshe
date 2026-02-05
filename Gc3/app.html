@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Schedule Manager-G3</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!--icon-->
+    <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+
+    <!-- EmailJS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script>
+        (function () {
+            emailjs.init("tGrjCtgPXTZpIcppF");
+        })();
+    </script>
+</head>
+<body>
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="loading-spinner">
+        
+        <!-- SKELETON Loading opening -->
+            <div id="heroSkeleton" class="hero-skeleton">
+                 <!-- Title Skeleton -->
+    <div class="skeleton-title">
+        <div class="skeleton-line skeleton-line-long"></div>
+    </div>
+    
+    <!-- Subtitle Skeleton -->
+    <div class="skeleton-subtitle">
+        <div class="skeleton-line skeleton-line-medium"></div>
+    </div>
+    
+    <!-- POC Skeleton -->
+    <div class="skeleton-poc">
+        <div class="skeleton-line skeleton-line-short"></div>
+    </div>
+    
+    <!-- Stats Skeleton -->
+    <div class="skeleton-stats">
+        <div class="skeleton-stat-card">
+            <div class="skeleton-icon"></div>
+            <div class="skeleton-number"></div>
+            <div class="skeleton-label"></div>
+        </div>
+        <div class="skeleton-stat-card">
+            <div class="skeleton-icon"></div>
+            <div class="skeleton-number"></div>
+            <div class="skeleton-label"></div>
+        </div>
+        <div class="skeleton-stat-card">
+            <div class="skeleton-icon"></div>
+            <div class="skeleton-number"></div>
+            <div class="skeleton-label"></div>
+        </div>
+    </div>
+    
+            <!-- Buttons Skeleton -->
+            <div class="skeleton-buttons">
+                <div class="skeleton-button"></div>
+                <div class="skeleton-button"></div>
+            </div>
+    </div>
+    </div>
+
+    <!-- Scroll Progress Bar -->
+    <div id="scrollProgress" class="scroll-progress"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-calendar-check"></i>
+                <span>Group-3</span>
+            </div>
+
+            <!-- Shift Indicator -->
+            <div id="currentShiftIndicator" class="current-shift-indicator">
+                <i class="fas fa-clock"></i> Loading...
+            </div>
+
+            <ul id="navMenu" class="nav-menu">
+                <li><a href="../main_app.html" class="nav-link"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="#schedule" class="nav-link"><i class="fas fa-calendar"></i> Schedule</a></li>
+                <li><a href="#team" class="nav-link"><i class="fas fa-users"></i> Team</a></li>
+                <li><a href="#contact" class="nav-link"><i class="fas fa-envelope"></i> Contact</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <button id="adminToggle" class="admin-toggle" title="Admin Access">
+                    <i class="fas fa-user-shield"></i>
+                </button>
+                <button id="themeToggle" class="theme-toggle" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="mobileToggle" class="mobile-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-background">
+            <div class="parallax-shape shape-1"></div>
+            <div class="parallax-shape shape-2"></div>
+            <div class="parallax-shape shape-3"></div>
+        </div>
+
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span id="typingText" class="typing-text"></span><span class="cursor">|</span>
+            </h1>
+            <p class="hero-subtitle">Intelligent Team & Platform Auto-Assignment System</p>
+            <p class="poc-subtitle">
+            Team1 POC: <span class="poc-name">Selva</span> 
+            &nbsp;&nbsp;&nbsp;&nbsp; 
+            Team2 POC: <span class="poc-name">Naveen</span>
+            </p>
+
+            <div class="hero-stats">
+                <div class="stat-item fade-in">
+                    <i class="fas fa-server"></i>
+                    <div class="stat-number" data-target="10">0</div>
+                    <p>Platforms</p>
+                </div>
+                <div class="stat-item fade-in">
+                    <i class="fas fa-users"></i>
+                    <div class="stat-number" data-target=" ">0</div>
+                    <p>Total Members</p>
+                </div>
+                <div class="stat-item fade-in">
+                    <i class="fas fa-calendar-alt"></i>
+                    <div class="stat-number" data-target="5">0</div>
+                    <p>Working Days</p>
+                </div>
+            </div>
+
+            <div class="hero-cta">
+                <a href="#schedule" class="btn btn-primary">
+                    <i class="fas fa-calendar-check"></i> View Schedule
+                </a>
+                <a href="#team" class="btn btn-secondary">
+                    <i class="fas fa-users"></i> Team Info
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Schedule Section -->
+    <section id="schedule" class="schedule-section">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2 class="section-title">Daily Platform Assignments</h2>
+                <p class="section-subtitle">Daily platform assignments and team rotation</p>
+                <div id="adminNotice" class="admin-notice">
+                    <i class="fas fa-info-circle"></i>
+                    Admin access required to edit schedules
+                </div>
+            </div>
+
+            <!-- Schedule Controls -->
+            <div class="schedule-controls fade-in">
+                <div class="date-selector">
+                    <label for="scheduleDate">
+                        <i class="fas fa-calendar"></i> Select Date:
+                    </label>
+                    <input type="date" id="scheduleDate" class="date-input">
+                </div>
+
+                <div class="schedule-actions">
+                    <button id="todayBtn" class="btn btn-primary btn-small">
+                        <i class="fas fa-calendar-day"></i> Today
+                    </button>
+                    <button id="generateSchedule" class="btn btn-primary btn-small">
+                        <i class="fas fa-sync-alt"></i> Generate Today
+                    </button>
+                    <button id="downloadSchedule" class="btn btn-secondary btn-small">
+                        <i class="fas fa-download"></i> Download CSV
+                    </button>
+                    <button id="toggleWeekView" class="btn btn-secondary btn-small">
+                        <i class="fas fa-calendar-week"></i> Show Full Week
+                    </button>
+                </div>
+            </div>
+
+            <!-- Current Day Card -->
+            <div class="current-day-card fade-in">
+                <h3 id="currentDayTitle">Loading...</h3>
+                <div class="current-shift-info" id="currentShiftBadge">
+    <i class="fas fa-clock"></i> <span id="shiftType">Loading...</span>
+    <button id="editShiftBtn" class="btn-icon admin-only hidden" onclick="openEditShiftModal()" title="Edit Shift" style="margin-left: 10px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer;">
+        <i class="fas fa-edit"></i> Edit Shift
+    </button>
+</div>
+                <div class="sgt-time">SGT Time: <span id="mainSGTTime">--:--:--</span></div>
+            </div>
+            
+            <!-- Active Schedule Display -->
+            <div class="fade-in">
+                <h3 style="margin-bottom: 1rem;">
+                    <i class="fas fa-clipboard-list"></i> Active Schedule
+                </h3>
+
+                <div class="table-wrapper">
+                    <table class="schedule-table">
+                        <thead>
+                            <tr>
+                                <th>Platform</th>
+                                <th>In-Charge (SA)</th>
+                                <th>Responsibility (Apprentice)</th>
+                                <th class="admin-only hidden">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scheduleTableBody">
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 2rem;">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading schedule...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Additional Tasks -->
+            <div class="additional-tasks fade-in">
+                <h3>
+                    <i class="fas fa-tasks"></i> Additional Tasks
+                </h3>
+                <div id="additionalTasksGrid" class="tasks-grid">
+                    <!-- Tasks will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Week View (Hidden by default) -->
+             <div id="weekSchedule" style="display: none;"></div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section id="team" class="team-section">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2 class="section-title">Team Members</h2>
+                <p class="section-subtitle">View team members and availability</p>
+            </div>
+
+            <!-- Team Controls (Admin Only) -->
+            <div class="team-controls admin-only hidden fade-in">
+                <button id="addSA" class="btn btn-primary btn-small">
+                    <i class="fas fa-user-plus"></i> Add SA
+                </button>
+                <button id="addApprentice" class="btn btn-primary btn-small">
+                    <i class="fas fa-user-plus"></i> Add Apprentice
+                </button>
+            </div>
+
+            <!-- Team Grid -->
+            <div class="team-grid">
+                <!-- Security Analysts -->
+                <div class="team-card fade-in">
+                    <h3>
+                        <i class="fas fa-shield-alt"></i> Security Analysts (SA)
+                    </h3>
+                    <ul id="saList" class="member-list">
+                        <!-- Populated by JavaScript -->
+                    </ul>
+                </div>
+
+                <!-- Apprentices -->
+                <div class="team-card fade-in">
+                    <h3>
+                        <i class="fas fa-graduation-cap"></i> Apprentices
+                    </h3>
+                    <ul id="apprenticeList" class="member-list">
+                        <!-- Populated by JavaScript -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Current Availability Status (Live) -->
+<!-- Current Availability Status -->
+<section id="availability" class="section fade-in">
+    <div class="container">
+        <div class="section-header">
+            <h2><i class="fas fa-user-check"></i> Current Availability Status (Live)</h2>
+            <p class="subtitle">Team member availability based on current date and time (SGT) <span id="availabilitySGT"></span></p>
+        </div>
+        <!-- ✅ ADD THIS BUTTON -->
+        <div class="admin-only hidden" style="display: flex; justify-content: center; margin-bottom: 2rem;">
+            <button class="btn btn-primary" onclick="openMonthlyLeaveManagement()">
+                <i class="fas fa-calendar-times"></i> Manage Monthly Leave
+            </button>
+        </div>
+        <!-- Add Member Buttons (Admin Only) -->
+        <div class="admin-only" style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 2rem;">
+            <button class="btn btn-primary" onclick="addMemberFromAvailability('SA')">
+                <i class="fas fa-user-plus"></i> Add SA
+            </button>
+            <button class="btn btn-primary" onclick="addMemberFromAvailability('Apprentice')">
+                <i class="fas fa-user-plus"></i> Add Apprentice
+            </button>
+        </div>
+
+        <!-- Rest of availability section... -->
+    </div>
+
+    <div class="availability-grid">
+      <!-- Available SAs Today -->
+      <div class="availability-card">
+        <h3><i class="fas fa-users"></i> Available SAs Today</h3>
+        <ul id="saAvailability" class="availability-list"></ul>
+      </div>
+
+      <!-- Available Apprentices Today -->
+      <div class="availability-card">
+        <h3><i class="fas fa-user-graduate"></i> Available Apprentices Today</h3>
+        <ul id="appAvailability" class="availability-list"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+</section>
+
+<!-- Testimonial Section -->
+<section id="testimonials" class="testimonial-section">
+    <div class="container">
+        <div class="section-header fade-in">
+            <h2 class="section-title">Meet Our Team Leaders</h2>
+            <p class="section-subtitle">Dedicated professionals ensuring seamless operations</p>
+        </div>
+
+        <div class="testimonial-carousel">
+            <!-- Previous Arrow -->
+            <button class="carousel-nav prev" onclick="changeTestimonial(-1)" aria-label="Previous">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <!-- Testimonial Track -->
+            <div class="testimonial-track" id="testimonialTrack">
+                <!-- Testimonial 1 - Balaji -->
+                <div class="testimonial-card">
+                    <div class="testimonial-content-wrapper">
+                        <div class="testimonial-avatar">
+                            <div class="avatar-circle">B
+                                <!--<img src="your-image-url.jpg" alt="Profile Picture"> -->
+                            </div>
+                            <span class="role-badge">Thread Intel</span>
+                        </div>
+                        <div class="testimonial-text">
+                            <h3 class="testimonial-name">Balaji</h3>
+                            <p class="testimonial-position">Security Analyst</p>
+                            <p class="testimonial-message">
+                                He served as the Group 3 Team Leader from May 2025 to July 2025, 
+                                and his leadership and dedication were highly appreciated for their 
+                                outstanding contribution to our team's success!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 2 - Idris -->
+                <div class="testimonial-card active">
+                    <div class="testimonial-content-wrapper">
+                        <div class="testimonial-avatar">
+                            <div class="avatar-circle">
+                                <img src="idris.png" alt="Profile Picture"> 
+                            </div>
+                            <span class="role-badge">MSP</span>
+                        </div>
+                        <div class="testimonial-text">
+                            <h3 class="testimonial-name">Idris</h3>
+                            <p class="testimonial-position">Security Analyst</p>
+                            <p class="testimonial-message">
+                                He served as the Group 3 Team Leader from May 2025 to November 2025, 
+                                and his leadership and dedication were highly appreciated for their 
+                                outstanding contribution to our team's success!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 3 - Kannan -->
+                <div class="testimonial-card">
+                    <div class="testimonial-content-wrapper">
+                        <div class="testimonial-avatar">
+                            <div class="avatar-circle">
+                               <img src="kan.png" alt="Profile Picture">
+                            </div>
+                            <span class="role-badge">Developed</span>
+                        </div>
+                        <div class="testimonial-text">
+                            <h3 class="testimonial-name">Kannan</h3>
+                            <p class="testimonial-position">Security Analyst</p>
+                            <p class="testimonial-message">
+                                This intelligent auto-scheduling and platform assignment system was 
+                                designed and developed to improve team efficiency!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 4 - Add More Members -->
+                <div class="testimonial-card">
+                    <div class="testimonial-content-wrapper">
+                        <div class="testimonial-avatar">
+                            <div class="avatar-circle">
+                                <img src="sel.jpg" alt="Profile Picture">
+                            </div>
+                            <span class="role-badge">Team1 Lead</span>
+                        </div>
+                        <div class="testimonial-text">
+                            <h3 class="testimonial-name">Selva</h3>
+                            <p class="testimonial-position">Security Analyst</p>
+                            <p class="testimonial-message">
+                                Dedicated to maintaining high standards in cybersecurity operations 
+                                and ensuring smooth workflow management across all platforms!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 5 - Add More Members -->
+                <div class="testimonial-card">
+                    <div class="testimonial-content-wrapper">
+                        <div class="testimonial-avatar">
+                            <div class="avatar-circle">N
+                                <!--<img src="your-image-url.jpg" alt="Profile Picture"> -->
+                            </div>
+                            <span class="role-badge">Team2 Lead</span>
+                        </div>
+                        <div class="testimonial-text">
+                            <h3 class="testimonial-name">Naveen</h3>
+                            <p class="testimonial-position">Security Analyst</p>
+                            <p class="testimonial-message">
+                                Committed to excellence in security monitoring and incident response 
+                                coordination, ensuring optimal team performance!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Next Arrow -->
+            <button class="carousel-nav prev" onclick="changeTestimonial(-1)">‹</button>
+            <button class="carousel-nav next" onclick="changeTestimonial(1)">›</button>
+            <button class="carousel-nav next" onclick="changeTestimonial(1)" aria-label="Next">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <!-- Navigation Dots -->
+        <div class="testimonial-dots" id="testimonialDots">
+            <span class="dot active" onclick="goToTestimonial(0)"></span>
+            <span class="dot" onclick="goToTestimonial(1)"></span>
+            <span class="dot" onclick="goToTestimonial(2)"></span>
+            <span class="dot" onclick="goToTestimonial(3)"></span>
+            <span class="dot" onclick="goToTestimonial(4)"></span>
+        </div>
+    </div>
+</section>
+
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2 class="section-title">Get In Touch</h2>
+                <p class="section-subtitle">Questions or feedback about the schedule?</p>
+            </div>
+
+            <div class="contact-content">
+                <!-- Contact Info -->
+                <div class="contact-info fade-in">
+                    <div class="info-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h4>Email</h4>
+                            <p>inzgroup03@gmail.com</p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <h4>Phone</h4>
+                            <p>+65 XXXX XXXX</p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <h4>Working Hours</h4>
+                            <p id="workingHoursDisplay">Loading...</p>
+                            <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                                <span id="shiftSchedule">Loading shift schedule...</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <h4>Timezone</h4>
+                            <p>Singapore (SGT / UTC+8)</p>
+                            <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                                Current: <span id="footerSGT" class="sgt-time">--:--:--</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/InsightzTechnology/" target="_blank" rel="noopener noreferrer" title="Facebook" aria-label="Facebook">
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                        <a href="https://www.instagram.com/insightztechnology?igsh=dDhpeXF2YXRqOWV4" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/feed/update/urn:li:activity:7417119742223847424" target="_blank" rel="noopener noreferrer" title="LinkedIn" aria-label="LinkedIn">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="https://insightztechnology.com/" target="_blank" rel="noopener noreferrer" title="Website" aria-label="Website">
+                            <i class="fas fa-globe"></i>
+                        </a>
+                </div>
+            </div>    
+
+                     <!-- Contact Form -->
+            <div class="contact-form fade-in">
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" placeholder="Type your name..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="Type your email..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" placeholder="Give your message as here!..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-paper-plane"></i> Send Message
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- Footer (New Design) -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section footer-brand">
+                    <h3>Team Schedule Manager</h3>
+                    <p>Intelligent Auto scheduling for cyber-security <br> platform monitoring</p>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#schedule">Schedule</a></li>
+                        <li><a href="#team">Team</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 Insightz Group-3 Team Schedule Manager. All rights reserved.<br> _Devoloped by Kannan_</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Modals -->
+
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3><i class="fas fa-user-shield"></i> Admin Login</h3>
+            <form id="adminLoginForm">
+                <div class="form-group">
+                    <label for="adminPassword">Password</label>
+                    <input type="password" id="adminPassword" placeholder="Enter admin password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Schedule Modal -->
+    <div id="editScheduleModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3><i class="fas fa-edit"></i> Edit Platform Assignment</h3>
+            <form id="editScheduleForm">
+                <div class="form-group">
+                    <label for="editPlatform">Platform</label>
+                    <input type="text" id="editPlatform" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="editInCharge">In-Charge (SA)</label>
+                    <select id="editInCharge" required>
+                        <!-- Populated by JavaScript -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editResponsibility">Responsibility</label>
+                    <input type="text" id="editResponsibility" placeholder="e.g., Linith / Sanjay" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-save"></i> Update Assignment
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Task Modal -->
+    <div id="editTaskModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3><i class="fas fa-tasks"></i> Edit Task Assignment</h3>
+            <form id="editTaskForm">
+                <div class="form-group">
+                    <label for="editTaskName">Task Name</label>
+                    <input type="text" id="editTaskName" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="editTaskAssigned">Assigned To</label>
+                    <input type="text" id="editTaskAssigned" placeholder="Enter name(s)" required>
+                    <small style="color: var(--text-secondary);">
+                        For multiple people, use " / " separator (e.g., Karl / Subash)
+                    </small>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-save"></i> Update Assignment
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Edit Shift Modal -->
+<div id="editShiftModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <h3><i class="fas fa-clock"></i> Edit Current Shift</h3>
+        <form id="editShiftForm">
+            <div class="form-group">
+                <label for="editShiftType">Select Shift Type:</label>
+                <select id="editShiftType" required>
+                    <option value="MORNING">Morning Shift (0900 - 1700)</option>
+                    <option value="AFTERNOON">Afternoon Shift (1800 - 0030)</option>
+                    <option value="NIGHT">Night Shift (0030 - 0830)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="applyToDate" checked>
+                    Apply to selected date only
+                </label>
+                <small style="color: var(--text-secondary); display: block; margin-top: 5px;">
+                    When unchecked, this will override automatic shift detection
+                </small>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <i class="fas fa-save"></i> Update Shift
+            </button>
+            <button type="button" id="clearShiftOverride" class="btn btn-secondary" style="width: 100%; margin-top: 10px;">
+                <i class="fas fa-undo"></i> Clear Global Override
+            </button>
+        </form>
+    </div>
+</div>
+
+
+
+    <!-- Add Member Modal -->
+    <div id="addMemberModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3><i class="fas fa-user-plus"></i> Add New Member</h3>
+            <form id="addMemberForm">
+                <div class="form-group">
+                    <label for="memberName">Name</label>
+                    <input type="text" id="memberName" placeholder="Enter member name" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-plus"></i> Add Member
+                </button>
+            </form>
+        </div>
+    </div>
+
+<script src="groupStorage.js"></script>
+     
+   <!-- Firebase SDKs from CDN -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<!-- ✅ CORRECT ORDER: All core scripts BEFORE firebase-config -->
+<script src="script.js"></script>
+<script src="monthlyLeaveManagement.js"></script>  <!-- ✅ ADD THIS -->
+
+<!-- Firebase config (now all functions exist) -->
+<script src="firebase-config.js"></script>
+<script src="firebase_functions.js"></script>
+
+<!-- Feature modules -->
+<script src="aiLearning.js"></script>    
+<script src="hybridAI.js"></script>  
+<script src="dragAndDrop.js"></script>
+    
+
+</body>
+</html>

@@ -1,0 +1,98 @@
+{
+  "sa_rotation_patterns": {
+    "SIEM": [
+      "Kannan",
+      "Logesh",
+      "Prem",
+      "Midhun",
+      "Naveen",
+      "Selva"
+    ],
+    "XDR": [
+      "Midhun",
+      "Selva",
+      "Kannan",
+      "Naveen",
+      "Logesh",
+      "Prem"
+    ],
+    "Forti EDR": [
+      "Prem",
+      "Naveen",
+      "Logesh",
+      "Kannan",
+      "Midhun",
+      "Selva"
+    ]
+  },
+  "apprentice_groups": [
+    [
+      "Karl",
+      "Subash"
+    ],
+    [
+      "Linith",
+      "Vishal"
+    ],
+    [
+      "Sanjay"
+    ]
+  ],
+  "team_structure": {
+    "team1": {
+      "SAs": [
+        "Selva",
+        "Kannan",
+        "Prem"
+      ],
+      "apprentices": [
+        "Karl",
+        "Subash"
+      ],
+      "work_days": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Saturday",
+        "Sunday"
+      ]
+    },
+    "team2": {
+      "SAs": [
+        "Naveen",
+        "Midhun",
+        "Logesh"
+      ],
+      "apprentices": [
+        "Linith",
+        "Sanjay",
+        "Vishal"
+      ],
+      "work_days": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday"
+      ]
+    }
+  },
+  "platform_categories": {
+    "main": [
+      "SIEM",
+      "XDR",
+      "Forti EDR"
+    ],
+    "common": [
+      "CrowdStrike EDR",
+      "Netskope",
+      "NDR",
+      "Acronis EDR"
+    ],
+    "grouped": [
+      "Sophos XDR",
+      "Trend Vision One",
+      "Cloudflare"
+    ]
+  }
+}

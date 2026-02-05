@@ -1,0 +1,111 @@
+{
+  "sa_rotation_patterns": {
+    "SIEM": [
+      "Vishali",
+      "Stephan",
+      "Raja",
+      "Sahasraa",
+      "Naveen Raj",
+      "Yuva",
+      "Priyanga",
+      "Elakkia",
+      "Deepak"
+    
+    ],
+    "XDR": [
+      "Yuva",
+      "Elakkia",
+      "Priyanga",
+      "Vishali",
+      "Raja",
+      "Naveen Raj",
+      "Stephan",
+      "Deepak",
+      "Sahasraa"
+
+    ],
+    "Forti EDR": [
+      "Sahasraa",
+      "Deepak",
+      "Stephan",
+      "Naveen Raj",
+      "Raja",
+      "Vishali",
+      "Priyanga",
+      "Elakkia",
+      "Yuva"
+    ]
+  },
+  "apprentice_groups": [
+    [
+      "All apprentice",
+      "Sriharan"
+    ],
+    [
+      "All apprentice",
+      "All apprentice"
+    ],
+    [
+      "All apprentice"
+    ]
+  ],
+  "team_structure": {
+    "team1": {
+      "SAs": [
+        "Raja",
+        "Priyanga",
+        "Elakkia",
+        "Yuva",
+        "Naveen Raj"
+      ],
+      "apprentices": [
+        "All apprentice",
+        " "
+      ],
+      "work_days": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Saturday",
+        "Sunday"
+      ]
+    },
+    "team2": {
+      "SAs": [
+        "Vishali",
+        "Sahasraa",
+        "Deepak",
+        "Stephan"
+      ],
+      "apprentices": [
+        "Sriharan"
+        
+      ],
+      "work_days": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday"
+      ]
+    }
+  },
+  "platform_categories": {
+    "main": [
+      "SIEM",
+      "XDR",
+      "Forti EDR"
+    ],
+    "common": [
+      "CrowdStrike EDR",
+      "Netskope",
+      "NDR",
+      "Acronis EDR"
+    ],
+    "grouped": [
+      "Sophos XDR",
+      "Trend Vision One",
+      "Cloudflare"
+    ]
+  }
+}
