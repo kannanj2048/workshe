@@ -3414,8 +3414,8 @@ console.log('🎯 Detected Group:', CURRENT_GROUP);
 
 // Default POC names
 const DEFAULT_POC_NAMES = {
-    team1: " ",
-    team2: " "
+    team1: "Gayathiri",
+    team2: "Ajay"
 };
 
 // Storage key - NOW GROUP-SPECIFIC
