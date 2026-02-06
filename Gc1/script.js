@@ -3884,3 +3884,129 @@ if (document.readyState === 'loading') {
 
 console.log('%c👤 POC Management System Loaded', 'color: #10b981; font-weight: bold; font-size: 14px');
 console.log(`%c   Group: ${CURRENT_GROUP} - Admin can edit POC names`, 'color: #3b82f6; font-size: 12px');
+
+// ==========================================
+// IMMEDIATE CLEANUP SCRIPT
+// browser console to remove all orphaned members
+// ==========================================
+
+(function() {
+    console.log('%c🧹 STARTING IMMEDIATE CLEANUP', 'color: #f59e0b; font-weight: bold; font-size: 16px');
+    console.log('='.repeat(60));
+    
+    // List of members to remove
+    const membersToRemove = {
+        SAs: ["Idris", "Midhun", "Prem", "Selva", "Logesh", "Kannan", "Subash"],
+        apprentices: ["Sanjay", "Vishal", "Subash", "Linith"]
+    };
+    
+    let removedCount = 0;
+    
+    // 1. Clean memberAvailabilitySettings
+    console.log('\n📋 Cleaning memberAvailabilitySettings...');
+    if (typeof memberAvailabilitySettings !== 'undefined') {
+        // Remove SAs
+        membersToRemove.SAs.forEach(name => {
+            if (memberAvailabilitySettings.SAs && memberAvailabilitySettings.SAs[name]) {
+                delete memberAvailabilitySettings.SAs[name];
+                removedCount++;
+                console.log(`   ✅ Removed SA: ${name}`);
+            }
+        });
+        
+        // Remove Apprentices
+        membersToRemove.apprentices.forEach(name => {
+            if (memberAvailabilitySettings.apprentices && memberAvailabilitySettings.apprentices[name]) {
+                delete memberAvailabilitySettings.apprentices[name];
+                removedCount++;
+                console.log(`   ✅ Removed Apprentice: ${name}`);
+            }
+        });
+        
+        // Save
+        localStorage.setItem('memberAvailabilitySettings', JSON.stringify(memberAvailabilitySettings));
+        console.log('   💾 Saved to localStorage');
+        
+        // Save to Firebase
+        if (typeof database !== 'undefined' && database) {
+            database.ref('memberAvailabilitySettings').set(memberAvailabilitySettings)
+                .then(() => console.log('   ☁️ Synced to Firebase'))
+                .catch(err => console.error('   ❌ Firebase error:', err));
+        }
+    }
+    
+    // 2. Clean availabilityOverrides
+    console.log('\n📅 Cleaning availabilityOverrides...');
+    if (typeof availabilityOverrides !== 'undefined') {
+        const allNamesToRemove = [...membersToRemove.SAs, ...membersToRemove.apprentices];
+        
+        for (const key in availabilityOverrides) {
+            const [name] = key.split('_');
+            if (allNamesToRemove.includes(name)) {
+                delete availabilityOverrides[key];
+                removedCount++;
+                console.log(`   ✅ Removed: ${key}`);
+            }
+        }
+        
+        // Save
+        localStorage.setItem('availabilityOverrides', JSON.stringify(availabilityOverrides));
+        console.log('   💾 Saved to localStorage');
+        
+        // Save to Firebase
+        if (typeof database !== 'undefined' && database) {
+            database.ref('availabilityOverrides').set(availabilityOverrides)
+                .then(() => console.log('   ☁️ Synced to Firebase'))
+                .catch(err => console.error('   ❌ Firebase error:', err));
+        }
+    }
+    
+    // 3. Clean monthlyLeaveSettings
+    console.log('\n🏖️ Cleaning monthlyLeaveSettings...');
+    if (typeof monthlyLeaveSettings !== 'undefined') {
+        const allNamesToRemove = [...membersToRemove.SAs, ...membersToRemove.apprentices];
+        
+        for (const monthKey in monthlyLeaveSettings) {
+            if (monthlyLeaveSettings[monthKey]) {
+                for (const memberKey in monthlyLeaveSettings[monthKey]) {
+                    const [name] = memberKey.split('|');
+                    if (allNamesToRemove.includes(name)) {
+                        delete monthlyLeaveSettings[monthKey][memberKey];
+                        removedCount++;
+                        console.log(`   ✅ Removed: ${memberKey} from ${monthKey}`);
+                    }
+                }
+            }
+        }
+        
+        // Save
+        localStorage.setItem('monthlyLeaveSettings', JSON.stringify(monthlyLeaveSettings));
+        console.log('   💾 Saved to localStorage');
+        
+        // Save to Firebase
+        if (typeof database !== 'undefined' && database) {
+            database.ref('leaveSettings').set(monthlyLeaveSettings)
+                .then(() => console.log('   ☁️ Synced to Firebase'))
+                .catch(err => console.error('   ❌ Firebase error:', err));
+        }
+    }
+    
+    // 4. Display summary
+    console.log('\n' + '='.repeat(60));
+    console.log('%c✅ CLEANUP COMPLETE!', 'color: #10b981; font-weight: bold; font-size: 16px');
+    console.log(`%c   Removed ${removedCount} orphaned entries`, 'color: #3b82f6; font-size: 14px');
+    console.log('='.repeat(60));
+    
+    // 5. Show notification
+    if (typeof showNotification === 'function') {
+        showNotification(`✅ Cleaned up ${removedCount} orphaned entries`, 'success');
+    }
+    
+    // 6. Reload the page to refresh UI
+    console.log('\n🔄 Reloading page in 2 seconds to refresh UI...');
+    setTimeout(() => {
+        location.reload();
+    }, 2000);
+    
+})();
+
