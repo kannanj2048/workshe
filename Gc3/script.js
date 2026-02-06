@@ -37,7 +37,12 @@ function formatSGTTime(date) {
 
 // Format date as YYYY-MM-DD for input field
 function formatDateForInput(date) {
-    date.toISOString().split('T')[0]
+    // SGT timezone
+        const sgtDate = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Singapore" }));
+        const year = sgtDate.getFullYear();
+        const month = String(sgtDate.getMonth() + 1).padStart(2, '0');
+        const day = String(sgtDate.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;  // Always correct in SGT
 
 // Auto-update at midnight SGT (00:00)
 let lastCheckedDate = null;
