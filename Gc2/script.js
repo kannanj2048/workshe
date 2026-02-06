@@ -3886,7 +3886,7 @@ console.log('%c👤 POC Management System Loaded', 'color: #10b981; font-weight:
 console.log(`%c   Group: ${CURRENT_GROUP} - Admin can edit POC names`, 'color: #3b82f6; font-size: 12px');
 
 // RUN THIS ONCE TO CLEAN UP
-(function() {
+/*(function() {
     console.log('🧹 PERMANENT CLEANUP - Removing ALL orphaned members');
     
     // Get current team members from teamData
@@ -3981,4 +3981,4 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Admin can edit POC names`, 'color: #
     alert(`✅ Cleanup complete!\n\nRemoved ${removedCount} orphaned members.\n\nPage will reload in 2 seconds.`);
     
     setTimeout(() => location.reload(), 2000);
-})();
+})(); */
