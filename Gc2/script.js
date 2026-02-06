@@ -3883,7 +3883,7 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Admin can edit POC names`, 'color: #
 
 // ==========================================
 // IMMEDIATE CLEANUP SCRIPT
-// Run this in your browser console to remove all orphaned members NOW
+// browser console to remove all orphaned members 
 // ==========================================
 
 (function() {
