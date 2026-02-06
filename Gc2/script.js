@@ -113,8 +113,12 @@ function getCurrentShift(dateSGT) {
 
 // Helper function to get shift for a specific date (checks for override first)
 function getShiftForDate(date) {
-    const dateStr = date.toISOString().split('T')[0];
-    
+        // SGT timezone
+        const sgtDate = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Singapore" }));
+        const year = sgtDate.getFullYear();
+        const month = String(sgtDate.getMonth() + 1).padStart(2, '0');
+        const day = String(sgtDate.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;  // Always correct in SGT    
     // Check if there's an active shift override for this date
     if (shiftOverride && shiftOverride.startDate && shiftOverride.endDate) {
         if (dateStr >= shiftOverride.startDate && dateStr <= shiftOverride.endDate) {
