@@ -43,7 +43,7 @@ function formatDateForInput(date) {
         const month = String(sgtDate.getMonth() + 1).padStart(2, '0');
         const day = String(sgtDate.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;  // Always correct in SGT
-
+}
 // Auto-update at midnight SGT (00:00)
 let lastCheckedDate = null;
 
