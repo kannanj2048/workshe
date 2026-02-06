@@ -1337,7 +1337,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         console.log('✅ Application fully loaded');
-    }, 1500); // currently adjust loading for skeleton
+    }, 500); // currently adjust loading for skeleton
 });
 
 // ---------- LIVE CLOCKS ----------
