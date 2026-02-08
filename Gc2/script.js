@@ -3885,3 +3885,211 @@ if (document.readyState === 'loading') {
 console.log('%c👤 POC Management System Loaded', 'color: #10b981; font-weight: bold; font-size: 14px');
 console.log(`%c   Group: ${CURRENT_GROUP} - Admin can edit POC names`, 'color: #3b82f6; font-size: 12px');
 
+// =============================
+// FIREBASE LOADING NOTIFICATION 
+// =============================
+
+(function() {
+    'use strict';
+    
+    let loadingCheckInterval = null;
+    let loadingStartTime = null;
+    let notificationShown = false;
+    const LOADING_TIMEOUT = 10000; // 10 seconds
+    const CHECK_INTERVAL = 1000; // Check every 1 second
+    
+    // Check if skeleton loading is visible
+    function isSkeletonLoading() {
+        const skeletonElements = document.querySelectorAll('.skeleton, .skeleton-loader, [class*="skeleton"]');
+        for (let element of skeletonElements) {
+            const style = window.getComputedStyle(element);
+            if (style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0') {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    // Check if main content is visible
+    function isMainContentVisible() {
+        const mainContent = document.querySelector('#scheduleContainer, .schedule-container, main, [role="main"]');
+        if (!mainContent) return false;
+        const style = window.getComputedStyle(mainContent);
+        return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+    }
+    
+    // Create notification
+    function createOnScreenNotification() {
+        // Find existing notifications to stack properly
+        const existingNotifications = document.querySelectorAll('[id^="firebase-loading-notification"]');
+        let topOffset = 20;
+        
+        // Calculate stack position
+        existingNotifications.forEach(notif => {
+            if (notif.style.display !== 'none') {
+                const rect = notif.getBoundingClientRect();
+                const currentTop = parseInt(notif.style.top) || 20;
+                topOffset = Math.max(topOffset, currentTop + rect.height + 15);
+            }
+        });
+        
+        const uniqueId = 'firebase-loading-notification-' + Date.now();
+        const notification = document.createElement('div');
+        notification.id = uniqueId;
+        notification.className = 'firebase-notification';
+        const isMobile = window.innerWidth <= 768;
+        
+        notification.style.cssText = `
+            position: fixed;
+            top: ${topOffset}px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+            color: white;
+            padding: ${isMobile ? '16px 20px' : '20px 28px'};
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            z-index: 999999;
+            max-width: ${isMobile ? '95%' : '90%'};
+            width: auto;
+            min-width: ${isMobile ? '280px' : '300px'};
+            text-align: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-size: ${isMobile ? '14px' : '15px'};
+            line-height: 1.6;
+            animation: slideDownBounce 0.5s ease-out;
+            backdrop-filter: blur(10px);
+            transition: top 0.3s ease-out;
+        `;
+        
+        notification.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; gap: ${isMobile ? '12px' : '15px'}; flex-wrap: wrap;">
+                <div style="font-size: ${isMobile ? '28px' : '32px'}; animation: rotate 2s linear infinite;">⏳</div>
+                <div style="text-align: left;">
+                    <div style="font-weight: 700; font-size: ${isMobile ? '15px' : '16px'}; margin-bottom: 4px;">Database Loading</div>
+                    <div style="font-weight: 400; font-size: ${isMobile ? '13px' : '14px'}; opacity: 0.95;">
+                        It will take some time. Please refresh the page.
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Add animations (only once)
+        if (!document.getElementById('firebase-loading-notification-styles')) {
+            const style = document.createElement('style');
+            style.id = 'firebase-loading-notification-styles';
+            style.textContent = `
+                @keyframes slideDownBounce {
+                    0% {
+                        opacity: 0;
+                        transform: translateX(-50%) translateY(-30px) scale(0.9);
+                    }
+                    60% {
+                        opacity: 1;
+                        transform: translateX(-50%) translateY(5px) scale(1.02);
+                    }
+                    100% {
+                        opacity: 1;
+                        transform: translateX(-50%) translateY(0) scale(1);
+                    }
+                }
+                @keyframes rotate {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                @keyframes slideUpFade {
+                    from {
+                        opacity: 1;
+                        transform: translateX(-50%) translateY(0) scale(1);
+                    }
+                    to {
+                        opacity: 0;
+                        transform: translateX(-50%) translateY(-30px) scale(0.9);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideUpFade 0.4s ease-out forwards';
+            setTimeout(() => {
+                notification.remove();
+                repositionNotifications();
+            }, 400);
+        }, 10000);
+    }
+    
+    // Reposition notifications when one is removed
+    function repositionNotifications() {
+        const notifications = document.querySelectorAll('.firebase-notification');
+        let currentTop = 20;
+        
+        notifications.forEach((notif) => {
+            if (notif.style.display !== 'none') {
+                notif.style.top = currentTop + 'px';
+                const rect = notif.getBoundingClientRect();
+                currentTop += rect.height + 15;
+            }
+        });
+    }
+    
+    // Show notification
+    function showLoadingTimeoutNotification() {
+        if (notificationShown) return;
+        createOnScreenNotification();
+        notificationShown = true;
+    }
+    
+    // Monitor loading state
+    function monitorLoadingState() {
+        const skeletonVisible = isSkeletonLoading();
+        const mainContentVisible = isMainContentVisible();
+        const currentTime = Date.now();
+        
+        if (skeletonVisible && !mainContentVisible) {
+            if (!loadingStartTime) {
+                loadingStartTime = currentTime;
+            }
+            
+            const elapsedTime = currentTime - loadingStartTime;
+            
+            if (elapsedTime >= LOADING_TIMEOUT && !notificationShown) {
+                showLoadingTimeoutNotification();
+            }
+        } else {
+            if (loadingStartTime && mainContentVisible) {
+                stopMonitoring();
+            }
+        }
+    }
+    
+    // Start monitoring
+    function startMonitoring() {
+        if (loadingCheckInterval) return;
+        loadingStartTime = null;
+        notificationShown = false;
+        monitorLoadingState();
+        loadingCheckInterval = setInterval(monitorLoadingState, CHECK_INTERVAL);
+    }
+    
+    // Stop monitoring
+    function stopMonitoring() {
+        if (loadingCheckInterval) {
+            clearInterval(loadingCheckInterval);
+            loadingCheckInterval = null;
+            loadingStartTime = null;
+        }
+    }
+    
+    // Auto-initialize
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => setTimeout(startMonitoring, 500));
+    } else {
+        setTimeout(startMonitoring, 500);
+    }
+    
+})();
