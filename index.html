@@ -70,6 +70,65 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            font-weight: 100;
+        }
+        
+        /* Navigation Item Container */
+        .nav-item {
+            position: relative;
+        }
+        
+        /* Dropdown Menu */
+        .dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 0.5rem 0;
+            min-width: 140px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 30;
+        }
+        
+        .dropdown.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Show dropdown on hover */
+        .nav-item:hover .dropdown {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .dropdown-item {
+            padding: 0.7rem 1.5rem;
+            color: #ffffff;
+            text-decoration: none;
+            display: block;
+            font-family: "Poppins", sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            text-align: center;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #22d3ee;
+        }
+        
+        .dropdown-item.active {
+            background: linear-gradient(to right, #a855f7, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         /* Spline container with crop */
@@ -239,7 +298,7 @@
 .avatar-frame-inner {
     width: 100%;
     height: 100%;
-    border-radius: 500%;
+    border-radius: 50%;
     overflow: hidden;
     background: #1a1a1a;
     display: flex;
@@ -331,17 +390,117 @@
 }
 
 
+              /* Dropdown Menu */
+        .dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 0.5rem 0;
+            min-width: 140px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 30;
+        }
+        
+        .dropdown.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .dropdown-item {
+            padding: 0.7rem 1.5rem;
+            color: #ffffff;
+            text-decoration: none;
+            display: block;
+            font-family: "Poppins", sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #22d3ee;
+        }
+        
+        .dropdown-item.active {
+            background: linear-gradient(to right, #a855f7, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
+
+        /* IMAGE PROTECTION CSS */
+        .avatar-frame {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            pointer-events: auto;
+        }
+
+        .avatar-frame-inner {
+            user-drag: none;
+            -webkit-user-drag: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .avatar-frame-inner img {
+            pointer-events: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+        }
+
+        /* Additional protection for Spline viewer image */
+        spline-viewer img {
+            pointer-events: none !important;
+            user-select: none !important;
+            -webkit-user-select: none !important;
+            -webkit-user-drag: none !important;
+        }
     </style>
 </head>
 <body>
+    
     <div id="main-container">
         <!-- Navigation -->
         <nav>
             <div class="nav-container">
-                <a href="Gc1/app.html" class="nav-link" data-group="1">Group 1</a>
-                <a href="Gc2/app.html" class="nav-link" data-group="2">Group 2</a>
-                <a href="Gc3/app.html" class="nav-link" data-group="3">Group 3</a>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" id="mspLink">MSP</a>
+                    <div class="dropdown" id="mspDropdown">
+                        <a href="#" class="dropdown-item">Operation</a>
+                        <a href="#" class="dropdown-item">Deployment</a>
+                    </div>
+                </div>
+                <div class="nav-item">
+                    <a href=" " class="nav-link active" id="socLink">SOC</a>
+                    <div class="dropdown" id="socDropdown">
+                        <a href="Gc1/app.html" class="dropdown-item">Group 1</a>
+                        <a href="Gc2/app.html" class="dropdown-item active">Group 2</a>
+                        <a href="Gc3/app.html" class="dropdown-item">Group 3</a>
+                    </div>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link">TI</a>
+                </div>
             </div>
         </nav>
         <!-- Loading indicator -->
@@ -378,7 +537,7 @@
                 <!-- Frame 1 -->
                 <div class="avatar-frame" data-index="0">
                     <div class="avatar-frame-inner">
-                        <img src="https://insightztechnology.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Flionel.48d0c64c.png&w=640&q=75" alt="Avatar 1">
+                        <img src="https://insightztechnology.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Flionel.48d0c64c.png&w=640&q=75" alt="Avatar 1" draggable="false">
                     </div>
                         <div class="role-badge">CEO</div>
                     </div>
@@ -386,7 +545,7 @@
                 <!-- Frame 2 -->
                 <div class="avatar-frame" data-index="1">
                     <div class="avatar-frame-inner">
-                        <img src="CTO.png" alt="Avatar 2">
+                        <img src="CTO.png" alt="Avatar 2" draggable="false">
                     </div>
                         <div class="role-badge">CTO</div>
                     </div>
@@ -394,7 +553,7 @@
                 <!-- Frame 3 -->
                 <div class="avatar-frame" data-index="2">
                     <div class="avatar-frame-inner">
-                        <img src="mam.png" alt="Avatar 3">
+                        <img src="mam.png" alt="Avatar 3" draggable="false">
                     </div>
                         <div class="role-badge">Soc Manager</div>
                     </div>
@@ -405,16 +564,90 @@
     </div><!-- end main-container -->
 
     <script>
-    // Navigation functionality
-            const navLinks = document.querySelectorAll('.nav-link');
+    // Dropdown Navigation Functionality
+    const mspLink = document.getElementById('mspLink');
+    const mspDropdown = document.getElementById('mspDropdown');
+    const socLink = document.getElementById('socLink');
+    const socDropdown = document.getElementById('socDropdown');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const allDropdownItems = document.querySelectorAll('.dropdown-item');
 
-            navLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    // Just update visual state - let href handle navigation
-                    navLinks.forEach(l => l.classList.remove('active'));
-                    this.classList.add('active');
-                });
+    // Toggle MSP dropdown
+    if (mspLink && mspDropdown) {
+        mspLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            mspDropdown.classList.toggle('active');
+            socDropdown.classList.remove('active');
+        });
+    }
+
+    // Toggle SOC dropdown
+    if (socLink && socDropdown) {
+        socLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            socDropdown.classList.toggle('active');
+            mspDropdown.classList.remove('active');
+        });
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.nav-item')) {
+            mspDropdown.classList.remove('active');
+            socDropdown.classList.remove('active');
+        }
+    });
+
+    // Handle dropdown item clicks
+    allDropdownItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            // Check if the item has a valid href (not "#" or empty)
+            const href = this.getAttribute('href');
+            
+            // If it's a real link, allow navigation
+            if (href && href !== '#' && href !== '') {
+                // Allow default navigation to happen
+                // Just update active states before navigation
+                const parentDropdown = this.closest('.dropdown');
+                parentDropdown.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                // Don't prevent default - let the link work
+                return;
+            }
+            
+            // Only prevent default for placeholder links (#)
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const parentDropdown = this.closest('.dropdown');
+            parentDropdown.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+            
+            if (mspDropdown) mspDropdown.classList.remove('active');
+            if (socDropdown) socDropdown.classList.remove('active');
+        });
+    });
+
+    // Handle main nav links (TI)
+    navLinks.forEach(link => {
+        if (link.id !== 'socLink' && link.id !== 'mspLink') {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active from all nav links
+                navLinks.forEach(l => l.classList.remove('active'));
+                
+                // Add active to clicked link
+                this.classList.add('active');
+                
+                // Close all dropdowns
+                mspDropdown.classList.remove('active');
+                socDropdown.classList.remove('active');
             });
+        }
+    });
 
         // Hide loading indicator when Spline loads
         setTimeout(() => {
@@ -489,6 +722,69 @@
             applySlots();                      // initial render
             setInterval(rotateCW, 3600);       // rotate every 3.6 s
         })();
+
+
+        // IMAGE PROTECTION - Disable right-click ONLY on images
+        document.addEventListener('contextmenu', function(e) {
+            if (e.target.tagName === 'IMG') {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // IMAGE PROTECTION - Disable drag start on images
+        document.addEventListener('dragstart', function(e) {
+            if (e.target.tagName === 'IMG') {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // IMAGE PROTECTION - Disable selection on images only
+        document.addEventListener('selectstart', function(e) {
+            if (e.target.tagName === 'IMG') {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // IMAGE PROTECTION - Disable keyboard shortcuts on images
+        document.addEventListener('keydown', function(e) {
+            // Disable Ctrl+S / Cmd+S (Save) when hovering over images
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                if (document.querySelectorAll('img:hover').length > 0) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+            // Disable Ctrl+C / Cmd+C (Copy) on images
+            if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+                if (e.target.tagName === 'IMG') {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        });
+
+        // IMAGE PROTECTION - Monitor for dynamically added images
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.tagName === 'IMG') {
+                        node.setAttribute('draggable', 'false');
+                        node.addEventListener('contextmenu', function(e) {
+                            e.preventDefault();
+                            return false;
+                        });
+                    }
+                });
+            });
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
     </script>
 </body>
 </html>
