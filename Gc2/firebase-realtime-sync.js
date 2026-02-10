@@ -234,6 +234,45 @@
             console.error('❌ Leave management listener error:', error);
         });
     }
+
+    // ========================================
+    // REAL-TIME PASSWORD SYNC
+    // ========================================
+    
+    function setupPasswordListener() {
+        if (!window.hasDatabase || !window.hasDatabase()) return;
+        
+        console.log('👂 Listening for password changes');
+        
+        // Get group-specific password key
+        const passwordKey = typeof CURRENT_GROUP !== 'undefined' 
+            ? `passwords_${CURRENT_GROUP}` 
+            : 'passwords_gc1';
+        
+        database.ref(passwordKey).on('value', (snapshot) => {
+            const firebasePasswords = snapshot.val();
+            
+            if (firebasePasswords && typeof userCredentials !== 'undefined') {
+                console.log('🔄 Passwords updated from Firebase');
+                
+                // Update local credentials
+                Object.assign(userCredentials, firebasePasswords);
+                
+                // Update localStorage
+                const storageKey = typeof CURRENT_GROUP !== 'undefined' 
+                    ? `userCredentials_${CURRENT_GROUP}` 
+                    : 'userCredentials_gc1';
+                localStorage.setItem(storageKey, JSON.stringify(userCredentials));
+                
+                // Show notification
+                if (typeof isAdmin !== 'undefined' && !isAdmin) {
+                    showNotification('🔐 Password settings updated', 'info');
+                }
+            }
+        }, (error) => {
+            console.error('❌ Password listener error:', error);
+        });
+    }
     
     // ========================================
     // INITIALIZE ALL LISTENERS
@@ -257,6 +296,7 @@
         setupAvailabilityListener();
         setupMemberAvailabilityListener();
         setupLeaveManagementListener();
+        setupPasswordListener();
         
         // Setup schedule listener for current date
         const dateInput = document.getElementById('scheduleDate');
@@ -330,6 +370,11 @@
             
             listenersAttached = false;
             console.log('✅ All listeners detached');
+            // password
+            const passwordKey = typeof CURRENT_GROUP !== 'undefined' 
+                ? `passwords_${CURRENT_GROUP}` 
+                : 'passwords_gc1';
+            database.ref(passwordKey).off('value');
         }
     };
     
