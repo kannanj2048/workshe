@@ -141,15 +141,14 @@ function getWorkingHoursDisplay() {
 let availabilityOverrides = JSON.parse(localStorage.getItem("availabilityOverrides")) || {};
 // ---------- TEAM DATA ----------
 let teamData = JSON.parse(localStorage.getItem("teamData")) || {
-    SAs: [ "Selva", "Naveen", "Kannan", "Midhun", "Prem", "Logesh", "Linith"],
-    apprentices: [ "Sanjay", "Vishal", "Subash"],
+    SAs: [ "Raja", "Vishali", "Elakkia", "Priyanga", "Yuva", "Stephan", "Sahasraa", "Deepak", "NaveenRaj"],
+    apprentices: [ "Sriharan"],
     responsibilities: {
-        Selva: "Vishal",
-        Naveen: "Vishal",
-        Kannan: "Karl / Subash",
-        Midhun: "Sanjay",
-        Prem: "Karl / Subash",
-        Idris: "All Apprentice"
+        Raja: " ",
+        Vishali: " ",
+        Elakkia: " ",
+        Priyanga: "Sriharan",
+        Yuva: " ",
     }
 };
 
@@ -170,16 +169,16 @@ let isAdmin = false;
 let memberAvailabilitySettings = JSON.parse(localStorage.getItem('memberAvailabilitySettings')) || {
     SAs: {
         "Idris": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], isPOC: true },
-        "Selva": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Naveen": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Kannan": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Midhun": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Prem": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Logesh": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
+        "Raja": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Vishali": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Elakkia": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Priyanga": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Yuva": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Stephan": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
     },
     apprentices: {
-        "Linith": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Sanjay": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Sahasraa": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Sriharan": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Vishal": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Subash": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] }
     }
