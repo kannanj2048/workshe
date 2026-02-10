@@ -3068,7 +3068,7 @@ const PASSWORD_STORAGE_KEY = `userCredentials_${CURRENT_GROUP}`;
 const PASSWORD_FIREBASE_KEY = `passwords_${CURRENT_GROUP}`;
 
 // Default passwords for this group
-const DEFAULT_PASSWORDS = {
+let userCredentials = JSON.parse(localStorage.getItem('userCredentials')) || {
     admin: {
         password: 'admin123',
         role: 'admin'
@@ -3079,7 +3079,7 @@ const DEFAULT_PASSWORDS = {
         activeSessions: []
     }
 };
-
+let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
 // User credentials storage - LOAD FROM FIREBASE OR LOCALSTORAGE
 let userCredentials = null;
 
@@ -3751,6 +3751,130 @@ function detectGroupID() {
 // Detect current group
 const CURRENT_GROUP = detectGroupID();
 console.log('🎯 Detected Group:', CURRENT_GROUP);
+const CURRENT_GROUP = detectGroupID();
+console.log('🎯 Detected Group:', CURRENT_GROUP);
+
+// ========================================
+// 🔒 PASSWORD MANAGEMENT SYSTEM
+// ========================================
+
+// 🔑 Password storage keys - GROUP-SPECIFIC
+const PASSWORD_STORAGE_KEY = `userCredentials_${CURRENT_GROUP}`;
+const PASSWORD_FIREBASE_KEY = `passwords_${CURRENT_GROUP}`;
+
+// Default passwords for this group
+const DEFAULT_PASSWORDS = {
+    admin: {
+        password: 'admin123',
+        role: 'admin'
+    },
+    guest: {
+        password: 'guest123',
+        maxUsers: 2,
+        activeSessions: []
+    }
+};
+
+// ✅ Initialize passwords from Firebase/localStorage
+function initializePasswords() {
+    console.log(`🔑 Initializing passwords for ${CURRENT_GROUP}...`);
+    
+    // Try Firebase first
+    if (window.hasDatabase && window.hasDatabase()) {
+        loadPasswordsFromFirebase((firebasePasswords) => {
+            if (firebasePasswords) {
+                console.log(`☁️ Passwords loaded from Firebase (${CURRENT_GROUP})`);
+                userCredentials = firebasePasswords;
+                
+                // Sync to localStorage
+                localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
+            } else {
+                // Try localStorage
+                loadPasswordsFromLocalStorage();
+            }
+        });
+    } else {
+        // No Firebase - use localStorage only
+        loadPasswordsFromLocalStorage();
+    }
+}
+
+// Load passwords from localStorage
+function loadPasswordsFromLocalStorage() {
+    const stored = localStorage.getItem(PASSWORD_STORAGE_KEY);
+    
+    if (stored) {
+        userCredentials = JSON.parse(stored);
+        console.log(`💾 Passwords loaded from localStorage (${CURRENT_GROUP})`);
+        
+        // Sync to Firebase if available
+        if (window.hasDatabase && window.hasDatabase()) {
+            savePasswordsToFirebase();
+        }
+    } else {
+        // Use defaults
+        userCredentials = JSON.parse(JSON.stringify(DEFAULT_PASSWORDS));
+        console.log(`ℹ️ Using default passwords for ${CURRENT_GROUP}`);
+        saveUserCredentials();
+    }
+}
+
+// Load passwords from Firebase
+function loadPasswordsFromFirebase(callback) {
+    if (!window.hasDatabase || !window.hasDatabase()) {
+        callback(null);
+        return;
+    }
+    
+    database.ref(PASSWORD_FIREBASE_KEY).once('value')
+        .then((snapshot) => {
+            const passwords = snapshot.val();
+            if (callback) callback(passwords);
+        })
+        .catch((error) => {
+            console.error('❌ Error loading passwords from Firebase:', error);
+            if (callback) callback(null);
+        });
+}
+
+// Save passwords to Firebase
+function savePasswordsToFirebase() {
+    if (!window.hasDatabase || !window.hasDatabase() || !userCredentials) return;
+    
+    database.ref(PASSWORD_FIREBASE_KEY).set(userCredentials)
+        .then(() => {
+            console.log(`☁️ Passwords saved to Firebase (${CURRENT_GROUP})`);
+        })
+        .catch((error) => {
+            console.error('❌ Error saving passwords to Firebase:', error);
+        });
+}
+
+// Save credentials to localStorage AND Firebase
+function saveUserCredentials() {
+    if (!userCredentials) {
+        console.error('❌ Cannot save - userCredentials not initialized');
+        return;
+    }
+    
+    // Save to localStorage
+    localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
+    console.log(`💾 Passwords saved to localStorage (${CURRENT_GROUP})`);
+    
+    // Save to Firebase
+    savePasswordsToFirebase();
+}
+// ✅ Initialize passwords when page loads
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(initializePasswords, 500);
+    });
+} else {
+    setTimeout(initializePasswords, 500);
+}
+
+console.log('%c🔒 Group-Specific Password System Loaded', 'color: #10b981; font-weight: bold; font-size: 14px');
+console.log(`%c   Group: ${CURRENT_GROUP} - Passwords sync across all devices`, 'color: #3b82f6; font-size: 12px');
 
 // Default POC names
 const DEFAULT_POC_NAMES = {
@@ -4657,15 +4781,3 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Admin can edit POC names`, 'color: #
     }
     
 })();
-
-// ✅ Initialize passwords when page loads
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(initializePasswords, 500); // Wait for Firebase to initialize
-    });
-} else {
-    setTimeout(initializePasswords, 500);
-}
-
-console.log('%c🔒 Group-Specific Password System Loaded', 'color: #10b981; font-weight: bold; font-size: 14px');
-console.log(`%c   Group: ${CURRENT_GROUP} - Passwords sync across all devices`, 'color: #3b82f6; font-size: 12px');
