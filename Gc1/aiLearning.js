@@ -372,7 +372,9 @@ function assignTasksWithAI(dayOfWeek, remainingSAs, availableApps) {
         tasks["HO PPT Update"] = `${remainingSAs[0]} / ${availableApps[0]} / ${availableApps[1] || ''}`.trim();
     }
     if (!tasks["Handover Presentation"]) {
-        tasks["Handover Presentation"] = (dayOfWeek === 1 || dayOfWeek === 0) ? POC_NAME : (remainingSAs[0] || 'TBD');
+        // ✅ FIX: Get POC name from pocNames object (defined in script.js)
+        const currentPOC = typeof pocNames !== 'undefined' && pocNames.team1 ? pocNames.team1 : 'Raja';
+        tasks["Handover Presentation"] = (dayOfWeek === 1 || dayOfWeek === 0) ? currentPOC : (remainingSAs[0] || 'TBD');
     }
     if (!tasks["Handover Summary"] && availableApps[availableApps.length - 1]) {
         tasks["Handover Summary"] = availableApps[availableApps.length - 1];
