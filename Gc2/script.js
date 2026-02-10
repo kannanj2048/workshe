@@ -153,7 +153,6 @@ let teamData = JSON.parse(localStorage.getItem("teamData")) || {
     }
 };
 
-const POC_NAME = "Idris";
 
 const platforms = {
     main: ["SIEM", "XDR", "Forti EDR"],
@@ -166,6 +165,25 @@ let isAdmin = false;
 
 // Load monthly leave management
 // let monthlyLeaveSettings = JSON.parse(localStorage.getItem('monthlyLeaveSettings')) || {};
+
+// ========== CENTRALIZED AVAILABILITY MANAGEMENT SYSTEM ==========
+let memberAvailabilitySettings = JSON.parse(localStorage.getItem('memberAvailabilitySettings')) || {
+    SAs: {
+        "Idris": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], isPOC: true },
+        "Selva": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Naveen": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Kannan": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Midhun": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Prem": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Logesh": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
+    },
+    apprentices: {
+        "Linith": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Sanjay": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Vishal": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Subash": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] }
+    }
+};
 
 
 // ========== GLOBAL AVAILABILITY FUNCTIONS ==========
@@ -340,25 +358,6 @@ function addMemberFromAvailability(role) {
     showNotification(`${name.trim()} added successfully`, "success");
 }
 
-// ========== CENTRALIZED AVAILABILITY MANAGEMENT SYSTEM ==========
-let memberAvailabilitySettings = JSON.parse(localStorage.getItem('memberAvailabilitySettings')) || {
-    SAs: {
-        "Idris": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], isPOC: true },
-        "Selva": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Naveen": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Kannan": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Midhun": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Prem": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Logesh": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
-    },
-    apprentices: {
-        "Linith": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Sanjay": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Vishal": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Subash": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] }
-    }
-};
-
 function saveMemberAvailabilitySettings() {
     localStorage.setItem('memberAvailabilitySettings', JSON.stringify(memberAvailabilitySettings));
     
@@ -413,7 +412,20 @@ function getAvailableSAsForDate(dateSGT) {
     const dayName = dayNames[dateSGT.getDay()];
     
     const availableMembers = [];
+    
+    // Safety check
+    if (!memberAvailabilitySettings || !memberAvailabilitySettings.SAs) {
+        console.warn('⚠️ memberAvailabilitySettings.SAs is not defined');
+        return availableMembers;
+    }
+    
     for (const [name, settings] of Object.entries(memberAvailabilitySettings.SAs)) {
+        // Safety check for settings
+        if (!settings || !settings.days) {
+            console.warn(`⚠️ Invalid settings for SA: ${name}`);
+            continue;
+        }
+        
         // Check working day schedule
         if (!settings.days.includes(dayName)) {
             continue;
@@ -432,22 +444,33 @@ function getAvailableSAsForDate(dateSGT) {
             continue;
         }
         
-        if (name !== POC_NAME) {
-            availableMembers.push(name);
-        }
+        
+        availableMembers.push(name);
     }
     
     console.log(`✅ Available SAs for ${dayName}: ${availableMembers.join(', ') || 'NONE'}`);
     return availableMembers;
 }
 
-
 function getAvailableApprenticesForDate(dateSGT) {
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const dayName = dayNames[dateSGT.getDay()];
     
     const availableMembers = [];
+    
+    // Safety check
+    if (!memberAvailabilitySettings || !memberAvailabilitySettings.apprentices) {
+        console.warn('⚠️ memberAvailabilitySettings.apprentices is not defined');
+        return availableMembers;
+    }
+    
     for (const [name, settings] of Object.entries(memberAvailabilitySettings.apprentices)) {
+        // Safety check for settings
+        if (!settings || !settings.days) {
+            console.warn(`⚠️ Invalid settings for Apprentice: ${name}`);
+            continue;
+        }
+        
         // Check working day schedule
         if (!settings.days.includes(dayName)) {
             continue;
@@ -477,33 +500,30 @@ function isMemberAvailableOnDate(member, dateSGT, role) {
     // 1. Check manual availability override
     const key = `${member}_${role}`;
     if (availabilityOverrides[key]) {
-        return false;
+        return false; // Member is unavailable (manual override)
     }
-
-    // 2. ✅ Check monthly leave
+    
+    // 2. Check if member is on leave
     if (typeof isMemberOnLeave === 'function' && isMemberOnLeave(member, role, dateSGT)) {
-        return false;
+        return false; // Member is on leave
     }
-
-    // 3. Check centralized working day schedule
-    const category = role === "SA" ? "SAs" : "apprentices";
-    if (memberAvailabilitySettings[category]?.[member]) {
-        const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        const dayName = dayNames[dateSGT.getDay()];
-        
-        if (!memberAvailabilitySettings[category][member].days.includes(dayName)) {
-            return false;
+    
+    // 3. Check working schedule (memberAvailabilitySettings)
+    if (typeof memberAvailabilitySettings !== 'undefined') {
+        const roleKey = role === 'SA' ? 'SAs' : 'apprentices';
+        if (memberAvailabilitySettings[roleKey] && memberAvailabilitySettings[roleKey][member]) {
+            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayName = dayNames[dateSGT.getDay()];
+            const workingDays = memberAvailabilitySettings[roleKey][member].days || [];
+            
+            if (!workingDays.includes(dayName)) {
+                return false; // Not a working day for this member
+            }
         }
     }
-
-    // POC is always available
-    if (role === "SA" && member === POC_NAME) {
-        return true;
-    }
-
-    return true;
+    
+    return true; // Member is available
 }
-
 
 // ---------- SCHEDULE GENERATION ----------
 
@@ -798,6 +818,10 @@ function smartApprenticeAssignment(sa, availableApps, dayName, platformIndex, to
 // ==========================================
 // SMART TASK ASSIGNMENT 
 // ==========================================
+
+// ==========================================
+// SMART TASK ASSIGNMENT - FIXED VERSION
+// ==========================================
 function assignAdditionalTasksSmart(sas, apprentices, date, recentHistory, mainPlatformSAs) {
     const tasks = {};
     const dayOfWeek = date.getDay();
@@ -805,15 +829,28 @@ function assignAdditionalTasksSmart(sas, apprentices, date, recentHistory, mainP
 
     console.log(`  📊 Task Assignment Strategy:`);
     console.log(`     - Main Platform SAs: ${mainPlatformSAs.join(', ')}`);
-    console.log(`     - Available for Tasks: ${sas.filter(sa => !mainPlatformSAs.includes(sa)).join(', ') || 'Will use main SAs'}`);
+    console.log(`     - All Available SAs: ${sas.join(', ') || 'NONE'}`);
+    console.log(`     - All Available Apprentices: ${apprentices.join(', ') || 'NONE'}`);
 
-    // ✅ Ensure we have fallback values for empty arrays
-    const safeSAs = sas.length > 0 ? sas : [POC_NAME];
-    const safeApps = apprentices.length > 0 ? apprentices : ['All'];
+    // ✅ Use only actual available members - no hardcoded fallback
+    const safeSAs = sas.length > 0 ? sas : [];
+    const safeApps = apprentices.length > 0 ? apprentices : [];
 
-    // Calculate scores
-    const saTaskScores = calculateWorkloadScores(safeSAs, recentHistory, 'SA');
-    const appTaskScores = calculateWorkloadScores(safeApps, recentHistory, 'Apprentice');
+    // If no members available at all, show "No one available"
+    if (safeSAs.length === 0 && safeApps.length === 0) {
+        console.warn('⚠️ No SAs or Apprentices available - assigning "No one available"');
+        tasks["Email Handle"] = "No one available";
+        tasks["Follow Up Remainder"] = "No one available";
+        tasks["SIEM Device Status"] = "No one available";
+        tasks["HO PPT Update"] = "No one available";
+        tasks["Handover Presentation"] = "No one available";
+        tasks["Handover Summary"] = "No one available";
+        return tasks;
+    }
+
+    // Calculate scores only with available members
+    const saTaskScores = safeSAs.length > 0 ? calculateWorkloadScores(safeSAs, recentHistory, 'SA') : {};
+    const appTaskScores = safeApps.length > 0 ? calculateWorkloadScores(safeApps, recentHistory, 'Apprentice') : {};
 
     // Sort by fairness (least loaded first)
     const sortedSAs = Object.entries(saTaskScores)
@@ -828,46 +865,116 @@ function assignAdditionalTasksSmart(sas, apprentices, date, recentHistory, mainP
     const availableForTasks = safeSAs.filter(sa => !mainPlatformSAs.includes(sa));
     const taskSAs = availableForTasks.length > 0 ? availableForTasks : sortedSAs;
 
-    console.log(`     - Task SAs Pool: ${taskSAs.join(', ')}`);
+    console.log(`     - Task SAs Pool: ${taskSAs.join(', ') || 'Using all SAs'}`);
 
     // ✅ TASK 1: Email Handle - ALWAYS ASSIGNED
-    const emailSA = taskSAs[0] || sortedSAs[0] || safeSAs[0];
-    const emailApp = sortedApps[0] || safeApps[0];
-    tasks["Email Handle"] = `${emailSA} / ${emailApp}`;
+    if (taskSAs.length > 0 && sortedApps.length > 0) {
+        const emailSA = taskSAs[0] || sortedSAs[0];
+        const emailApp = sortedApps[0];
+        tasks["Email Handle"] = `${emailSA} / ${emailApp}`;
+    } else if (taskSAs.length > 0) {
+        tasks["Email Handle"] = taskSAs[0] || sortedSAs[0];
+    } else if (sortedApps.length > 0) {
+        tasks["Email Handle"] = sortedApps[0];
+    } else {
+        tasks["Email Handle"] = "All SA's";
+    }
     console.log(`  ✉️ Email Handle: ${tasks["Email Handle"]}`);
 
     // ✅ TASK 2: Follow Up Remainder - ALWAYS ASSIGNED
-    const followUpApp = sortedApps[1] || sortedApps[0] || safeApps[0];
-    tasks["Follow Up Remainder"] = followUpApp;
+    if (sortedApps.length > 0) {
+        tasks["Follow Up Remainder"] = sortedApps[1] || sortedApps[0];
+    } else if (taskSAs.length > 0) {
+        tasks["Follow Up Remainder"] = taskSAs[0];
+    } else {
+        tasks["Follow Up Remainder"] = "All Apprentice";
+    }
     console.log(`  🔔 Follow Up Remainder: ${tasks["Follow Up Remainder"]}`);
 
     // ✅ TASK 3: SIEM Device Status - ALWAYS ASSIGNED
-    const siemSA = taskSAs[1] || taskSAs[0] || sortedSAs[0] || safeSAs[0];
-    const siemApp = sortedApps[2] || sortedApps[1] || sortedApps[0] || safeApps[0];
-    tasks["SIEM Device Status"] = `${siemSA} / ${siemApp}`;
+    if (taskSAs.length > 0 && sortedApps.length > 0) {
+        const siemSA = taskSAs[1] || taskSAs[0] || sortedSAs[0];
+        const siemApp = sortedApps[2] || sortedApps[1] || sortedApps[0];
+        tasks["SIEM Device Status"] = `${siemSA} / ${siemApp}`;
+    } else if (taskSAs.length > 0) {
+        tasks["SIEM Device Status"] = taskSAs[1] || taskSAs[0] || sortedSAs[0];
+    } else if (sortedApps.length > 0) {
+        tasks["SIEM Device Status"] = sortedApps[0];
+    } else {
+        tasks["SIEM Device Status"] = "All SA's";
+    }
     console.log(`  🖥️ SIEM Device Status: ${tasks["SIEM Device Status"]}`);
 
     // ✅ TASK 4: HO PPT Update - ALWAYS ASSIGNED
-    const pptSA = taskSAs[0] || sortedSAs[0] || safeSAs[0];
-    const pptApp1 = sortedApps[0] || safeApps[0];
-    const pptApp2 = sortedApps[1] || safeApps[Math.min(1, safeApps.length - 1)];
-    const pptApps = [pptApp1, pptApp2].filter(a => a && a !== 'All').join(' / ');
-    tasks["HO PPT Update"] = `${pptSA}${pptApps ? ' / ' + pptApps : ''}`;
+    if (taskSAs.length > 0) {
+        const pptSA = taskSAs[0] || sortedSAs[0];
+        const pptAppsArray = [];
+        
+        if (sortedApps.length > 0) {
+            pptAppsArray.push(sortedApps[0]);
+        }
+        if (sortedApps.length > 1 && sortedApps[1] !== sortedApps[0]) {
+            pptAppsArray.push(sortedApps[1]);
+        }
+        
+        if (pptAppsArray.length > 0) {
+            tasks["HO PPT Update"] = `${pptSA} / ${pptAppsArray.join(' / ')}`;
+        } else {
+            tasks["HO PPT Update"] = pptSA;
+        }
+    } else if (sortedApps.length > 0) {
+        tasks["HO PPT Update"] = sortedApps.join(' / ');
+    } else {
+        tasks["HO PPT Update"] = "All SA's";
+    }
     console.log(`  📊 HO PPT Update: ${tasks["HO PPT Update"]}`);
 
     // ✅ TASK 5: Handover Presentation - ALWAYS ASSIGNED
-    if (dayOfWeek === 1 || dayOfWeek === 0) {
-        tasks["Handover Presentation"] = POC_NAME;
-    } else {
-        const handoverSA = taskSAs[2] || taskSAs[1] || taskSAs[0] || sortedSAs[0] || safeSAs[0];
+    if (taskSAs.length > 0) {
+        const handoverSA = taskSAs[2] || taskSAs[1] || taskSAs[0] || sortedSAs[0];
         tasks["Handover Presentation"] = handoverSA;
+    } else if (sortedApps.length > 0) {
+        tasks["Handover Presentation"] = sortedApps[0];
+    } else {
+        tasks["Handover Presentation"] = "All SA's";
     }
     console.log(`  🎤 Handover Presentation: ${tasks["Handover Presentation"]}`);
 
     // ✅ TASK 6: Handover Summary - ALWAYS ASSIGNED
-    const summaryApp = sortedApps[safeApps.length - 1] || sortedApps[3] || sortedApps[2] || sortedApps[1] || sortedApps[0] || safeApps[0];
-    tasks["Handover Summary"] = summaryApp;
+    if (sortedApps.length > 0) {
+        const summaryApp = sortedApps[sortedApps.length - 1] || sortedApps[3] || sortedApps[2] || sortedApps[1] || sortedApps[0];
+        tasks["Handover Summary"] = summaryApp;
+    } else if (taskSAs.length > 0) {
+        tasks["Handover Summary"] = taskSAs[taskSAs.length - 1] || taskSAs[0];
+    } else {
+        tasks["Handover Summary"] = "All Apprentice";
+    }
     console.log(`  📝 Handover Summary: ${tasks["Handover Summary"]}`);
+
+    // ✅ VERIFICATION: Ensure all 6 tasks are present
+    const requiredTasks = [
+        "Email Handle",
+        "Follow Up Remainder",
+        "SIEM Device Status",
+        "HO PPT Update",
+        "Handover Presentation",
+        "Handover Summary"
+    ];
+
+    requiredTasks.forEach(taskName => {
+        if (!tasks[taskName]) {
+            console.error(`❌ MISSING TASK: ${taskName} - Adding fallback`);
+            tasks[taskName] = "All SA's";
+        }
+    });
+
+    console.log(`  ✅ All 6 tasks assigned successfully`);
+    
+    // ✅ FINAL VERIFICATION: Log all tasks before returning
+    console.log(`  📊 Final Task Summary (${Object.keys(tasks).length} tasks):`);
+    Object.entries(tasks).forEach(([taskName, assigned]) => {
+        console.log(`     - ${taskName}: ${assigned}`);
+    });
 
     // Record task assignments
     Object.entries(tasks).forEach(([task, assigned]) => {
@@ -887,6 +994,7 @@ function assignAdditionalTasksSmart(sas, apprentices, date, recentHistory, mainP
 
     return tasks;
 }
+
 
 // ==========================================
 // HELPER FUNCTIONS
@@ -1153,8 +1261,10 @@ function displaySchedule(schedule) {
     const shiftBadge = document.getElementById('currentShiftBadge');
     if (shiftBadge && schedule.shift) {
         const shift = SHIFT_TYPES[schedule.shift];
-        const editBtn = isAdmin ? `<button id="editShiftBtn" class="btn-icon admin-only" onclick="openEditShiftModal()" title="Edit Shift" style="margin-left: 10px; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); color: var(--primary); padding: 5px 25px; border-radius: 5px; cursor: pointer;"><i class="fas fa-edit"></i> Edit</button>` : '';
-        shiftBadge.innerHTML = `<i class="fas fa-clock"></i> ${shift.name} Shift (${shift.label}) ${editBtn}`;
+        if (shift) {
+            const editBtn = isAdmin ? `<button id="editShiftBtn" class="btn-icon admin-only" onclick="openEditShiftModal()" title="Edit Shift" style="margin-left: 10px; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); color: var(--primary); padding: 5px 25px; border-radius: 5px; cursor: pointer;"><i class="fas fa-edit"></i> Edit</button>` : '';
+            shiftBadge.innerHTML = `<i class="fas fa-clock"></i> ${shift.name} Shift (${shift.label}) ${editBtn}`;
+        }
     }
 
     // Apply drag/drop ordering if available
@@ -1187,11 +1297,37 @@ function displaySchedule(schedule) {
 function displayAdditionalTasks(schedule) {
     const tasksGrid = document.getElementById("additionalTasksGrid");
     if (!tasksGrid) return;
+    
+    // ✅ DEBUG: Log tasks being displayed
+    console.log(`📋 Displaying Additional Tasks for ${schedule.date}:`);
+    console.log(`   Total tasks: ${Object.keys(schedule.tasks).length}`);
+    console.log(`   Tasks:`, schedule.tasks);
+    
     tasksGrid.innerHTML = "";
-    Object.keys(schedule.tasks).forEach(taskName => {
+    
+    // ✅ ENSURE ALL 6 TASKS ARE PRESENT
+    const requiredTasks = [
+        "Email Handle",
+        "Follow Up Remainder",
+        "SIEM Device Status",
+        "HO PPT Update",
+        "Handover Presentation",
+        "Handover Summary"
+    ];
+    
+    // Check for missing tasks and add them with fallback
+    requiredTasks.forEach(taskName => {
+        if (!schedule.tasks[taskName]) {
+            console.warn(`⚠️ Missing task: ${taskName} - adding fallback`);
+            schedule.tasks[taskName] = "All SA's";
+        }
+    });
+    
+    // Display all tasks in the required order
+    requiredTasks.forEach(taskName => {
         const assigned = schedule.tasks[taskName];
-
-// Show edit button for BOTH admin AND guest
+        
+        // Show edit button for BOTH admin AND guest
         const editBtn = (isAdmin || isGuest) ? 
             `<button class="edit-task-btn ${isGuest ? 'guest-only' : 'admin-only'}" onclick="openEditTaskModal(scheduleHistory['${schedule.date}'], '${taskName}')">
                 <i class="fas fa-edit"></i>
@@ -1205,6 +1341,8 @@ function displayAdditionalTasks(schedule) {
         `;
         tasksGrid.appendChild(card);
     });
+
+    console.log(`✅ Displayed ${tasksGrid.children.length} tasks`);
 
     // Load and apply task order
     if (typeof loadAndApplyTaskOrder === 'function') {
@@ -1805,165 +1943,256 @@ function initScheduleFeatures() {
     
     const dlBtn = document.getElementById("downloadSchedule");
     if (dlBtn) {
-        dlBtn.addEventListener("click", downloadScheduleAsCSV);
+        dlBtn.addEventListener("click", () => {
+            console.log('📥 Download CSV button clicked');
+            try {
+                downloadScheduleAsCSV();
+            } catch (error) {
+                console.error('❌ Error in download handler:', error);
+                showNotification(`Download failed: ${error.message}`, 'error');
+            }
+        });
+        console.log('✅ Download CSV button initialized');
+    } else {
+        console.warn('⚠️ Download CSV button not found (ID: downloadSchedule)');
     }
     
     const toggleWeekBtn = document.getElementById("toggleWeekView");
     if (toggleWeekBtn) {
         toggleWeekBtn.addEventListener("click", () => {
-            const weekDiv = document.getElementById("weekSchedule");
-            if (weekDiv) {
+            console.log('📅 Toggle Week View button clicked');
+            try {
+                const weekDiv = document.getElementById("weekSchedule");
+                if (!weekDiv) {
+                    console.error('❌ weekSchedule element not found');
+                    showNotification('Error: Week view container not found', 'error');
+                    return;
+                }
+                
                 if (weekDiv.style.display === "none" || !weekDiv.style.display) {
                     generateWeekView();
                     weekDiv.style.display = "block";
                     toggleWeekBtn.innerHTML = '<i class="fas fa-calendar-day"></i> Show Day View';
+                    console.log('✅ Week view shown');
                 } else {
                     weekDiv.style.display = "none";
                     toggleWeekBtn.innerHTML = '<i class="fas fa-calendar-week"></i> Show Full Week';
+                    console.log('✅ Week view hidden');
                 }
+            } catch (error) {
+                console.error('❌ Error in week view toggle:', error);
+                showNotification(`Week view error: ${error.message}`, 'error');
             }
         });
+        console.log('✅ Toggle Week View button initialized');
+    } else {
+        console.warn('⚠️ Toggle Week View button not found (ID: toggleWeekView)');
     }
 }
 
 function generateWeekView() {
-    const weekDiv = document.getElementById('weekSchedule');
-    if (!weekDiv) return;
-    const dateInput = document.getElementById('scheduleDate');
-    const currentDate = new Date(dateInput ? dateInput.value : getNowSGT());
-    const monday = new Date(currentDate);
-    const day = monday.getDay();
-    const diff = monday.getDate() - day + (day === 0 ? -6 : 1);
-    monday.setDate(diff);
-    
-    let html = '<div class="week-view-table"><table class="schedule-table"><thead><tr><th>Platform / Task</th>';
-    const weekSchedules = [];
-    
-    for (let i = 0; i < 7; i++) {
-        const d = new Date(monday);
-        d.setDate(monday.getDate() + i);
-        const dn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()];
-        html += `<th>${dn} ${d.getDate()}/${d.getMonth() + 1}</th>`;
-        
-        const dateStr = d.toISOString().split('T')[0];
-        let schedule;
-        if (scheduleHistory[dateStr]) {
-            schedule = scheduleHistory[dateStr];
-        } else {
-            schedule = generateScheduleForDate(d);
-            scheduleHistory[dateStr] = schedule;
-            localStorage.setItem('scheduleHistory', JSON.stringify(scheduleHistory));
+    try {
+        const weekDiv = document.getElementById('weekSchedule');
+        if (!weekDiv) {
+            console.error('❌ weekSchedule element not found');
+            return;
         }
-        weekSchedules.push(schedule);
-    }
-    
-    html += '</tr></thead><tbody>';
-    const allPlatforms = [...platforms.main, ...platforms.common, ...platforms.grouped];
-    allPlatforms.forEach(p => {
-        html += `<tr><td><strong>${p}</strong></td>`;
-        weekSchedules.forEach(s => {
-            const a = s.platforms[p];
-            html += `<td>${a ? a.inCharge : '-'}</td>`;
+        
+        // Check if required dependencies exist
+        if (typeof platforms === 'undefined') {
+            console.error('❌ platforms is not defined');
+            showNotification('Error: Schedule data not loaded', 'error');
+            return;
+        }
+        
+        if (typeof scheduleHistory === 'undefined') {
+            console.error('❌ scheduleHistory is not defined');
+            showNotification('Error: Schedule history not loaded', 'error');
+            return;
+        }
+        
+        if (typeof generateScheduleForDate !== 'function') {
+            console.error('❌ generateScheduleForDate is not defined');
+            showNotification('Error: Schedule generator not loaded', 'error');
+            return;
+        }
+        
+        console.log('📅 Generating week view...');
+        
+        const dateInput = document.getElementById('scheduleDate');
+        const currentDate = new Date(dateInput ? dateInput.value : getNowSGT());
+        const monday = new Date(currentDate);
+        const day = monday.getDay();
+        const diff = monday.getDate() - day + (day === 0 ? -6 : 1);
+        monday.setDate(diff);
+        
+        let html = '<div class="week-view-table"><table class="schedule-table"><thead><tr><th>Platform / Task</th>';
+        const weekSchedules = [];
+        
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(monday);
+            d.setDate(monday.getDate() + i);
+            const dn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()];
+            html += `<th>${dn} ${d.getDate()}/${d.getMonth() + 1}</th>`;
+            
+            const dateStr = d.toISOString().split('T')[0];
+            let schedule;
+            if (scheduleHistory[dateStr]) {
+                schedule = scheduleHistory[dateStr];
+            } else {
+                schedule = generateScheduleForDate(d);
+                scheduleHistory[dateStr] = schedule;
+                localStorage.setItem('scheduleHistory', JSON.stringify(scheduleHistory));
+            }
+            weekSchedules.push(schedule);
+        }
+        
+        html += '</tr></thead><tbody>';
+        const allPlatforms = [...platforms.main, ...platforms.common, ...platforms.grouped];
+        allPlatforms.forEach(p => {
+            html += `<tr><td><strong>${p}</strong></td>`;
+            weekSchedules.forEach(s => {
+                const a = s.platforms[p];
+                html += `<td>${a ? a.inCharge : '-'}</td>`;
+            });
+            html += '</tr>';
         });
-        html += '</tr>';
-    });
-    html += '</tbody></table></div>';
-    weekDiv.innerHTML = html;
+        html += '</tbody></table></div>';
+        weekDiv.innerHTML = html;
+        
+        console.log('✅ Week view generated successfully');
+        showNotification('Week view loaded', 'success');
+        
+    } catch (error) {
+        console.error('❌ Week view generation error:', error);
+        showNotification(`Error generating week view: ${error.message}`, 'error');
+    }
 }
 
 // CSV downloaded 
 function downloadScheduleAsCSV() {
-    const dateInput = document.getElementById("scheduleDate");
-    const currentDate = new Date(dateInput ? dateInput.value : getNowSGT());
-    
-    // Calculate Monday of the week
-    const monday = new Date(currentDate);
-    const day = monday.getDay();
-    const diff = monday.getDate() - day + (day === 0 ? -6 : 1);
-    monday.setDate(diff);
-    
-    // Generate week schedules
-    const weekSchedules = [];
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    
-    for (let i = 0; i < 7; i++) {
-        const d = new Date(monday);
-        d.setDate(monday.getDate() + i);
-        const dateStr = d.toISOString().split('T')[0];
-        
-        let schedule;
-        if (scheduleHistory[dateStr]) {
-            schedule = scheduleHistory[dateStr];
-        } else {
-            schedule = generateScheduleForDate(d);
-            scheduleHistory[dateStr] = schedule;
-            localStorage.setItem('scheduleHistory', JSON.stringify(scheduleHistory));
+    try {
+        // Check if required dependencies exist
+        if (typeof platforms === 'undefined') {
+            console.error('❌ platforms is not defined');
+            showNotification('Error: Schedule data not loaded', 'error');
+            return;
         }
         
-        weekSchedules.push({
-            date: dateStr,
-            dayName: dayNames[d.getDay()],
-            dayDate: `${d.getDate()}/${d.getMonth() + 1}`,
-            schedule: schedule
+        if (typeof scheduleHistory === 'undefined') {
+            console.error('❌ scheduleHistory is not defined');
+            showNotification('Error: Schedule history not loaded', 'error');
+            return;
+        }
+        
+        if (typeof generateScheduleForDate !== 'function') {
+            console.error('❌ generateScheduleForDate is not defined');
+            showNotification('Error: Schedule generator not loaded', 'error');
+            return;
+        }
+        
+        console.log('📥 Starting CSV download...');
+        
+        const dateInput = document.getElementById("scheduleDate");
+        const currentDate = new Date(dateInput ? dateInput.value : getNowSGT());
+        
+        // Calculate Monday of the week
+        const monday = new Date(currentDate);
+        const day = monday.getDay();
+        const diff = monday.getDate() - day + (day === 0 ? -6 : 1);
+        monday.setDate(diff);
+        
+        // Generate week schedules
+        const weekSchedules = [];
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(monday);
+            d.setDate(monday.getDate() + i);
+            const dateStr = d.toISOString().split('T')[0];
+            
+            let schedule;
+            if (scheduleHistory[dateStr]) {
+                schedule = scheduleHistory[dateStr];
+            } else {
+                schedule = generateScheduleForDate(d);
+                scheduleHistory[dateStr] = schedule;
+                localStorage.setItem('scheduleHistory', JSON.stringify(scheduleHistory));
+            }
+            
+            weekSchedules.push({
+                date: dateStr,
+                dayName: dayNames[d.getDay()],
+                dayDate: `${d.getDate()}/${d.getMonth() + 1}`,
+                schedule: schedule
+            });
+        }
+        
+        // Build CSV with full week
+        let csv = "WEEKLY WORK SCHEDULE\n";
+        csv += `Week Starting: ${weekSchedules[0].date}\n\n`;
+        
+        // Header row with all days
+        csv += "Platform / Task";
+        weekSchedules.forEach(day => {
+            csv += `,${day.dayName} ${day.dayDate}`;
         });
+        csv += "\n";
+        
+        // Get all platforms
+        const allPlatforms = [...platforms.main, ...platforms.common, ...platforms.grouped];
+        
+        // Platform assignments for each day
+        allPlatforms.forEach(platform => {
+            csv += platform;
+            weekSchedules.forEach(day => {
+                const assignment = day.schedule.platforms[platform];
+                csv += `,${assignment ? assignment.inCharge : '-'}`;
+            });
+            csv += "\n";
+        });
+        
+        // Add tasks section
+        csv += "\nTASKS\n";
+        csv += "Task Name";
+        weekSchedules.forEach(day => {
+            csv += `,${day.dayName} ${day.dayDate}`;
+        });
+        csv += "\n";
+        
+        // Get all unique tasks
+        const allTasks = new Set();
+        weekSchedules.forEach(day => {
+            Object.keys(day.schedule.tasks).forEach(task => allTasks.add(task));
+        });
+        
+        // Task assignments for each day
+        allTasks.forEach(task => {
+            csv += task;
+            weekSchedules.forEach(day => {
+                csv += `,${day.schedule.tasks[task] || '-'}`;
+            });
+            csv += "\n";
+        });
+        
+        // Download
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `weekly_schedule_${weekSchedules[0].date}.csv`;
+        document.body.appendChild(a); // ✅ Add to DOM before clicking
+        a.click();
+        document.body.removeChild(a); // ✅ Clean up
+        window.URL.revokeObjectURL(url);
+        
+        console.log('✅ CSV downloaded successfully');
+        showNotification("Weekly schedule downloaded successfully!", "success");
+        
+    } catch (error) {
+        console.error('❌ CSV download error:', error);
+        showNotification(`Error downloading CSV: ${error.message}`, 'error');
     }
-    
-    // Build CSV with full week
-    let csv = "WEEKLY WORK SCHEDULE\n";
-    csv += `Week Starting: ${weekSchedules[0].date}\n\n`;
-    
-    // Header row with all days
-    csv += "Platform / Task";
-    weekSchedules.forEach(day => {
-        csv += `,${day.dayName} ${day.dayDate}`;
-    });
-    csv += "\n";
-    
-    // Get all platforms
-    const allPlatforms = [...platforms.main, ...platforms.common, ...platforms.grouped];
-    
-    // Platform assignments for each day
-    allPlatforms.forEach(platform => {
-        csv += platform;
-        weekSchedules.forEach(day => {
-            const assignment = day.schedule.platforms[platform];
-            csv += `,${assignment ? assignment.inCharge : '-'}`;
-        });
-        csv += "\n";
-    });
-    
-    // Add tasks section
-    csv += "\nTASKS\n";
-    csv += "Task Name";
-    weekSchedules.forEach(day => {
-        csv += `,${day.dayName} ${day.dayDate}`;
-    });
-    csv += "\n";
-    
-    // Get all unique tasks
-    const allTasks = new Set();
-    weekSchedules.forEach(day => {
-        Object.keys(day.schedule.tasks).forEach(task => allTasks.add(task));
-    });
-    
-    // Task assignments for each day
-    allTasks.forEach(task => {
-        csv += task;
-        weekSchedules.forEach(day => {
-            csv += `,${day.schedule.tasks[task] || '-'}`;
-        });
-        csv += "\n";
-    });
-    
-    // Download
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `weekly_schedule_${weekSchedules[0].date}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-    showNotification("Weekly schedule downloaded successfully!");
 }
 
 // ---------- TEAM MANAGEMENT ----------
@@ -2003,7 +2232,7 @@ function displayTeamMembers(category, listId) {
         li.innerHTML = `
             <div class="member-name">
                 <i class="fas fa-user"></i>
-                <span>${member}${member === POC_NAME ? " (POC)" : ""}</span>
+                <span>${member}</span>
             </div>
             ${actions}
         `;
@@ -2204,7 +2433,7 @@ function updateAvailabilityStatus() {
                     <span class="status-icon ${available ? 'status-available' : 'status-unavailable'}">
                         <i class="fas fa-${available ? 'check-circle' : 'times-circle'}"></i>
                     </span>
-                    <span class="member-name-text">${sa}${sa === POC_NAME ? " (POC)" : ""}</span>
+                    <span class="member-name-text">${sa}</span>
                 </div>
             ${actions}
             
@@ -3004,7 +3233,26 @@ function displayAdditionalTasksForGuest(schedule) {
     
     tasksGrid.innerHTML = "";
     
-    Object.keys(schedule.tasks).forEach(taskName => {
+    // ✅ ENSURE ALL 6 TASKS ARE PRESENT
+    const requiredTasks = [
+        "Email Handle",
+        "Follow Up Remainder",
+        "SIEM Device Status",
+        "HO PPT Update",
+        "Handover Presentation",
+        "Handover Summary"
+    ];
+    
+    // Check for missing tasks and add them with fallback
+    requiredTasks.forEach(taskName => {
+        if (!schedule.tasks[taskName]) {
+            console.warn(`⚠️ Missing task: ${taskName} - adding fallback`);
+            schedule.tasks[taskName] = "All SA's";
+        }
+    });
+    
+    // Display all tasks in the required order
+    requiredTasks.forEach(taskName => {
         const assigned = schedule.tasks[taskName];
         
         const card = document.createElement("div");
@@ -3046,7 +3294,7 @@ function enableGuestAvailabilityManagement() {
                     <span class="status-icon ${available ? 'status-available' : 'status-unavailable'}">
                         <i class="fas fa-${available ? 'check-circle' : 'times-circle'}"></i>
                     </span>
-                    <span class="member-name-text">${sa}${sa === POC_NAME ? " (POC)" : ""}</span>
+                    <span class="member-name-text">${sa}</span>
                 </div>
                 <div class="member-actions-inline guest-only">
                     <button class="btn-icon-inline" onclick="toggleMemberAvailabilityGuest('${sa}', 'SA')" title="Toggle Availability">
@@ -3884,6 +4132,230 @@ if (document.readyState === 'loading') {
 
 console.log('%c👤 POC Management System Loaded', 'color: #10b981; font-weight: bold; font-size: 14px');
 console.log(`%c   Group: ${CURRENT_GROUP} - Admin can edit POC names`, 'color: #3b82f6; font-size: 12px');
+
+// ==========================================
+// FIREBASE LOADING TIMEOUT NOTIFICATION
+// ==========================================
+
+(function() {
+    'use strict';
+    
+    let loadingCheckInterval = null;
+    let loadingStartTime = null;
+    let notificationShown = false;
+    const LOADING_TIMEOUT = 10000; // 10 seconds
+    const CHECK_INTERVAL = 1000; // Check every 1 second
+    
+    // Check if skeleton loading is visible
+    function isSkeletonLoading() {
+        const skeletonElements = document.querySelectorAll('.skeleton, .skeleton-loader, [class*="skeleton"]');
+        for (let element of skeletonElements) {
+            const style = window.getComputedStyle(element);
+            if (style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0') {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    // Check if main content is visible
+    function isMainContentVisible() {
+        const mainContent = document.querySelector('#scheduleContainer, .schedule-container, main, [role="main"]');
+        if (!mainContent) return false;
+        const style = window.getComputedStyle(mainContent);
+        return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+    }
+    
+    // Create and show on-screen notification
+    function createOnScreenNotification() {
+        // Find existing notifications to stack properly
+        const existingNotifications = document.querySelectorAll('[id^="firebase-loading-notification"]');
+        let topOffset = 20; // Default top position
+        
+        // Calculate stack position (don't remove existing, stack below it)
+        existingNotifications.forEach(notif => {
+            if (notif.style.display !== 'none') {
+                const rect = notif.getBoundingClientRect();
+                const currentTop = parseInt(notif.style.top) || 20;
+                topOffset = Math.max(topOffset, currentTop + rect.height + 15); // 15px gap between notifications
+            }
+        });
+        
+        // Create unique ID with timestamp
+        const uniqueId = 'firebase-loading-notification-' + Date.now();
+        const notification = document.createElement('div');
+        notification.id = uniqueId;
+        notification.className = 'firebase-notification';
+        const isMobile = window.innerWidth <= 768;
+        
+        notification.style.cssText = `
+            position: fixed;
+            top: ${isMobile ? topOffset + 'px' : topOffset + 'px'};
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+            color: white;
+            padding: ${isMobile ? '16px 20px' : '20px 28px'};
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            z-index: 999999;
+            max-width: ${isMobile ? '95%' : '90%'};
+            width: auto;
+            min-width: ${isMobile ? '280px' : '300px'};
+            text-align: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-size: ${isMobile ? '14px' : '15px'};
+            line-height: 1.6;
+            animation: slideDownBounce 0.5s ease-out;
+            backdrop-filter: blur(10px);
+            transition: top 0.3s ease-out;
+        `;
+        
+        notification.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; gap: ${isMobile ? '12px' : '15px'}; flex-wrap: wrap;">
+                <div style="font-size: ${isMobile ? '28px' : '32px'}; animation: rotate 2s linear infinite;">⏳</div>
+                <div style="text-align: left;">
+                    <div style="font-weight: 700; font-size: ${isMobile ? '15px' : '16px'}; margin-bottom: 4px;">Database Loading</div>
+                    <div style="font-weight: 400; font-size: ${isMobile ? '13px' : '14px'}; opacity: 0.95;">
+                        It will take some time. Please refresh the page.
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Add animations (only once)
+        if (!document.getElementById('firebase-loading-notification-styles')) {
+            const style = document.createElement('style');
+            style.id = 'firebase-loading-notification-styles';
+            style.textContent = `
+                @keyframes slideDownBounce {
+                    0% {
+                        opacity: 0;
+                        transform: translateX(-50%) translateY(-30px) scale(0.9);
+                    }
+                    60% {
+                        opacity: 1;
+                        transform: translateX(-50%) translateY(5px) scale(1.02);
+                    }
+                    100% {
+                        opacity: 1;
+                        transform: translateX(-50%) translateY(0) scale(1);
+                    }
+                }
+                @keyframes rotate {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                @keyframes slideUpFade {
+                    from {
+                        opacity: 1;
+                        transform: translateX(-50%) translateY(0) scale(1);
+                    }
+                    to {
+                        opacity: 0;
+                        transform: translateX(-50%) translateY(-30px) scale(0.9);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 10 seconds with repositioning
+        setTimeout(() => {
+            notification.style.animation = 'slideUpFade 0.4s ease-out forwards';
+            setTimeout(() => {
+                notification.remove();
+                // Reposition remaining notifications
+                repositionNotifications();
+            }, 400);
+        }, 10000);
+    }
+    
+    // Reposition all notifications when one is removed
+    function repositionNotifications() {
+        const notifications = document.querySelectorAll('.firebase-notification');
+        let currentTop = 20;
+        
+        notifications.forEach((notif) => {
+            if (notif.style.display !== 'none') {
+                notif.style.top = currentTop + 'px';
+                const rect = notif.getBoundingClientRect();
+                currentTop += rect.height + 15; // 15px gap
+            }
+        });
+    }
+    
+    // Show loading timeout notification
+    function showLoadingTimeoutNotification() {
+        if (notificationShown) return;
+        console.warn('⚠️ Firebase loading timeout - showing ON-SCREEN notification');
+        createOnScreenNotification();
+        notificationShown = true;
+    }
+    
+    // Monitor loading state
+    function monitorLoadingState() {
+        const skeletonVisible = isSkeletonLoading();
+        const mainContentVisible = isMainContentVisible();
+        const currentTime = Date.now();
+        
+        if (skeletonVisible && !mainContentVisible) {
+            if (!loadingStartTime) {
+                loadingStartTime = currentTime;
+                console.log('🔄 Skeleton loading detected - starting timer');
+            }
+            
+            const elapsedTime = currentTime - loadingStartTime;
+            
+            if (elapsedTime >= LOADING_TIMEOUT && !notificationShown) {
+                showLoadingTimeoutNotification();
+            }
+        } else {
+            if (loadingStartTime && mainContentVisible) {
+                console.log('✅ Main content loaded successfully');
+                stopMonitoring();
+            }
+        }
+    }
+    
+    // Start monitoring
+    function startMonitoring() {
+        if (loadingCheckInterval) return;
+        console.log('👀 Starting Firebase loading monitor');
+        loadingStartTime = null;
+        notificationShown = false;
+        monitorLoadingState();
+        loadingCheckInterval = setInterval(monitorLoadingState, CHECK_INTERVAL);
+    }
+    
+    // Stop monitoring
+    function stopMonitoring() {
+        if (loadingCheckInterval) {
+            clearInterval(loadingCheckInterval);
+            loadingCheckInterval = null;
+            loadingStartTime = null;
+            console.log('🛑 Stopped Firebase loading monitor');
+        }
+    }
+    
+    // Initialize
+    function initialize() {
+        console.log('🚀 Firebase Loading Monitor initialized');
+        setTimeout(startMonitoring, 500);
+    }
+    
+    // Auto-initialize
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initialize);
+    } else {
+        initialize();
+    }
+    
+    console.log('%c⏳ Firebase Loading Monitor Active', 'color: #f59e0b; font-weight: bold');
+    
+})();
 
 // =============================
 // FIREBASE LOADING NOTIFICATION 
