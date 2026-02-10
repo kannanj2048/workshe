@@ -141,15 +141,14 @@ function getWorkingHoursDisplay() {
 let availabilityOverrides = JSON.parse(localStorage.getItem("availabilityOverrides")) || {};
 // ---------- TEAM DATA ----------
 let teamData = JSON.parse(localStorage.getItem("teamData")) || {
-    SAs: [ "Selva", "Naveen", "Kannan", "Midhun", "Prem", "Logesh", "Linith"],
-    apprentices: [ "Sanjay", "Vishal", "Subash"],
+    SAs: [ "Gayathri", "Ajay", "Jana", "Malini", "RajaG", "Keerthana", "Sivabharathi"],
+    apprentices: [ "Deva", "Rokita", "Soban"],
     responsibilities: {
-        Selva: "Vishal",
-        Naveen: "Vishal",
-        Kannan: "Karl / Subash",
-        Midhun: "Sanjay",
-        Prem: "Karl / Subash",
-        Idris: "All Apprentice"
+        Gayathri: "Rokita",
+        Ajay: "Rokita",
+        Jana: "Soban",
+        Malini: "Deva",
+        RajaG: "Soban",
     }
 };
 
@@ -169,19 +168,18 @@ let isAdmin = false;
 // ========== CENTRALIZED AVAILABILITY MANAGEMENT SYSTEM ==========
 let memberAvailabilitySettings = JSON.parse(localStorage.getItem('memberAvailabilitySettings')) || {
     SAs: {
-        "Idris": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], isPOC: true },
-        "Selva": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Naveen": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Kannan": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Midhun": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Prem": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Logesh": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
+        "Gayathri": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Ajay": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Jana": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Malini": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "RajaG": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Keerthana": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
     },
     apprentices: {
-        "Linith": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Sanjay": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Vishal": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Subash": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] }
+        "Sivabharathi": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Deva": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Rokita": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Soban": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] }
     }
 };
 
@@ -317,7 +315,7 @@ function addMemberFromAvailability(role) {
     teamData[category].push(name.trim());
     
     if (role === "SA") {
-        const responsibilities = prompt(`Enter responsibilities for ${name.trim()} (e.g., "Karl / Subash"):`);
+        const responsibilities = prompt(`Enter responsibilities for ${name.trim()} (e.g., "Karl / Soban"):`);
         if (responsibilities) {
             teamData.responsibilities[name.trim()] = responsibilities.trim();
         }
@@ -3663,7 +3661,7 @@ console.log('🎯 Detected Group:', CURRENT_GROUP);
 // Default POC names
 const DEFAULT_POC_NAMES = {
     team1: "Raja",
-    team2: "Vishali"
+    team2: "Rokitai"
 };
 
 // Storage key - NOW GROUP-SPECIFIC
