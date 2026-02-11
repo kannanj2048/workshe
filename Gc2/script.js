@@ -201,7 +201,7 @@ function toggleMemberAvailability(name, role) {
         showNotification(`${name} marked as unavailable`, "success");
     }
     localStorage.setItem("availabilityOverrides", JSON.stringify(availabilityOverrides));
-    if (hasDatabase()) {
+    if (typeof database !== 'undefined') {
         saveAvailabilityToFirebase();
     }
     updateAvailabilityStatus();
@@ -239,12 +239,12 @@ function editMemberInAvailability(oldName, role) {
             availabilityOverrides[newKey] = availabilityOverrides[oldKey];
             delete availabilityOverrides[oldKey];
             localStorage.setItem("availabilityOverrides", JSON.stringify(availabilityOverrides));
-            if (hasDatabase()) {
+            if (typeof database !== 'undefined') {
                 saveAvailabilityToFirebase();
             }
         }
         localStorage.setItem("teamData", JSON.stringify(teamData));
-        if (hasDatabase()) {
+        if (typeof database !== 'undefined') {
             saveTeamDataToFirebase();
         }
         updateAvailabilityStatus();
@@ -279,12 +279,12 @@ function removeMemberFromAvailability(name, role) {
         if (availabilityOverrides[key]) {
             delete availabilityOverrides[key];
             localStorage.setItem("availabilityOverrides", JSON.stringify(availabilityOverrides));
-            if (hasDatabase()) {
+            if (typeof database !== 'undefined') {
                 saveAvailabilityToFirebase();
             }
         }
         localStorage.setItem("teamData", JSON.stringify(teamData));
-        if (hasDatabase()) {
+        if (typeof database !== 'undefined') {
             // Delete user from Firebase
             deleteUserFromRole(name, role, () => {
                 console.log("User deleted from Firebase");
@@ -341,7 +341,7 @@ function addMemberFromAvailability(role) {
     localStorage.setItem("teamData", JSON.stringify(teamData));
     
     // Save to Firebase
-    if (hasDatabase()) {
+    if (typeof database !== 'undefined') {
         checkAndAddUser(name.trim(), role, (success, status) => {
             if (success) {
                 console.log(`✅ User ${name.trim()} added to Firebase`);
@@ -362,10 +362,14 @@ function saveMemberAvailabilitySettings() {
     localStorage.setItem('memberAvailabilitySettings', JSON.stringify(memberAvailabilitySettings));
     
     // ✅ Try Firebase sync silently - localStorage is the source of truth
-    if (typeof hasDatabase === 'function' && hasDatabase() && typeof database !== 'undefined') {
-        database.ref('memberAvailabilitySettings').set(memberAvailabilitySettings)
-            .then(() => console.log('✅ Availability settings saved to Firebase'))
-            .catch(() => {}); // Silent fail - localStorage already saved successfully
+    if (typeof database !== 'undefined') {
+        try {
+            database.ref('memberAvailabilitySettings').set(memberAvailabilitySettings)
+                .then(() => console.log('✅ Availability settings saved to Firebase'))
+                .catch(() => {}); // Silent fail - localStorage already saved successfully
+        } catch (error) {
+            // Silent fail - localStorage already saved successfully
+        }
     }
     console.log('✅ Member availability settings saved to localStorage');
 }
@@ -1183,7 +1187,7 @@ function generateDailySchedule(dateSGT) {
     updateCurrentShiftInfo(dateSGT);
     
     // Check if we have Firebase
-    if (typeof hasDatabase === 'function' && hasDatabase()) {
+    if (typeof database !== 'undefined') {
         // Try localStorage first for instant display
         let localSchedule = scheduleHistory[dateStr];
         
@@ -1389,7 +1393,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initScrollAnimations();
 
     // Load team data from Firebase if available
-    if (typeof hasDatabase === 'function' && hasDatabase()) {
+    if (typeof database !== 'undefined') {
         if (typeof loadTeamDataFromFirebase === 'function') {
             loadTeamDataFromFirebase(() => {
                 // Callback after Firebase load completes
@@ -2278,7 +2282,7 @@ function openAddMemberModal(type) {
         teamData[category].push(name);
         localStorage.setItem("teamData", JSON.stringify(teamData));
         
-        if (typeof hasDatabase === 'function' && hasDatabase() && typeof checkAndAddUser === 'function') {
+        if (typeof database !== 'undefined' && typeof checkAndAddUser === 'function') {
             checkAndAddUser(name, type, (success) => {
                 if (success) {
                     console.log(`✅ User ${name} added to Firebase`);
@@ -2310,7 +2314,7 @@ function editMember(category, oldName) {
         teamData[category][idx] = newName.trim();
         localStorage.setItem("teamData", JSON.stringify(teamData));
         
-        if (typeof hasDatabase === 'function' && hasDatabase()) {
+        if (typeof database !== 'undefined') {
             const role = category === "SAs" ? "SA" : "Apprentice";
             if (typeof deleteUserFromRole === 'function' && typeof checkAndAddUser === 'function') {
                 deleteUserFromRole(oldName, role, () => {
@@ -2334,7 +2338,7 @@ function deleteMember(category, name) {
         teamData[category].splice(idx, 1);
         localStorage.setItem("teamData", JSON.stringify(teamData));
         
-        if (typeof hasDatabase === 'function' && hasDatabase()) {
+        if (typeof database !== 'undefined') {
             const role = category === "SAs" ? "SA" : "Apprentice";
             if (typeof deleteUserFromRole === 'function') {
                 deleteUserFromRole(name, role, () => {
@@ -2554,7 +2558,7 @@ if (!isAdmin && !isGuest) {
             const dateKey = schedule.date;
             scheduleHistory[dateKey] = schedule;
             localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-            if (typeof hasDatabase === 'function' && hasDatabase() && typeof saveScheduleToFirebase === 'function') {
+            if (typeof database !== 'undefined' && typeof saveScheduleToFirebase === 'function') {
                 saveScheduleToFirebase(schedule);
             }
             displaySchedule(schedule);
@@ -2595,7 +2599,7 @@ if (!isAdmin && !isGuest) {
             const dateKey = schedule.date;
             scheduleHistory[dateKey] = schedule;
             localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-            if (typeof hasDatabase === 'function' && hasDatabase() && typeof saveScheduleToFirebase === 'function') {
+            if (typeof database !== 'undefined' && typeof saveScheduleToFirebase === 'function') {
                 saveScheduleToFirebase(schedule);
             }
             displaySchedule(schedule);
@@ -2650,7 +2654,7 @@ function openEditShiftModal() {
                 // Handle shift override based on checkbox state
                 if (applyToDate) {
                     // Checkbox checked: Apply to this date only, no override
-                    if (typeof hasDatabase === 'function' && hasDatabase() && typeof saveScheduleToFirebase === 'function') {
+                    if (typeof database !== 'undefined' && typeof saveScheduleToFirebase === 'function') {
                         saveScheduleToFirebase(schedule);
                     }
                     displaySchedule(schedule);
@@ -2680,7 +2684,7 @@ function openEditShiftModal() {
                     }
                     localStorage.setItem('scheduleHistory', JSON.stringify(scheduleHistory));
                     
-                    if (typeof hasDatabase === 'function' && hasDatabase() && typeof saveScheduleToFirebase === 'function') {
+                    if (typeof database !== 'undefined' && typeof saveScheduleToFirebase === 'function') {
                         saveScheduleToFirebase(schedule);
                     }
                     displaySchedule(schedule);
@@ -2724,7 +2728,7 @@ function openEditShiftModal() {
                 scheduleHistory[dateStr] = newSchedule;
                 localStorage.setItem('scheduleHistory', JSON.stringify(scheduleHistory));
                 
-                if (typeof hasDatabase === 'function' && hasDatabase() && typeof saveScheduleToFirebase === 'function') {
+                if (typeof database !== 'undefined' && typeof saveScheduleToFirebase === 'function') {
                     saveScheduleToFirebase(newSchedule);
                 }
                 
@@ -3381,7 +3385,7 @@ function toggleMemberAvailabilityGuest(name, role) {
     }
     
     localStorage.setItem("availabilityOverrides", JSON.stringify(availabilityOverrides));
-    if (hasDatabase()) {
+    if (typeof database !== 'undefined') {
         saveAvailabilityToFirebase();
     }
     enableGuestAvailabilityManagement();
@@ -3689,7 +3693,7 @@ const PASSWORD_FIREBASE_KEY = `passwords_${CURRENT_GROUP}`;
 
 // Load passwords from Firebase
 function loadPasswordsFromFirebase(callback) {
-    if (typeof window.database === 'undefined') {
+    if (typeof window.database === 'undefined' || typeof database === 'undefined') {
         console.log('⚠️ Firebase not available for password sync');
         if (callback) callback(null);
         return;
@@ -3697,7 +3701,8 @@ function loadPasswordsFromFirebase(callback) {
     
     console.log(`🔍 Loading passwords from Firebase: ${PASSWORD_FIREBASE_KEY}`);
     
-    database.ref(PASSWORD_FIREBASE_KEY).once('value')
+    try {
+        database.ref(PASSWORD_FIREBASE_KEY).once('value')
         .then((snapshot) => {
             const firebasePasswords = snapshot.val();
             if (firebasePasswords) {
@@ -3718,53 +3723,65 @@ function loadPasswordsFromFirebase(callback) {
             console.error('❌ Error loading passwords from Firebase:', error);
             if (callback) callback(null);
         });
+    } catch (error) {
+        console.error('❌ Failed to access Firebase for passwords:', error);
+        if (callback) callback(null);
+    }
 }
 
 // Save passwords to Firebase
 function savePasswordsToFirebase() {
-    if (typeof window.database === 'undefined' || !userCredentials) {
+    if (typeof window.database === 'undefined' || typeof database === 'undefined' || !userCredentials) {
         console.log('⚠️ Firebase not available or userCredentials not initialized');
         return;
     }
     
-    database.ref(PASSWORD_FIREBASE_KEY).set(userCredentials)
-        .then(() => {
-            console.log(`☁️ Passwords saved to Firebase (${CURRENT_GROUP})`);
-        })
-        .catch((error) => {
-            console.error('❌ Error saving passwords to Firebase:', error);
-        });
+    try {
+        database.ref(PASSWORD_FIREBASE_KEY).set(userCredentials)
+            .then(() => {
+                console.log(`☁️ Passwords saved to Firebase (${CURRENT_GROUP})`);
+            })
+            .catch((error) => {
+                console.error('❌ Error saving passwords to Firebase:', error);
+            });
+    } catch (error) {
+        console.error('❌ Failed to access Firebase for saving passwords:', error);
+    }
 }
 
 // Setup real-time password listener
 function setupPasswordSyncListener() {
-    if (typeof window.database === 'undefined') {
+    if (typeof window.database === 'undefined' || typeof database === 'undefined') {
         console.log('⚠️ Firebase not available - password sync disabled');
         return;
     }
     
     console.log(`👂 Setting up real-time password sync for ${CURRENT_GROUP}`);
     
-    database.ref(PASSWORD_FIREBASE_KEY).on('value', (snapshot) => {
-        const firebasePasswords = snapshot.val();
-        
-        if (firebasePasswords) {
-            console.log(`🔄 Password updated from Firebase (${CURRENT_GROUP})`);
+    try {
+        database.ref(PASSWORD_FIREBASE_KEY).on('value', (snapshot) => {
+            const firebasePasswords = snapshot.val();
             
-            // Update local credentials
-            userCredentials = firebasePasswords;
-            
-            // Update localStorage
-            localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
-            
-            // Show notification to non-admin users
-            if (typeof isAdmin !== 'undefined' && !isAdmin) {
-                showNotification('🔐 Password settings updated by admin', 'info');
+            if (firebasePasswords) {
+                console.log(`🔄 Password updated from Firebase (${CURRENT_GROUP})`);
+                
+                // Update local credentials
+                userCredentials = firebasePasswords;
+                
+                // Update localStorage
+                localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
+                
+                // Show notification to non-admin users
+                if (typeof isAdmin !== 'undefined' && !isAdmin) {
+                    showNotification('🔐 Password settings updated by admin', 'info');
+                }
             }
-        }
-    }, (error) => {
-        console.error('❌ Password sync listener error:', error);
-    });
+        }, (error) => {
+            console.error('❌ Password sync listener error:', error);
+        });
+    } catch (error) {
+        console.error('❌ Failed to setup password sync listener:', error);
+    }
 }
 
 // Initialize password system with Firebase sync
@@ -3829,23 +3846,28 @@ function initializePOCSystem() {
 // ========================================
 function loadPOCNamesFromStorage() {
     // Try Firebase first
-    if (typeof window.hasDatabase === 'function' && window.hasDatabase()) {
-        database.ref(POC_FIREBASE_KEY).once('value')
-            .then(snapshot => {
-                const data = snapshot.val();
-                if (data) {
-                    pocNames = data;
-                    console.log(`☁️ POC names loaded from Firebase (${CURRENT_GROUP}):`, pocNames);
-                    updatePOCDisplay();
-                } else {
-                    // Try localStorage
+    if (typeof window.database !== 'undefined' && typeof database !== 'undefined') {
+        try {
+            database.ref(POC_FIREBASE_KEY).once('value')
+                .then(snapshot => {
+                    const data = snapshot.val();
+                    if (data) {
+                        pocNames = data;
+                        console.log(`☁️ POC names loaded from Firebase (${CURRENT_GROUP}):`, pocNames);
+                        updatePOCDisplay();
+                    } else {
+                        // Try localStorage
+                        loadPOCFromLocalStorage();
+                    }
+                })
+                .catch(err => {
+                    console.warn('⚠️ Firebase POC load failed, using localStorage:', err);
                     loadPOCFromLocalStorage();
-                }
-            })
-            .catch(err => {
-                console.warn('⚠️ Firebase POC load failed, using localStorage:', err);
-                loadPOCFromLocalStorage();
-            });
+                });
+        } catch (error) {
+            console.warn('⚠️ Failed to access Firebase for POC, using localStorage:', error);
+            loadPOCFromLocalStorage();
+        }
     } else {
         // Use localStorage only
         loadPOCFromLocalStorage();
@@ -3878,14 +3900,18 @@ function savePOCNamesToStorage() {
     console.log(`💾 POC names saved to localStorage (${CURRENT_GROUP})`);
     
     // Save to Firebase if available
-    if (typeof window.hasDatabase === 'function' && window.hasDatabase()) {
-        database.ref(POC_FIREBASE_KEY).set(pocNames)
-            .then(() => {
-                console.log(`☁️ POC names saved to Firebase (${CURRENT_GROUP})`);
-            })
-            .catch(err => {
-                console.error('❌ Firebase POC save failed:', err);
-            });
+    if (typeof window.database !== 'undefined' && typeof database !== 'undefined') {
+        try {
+            database.ref(POC_FIREBASE_KEY).set(pocNames)
+                .then(() => {
+                    console.log(`☁️ POC names saved to Firebase (${CURRENT_GROUP})`);
+                })
+                .catch(err => {
+                    console.error('❌ Firebase POC save failed:', err);
+                });
+        } catch (error) {
+            console.error('❌ Failed to access Firebase for POC save:', error);
+        }
     }
 }
 
