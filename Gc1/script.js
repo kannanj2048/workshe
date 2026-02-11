@@ -170,7 +170,6 @@ let memberAvailabilitySettings = JSON.parse(localStorage.getItem('memberAvailabi
     SAs: {
         "Gayathri": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
         "Ajay": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Jana": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Malini": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "RajaG": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
         "Keerthana": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
