@@ -4692,3 +4692,619 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Passwords will sync in real-time`, '
     }
     
 })();
+
+// ==========================================
+// PLATFORM & TASK MANAGER (ADMIN ONLY)
+// Add/Remove Platforms and Additional Tasks
+// ==========================================
+
+(function() {
+    'use strict';
+    
+    // Storage keys
+    const CUSTOM_PLATFORMS_KEY = 'customPlatforms';
+    const CUSTOM_TASKS_KEY = 'customAdditionalTasks';
+    
+    // Load custom platforms and tasks from localStorage
+    let customPlatforms = JSON.parse(localStorage.getItem(CUSTOM_PLATFORMS_KEY)) || null;
+    let customTasks = JSON.parse(localStorage.getItem(CUSTOM_TASKS_KEY)) || null;
+    
+    // Apply custom platforms if they exist
+    function applyCustomPlatforms() {
+        if (customPlatforms && typeof platforms !== 'undefined') {
+            platforms.main = customPlatforms.main || platforms.main;
+            platforms.common = customPlatforms.common || platforms.common;
+            platforms.grouped = customPlatforms.grouped || platforms.grouped;
+            console.log('✅ Custom platforms applied:', platforms);
+        }
+    }
+    
+    // Initialize on page load
+    function initPlatformTaskManager() {
+        if (!isAdmin) return;
+        
+        // Apply custom platforms
+        applyCustomPlatforms();
+        
+        // Add management buttons
+        addManagementButtons();
+        
+        console.log('🔧 Platform & Task Manager initialized (Admin Mode)');
+    }
+    
+    // Add management buttons to the UI
+    function addManagementButtons() {
+        const scheduleControls = document.querySelector('.schedule-controls .schedule-actions');
+        if (!scheduleControls) return;
+        
+        // Check if buttons already exist
+        if (document.getElementById('managePlatformsBtn')) return;
+        
+        // Platform Management Button
+        const platformBtn = document.createElement('button');
+        platformBtn.id = 'managePlatformsBtn';
+        platformBtn.className = 'btn btn-primary btn-small admin-only';
+        platformBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Manage Platforms';
+        platformBtn.onclick = openPlatformManager;
+        platformBtn.style.marginLeft = '10px';
+        scheduleControls.appendChild(platformBtn);
+        
+        // Task Management Button
+        const taskBtn = document.createElement('button');
+        taskBtn.id = 'manageTasksBtn';
+        taskBtn.className = 'btn btn-primary btn-small admin-only';
+        taskBtn.innerHTML = '<i class="fas fa-tasks"></i> Manage Tasks';
+        taskBtn.onclick = openTaskManager;
+        taskBtn.style.marginLeft = '10px';
+        scheduleControls.appendChild(taskBtn);
+    }
+    
+    // ========================================
+    // PLATFORM MANAGER MODAL
+    // ========================================
+    
+    function openPlatformManager() {
+        // Get current platforms
+        const currentPlatforms = customPlatforms || {
+            main: [...platforms.main],
+            common: [...platforms.common],
+            grouped: [...platforms.grouped]
+        };
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal show';
+        modal.id = 'platformManagerModal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+                <div class="modal-header">
+                    <h3><i class="fas fa-server"></i> Manage Platforms</h3>
+                    <button class="modal-close" onclick="closePlatformManager()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <!-- Main Platforms -->
+                    <div class="platform-section">
+                        <h4 style="color: var(--primary-color); margin-bottom: 15px;">
+                            <i class="fas fa-star"></i> Main Platforms
+                        </h4>
+                        <div id="mainPlatformsList" class="platform-list">
+                            ${currentPlatforms.main.map((p, i) => `
+                                <div class="platform-item">
+                                    <input type="text" value="${p}" data-category="main" data-index="${i}" 
+                                           class="platform-input" />
+                                    <button class="btn-icon btn-danger" onclick="removePlatform('main', ${i})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="btn btn-secondary btn-small" onclick="addNewPlatform('main')" style="margin-top: 10px;">
+                            <i class="fas fa-plus"></i> Add Main Platform
+                        </button>
+                    </div>
+                    
+                    <hr style="margin: 25px 0; border-color: var(--border-color);">
+                    
+                    <!-- Common Platforms -->
+                    <div class="platform-section">
+                        <h4 style="color: var(--primary-color); margin-bottom: 15px;">
+                            <i class="fas fa-layer-group"></i> Common Platforms
+                        </h4>
+                        <div id="commonPlatformsList" class="platform-list">
+                            ${currentPlatforms.common.map((p, i) => `
+                                <div class="platform-item">
+                                    <input type="text" value="${p}" data-category="common" data-index="${i}" 
+                                           class="platform-input" />
+                                    <button class="btn-icon btn-danger" onclick="removePlatform('common', ${i})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="btn btn-secondary btn-small" onclick="addNewPlatform('common')" style="margin-top: 10px;">
+                            <i class="fas fa-plus"></i> Add Common Platform
+                        </button>
+                    </div>
+                    
+                    <hr style="margin: 25px 0; border-color: var(--border-color);">
+                    
+                    <!-- Grouped Platforms -->
+                    <div class="platform-section">
+                        <h4 style="color: var(--primary-color); margin-bottom: 15px;">
+                            <i class="fas fa-object-group"></i> Grouped Platforms
+                        </h4>
+                        <div id="groupedPlatformsList" class="platform-list">
+                            ${currentPlatforms.grouped.map((p, i) => `
+                                <div class="platform-item">
+                                    <input type="text" value="${p}" data-category="grouped" data-index="${i}" 
+                                           class="platform-input" />
+                                    <button class="btn-icon btn-danger" onclick="removePlatform('grouped', ${i})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="btn btn-secondary btn-small" onclick="addNewPlatform('grouped')" style="margin-top: 10px;">
+                            <i class="fas fa-plus"></i> Add Grouped Platform
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closePlatformManager()">Cancel</button>
+                    <button class="btn btn-danger" onclick="resetPlatformsToDefault()">
+                        <i class="fas fa-undo"></i> Reset to Default
+                    </button>
+                    <button class="btn btn-primary" onclick="savePlatforms()">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Add custom styles
+        addPlatformManagerStyles();
+    }
+    
+    function closePlatformManager() {
+        const modal = document.getElementById('platformManagerModal');
+        if (modal) modal.remove();
+    }
+    
+    function addNewPlatform(category) {
+        const listId = category + 'PlatformsList';
+        const list = document.getElementById(listId);
+        if (!list) return;
+        
+        const currentItems = list.querySelectorAll('.platform-item').length;
+        
+        const newItem = document.createElement('div');
+        newItem.className = 'platform-item';
+        newItem.innerHTML = `
+            <input type="text" value="New Platform" data-category="${category}" data-index="${currentItems}" 
+                   class="platform-input" autofocus />
+            <button class="btn-icon btn-danger" onclick="removePlatform('${category}', ${currentItems})">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        
+        list.appendChild(newItem);
+        newItem.querySelector('input').select();
+    }
+    
+    function removePlatform(category, index) {
+        const listId = category + 'PlatformsList';
+        const list = document.getElementById(listId);
+        if (!list) return;
+        
+        const items = list.querySelectorAll('.platform-item');
+        if (items[index]) {
+            items[index].remove();
+            
+            // Re-index remaining items
+            list.querySelectorAll('.platform-item').forEach((item, i) => {
+                item.querySelector('input').setAttribute('data-index', i);
+                item.querySelector('button').setAttribute('onclick', `removePlatform('${category}', ${i})`);
+            });
+        }
+    }
+    
+    function savePlatforms() {
+        const newPlatforms = {
+            main: [],
+            common: [],
+            grouped: []
+        };
+        
+        // Collect all platform values
+        document.querySelectorAll('.platform-input').forEach(input => {
+            const category = input.getAttribute('data-category');
+            const value = input.value.trim();
+            if (value && newPlatforms[category]) {
+                newPlatforms[category].push(value);
+            }
+        });
+        
+        // Validate
+        if (newPlatforms.main.length === 0) {
+            showNotification('❌ At least one main platform is required', 'error');
+            return;
+        }
+        
+        // Save to localStorage
+        localStorage.setItem(CUSTOM_PLATFORMS_KEY, JSON.stringify(newPlatforms));
+        customPlatforms = newPlatforms;
+        
+        // Apply to global platforms object
+        platforms.main = newPlatforms.main;
+        platforms.common = newPlatforms.common;
+        platforms.grouped = newPlatforms.grouped;
+        
+        // Sync to Firebase if available
+        if (window.hasDatabase && window.hasDatabase()) {
+            database.ref('customPlatforms').set(newPlatforms)
+                .then(() => console.log('☁️ Platforms saved to Firebase'))
+                .catch(err => console.warn('⚠️ Firebase save failed:', err.message));
+        }
+        
+        closePlatformManager();
+        showNotification('✅ Platforms saved successfully! Regenerating schedule...', 'success');
+        
+        // Regenerate current schedule
+        setTimeout(() => {
+            const dateInput = document.getElementById('scheduleDate');
+            if (dateInput && dateInput.value) {
+                const currentDate = new Date(dateInput.value);
+                generateDailySchedule(currentDate);
+            }
+        }, 500);
+    }
+    
+    function resetPlatformsToDefault() {
+        if (!confirm('Reset all platforms to default? This will remove all custom platforms.')) return;
+        
+        localStorage.removeItem(CUSTOM_PLATFORMS_KEY);
+        customPlatforms = null;
+        
+        // Reset to original defaults
+        platforms.main = ["SIEM", "XDR", "Forti EDR"];
+        platforms.common = ["CrowdStrike EDR", "NDR", "Netskope"];
+        platforms.grouped = ["Sophos XDR", "Trend Vision One", "Cloudflare", "Acronis EDR"];
+        
+        // Remove from Firebase
+        if (window.hasDatabase && window.hasDatabase()) {
+            database.ref('customPlatforms').remove();
+        }
+        
+        closePlatformManager();
+        showNotification('✅ Platforms reset to default! Regenerating schedule...', 'success');
+        
+        // Regenerate schedule
+        setTimeout(() => {
+            const dateInput = document.getElementById('scheduleDate');
+            if (dateInput && dateInput.value) {
+                const currentDate = new Date(dateInput.value);
+                generateDailySchedule(currentDate);
+            }
+        }, 500);
+    }
+    
+    // ========================================
+    // TASK MANAGER MODAL
+    // ========================================
+    
+    function openTaskManager() {
+        // Get current tasks (default tasks)
+        const defaultTasks = [
+            "Email Handle",
+            "Follow Up Remainder",
+            "SIEM Device Status",
+            "HO PPT Update",
+            "Handover Presentation",
+            "Handover Summary"
+        ];
+        
+        const currentTasks = customTasks || [...defaultTasks];
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal show';
+        modal.id = 'taskManagerModal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+                <div class="modal-header">
+                    <h3><i class="fas fa-tasks"></i> Manage Additional Tasks</h3>
+                    <button class="modal-close" onclick="closeTaskManager()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                        <i class="fas fa-info-circle"></i> Add, remove, or rename additional tasks
+                    </p>
+                    <div id="tasksList" class="platform-list">
+                        ${currentTasks.map((t, i) => `
+                            <div class="platform-item">
+                                <input type="text" value="${t}" data-index="${i}" class="task-input" />
+                                <button class="btn-icon btn-danger" onclick="removeTask(${i})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="btn btn-secondary btn-small" onclick="addNewTask()" style="margin-top: 15px;">
+                        <i class="fas fa-plus"></i> Add New Task
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeTaskManager()" style="margin-top: 15px;">Cancel</button>
+                    <button class="btn btn-danger" onclick="resetTasksToDefault()">
+                        <i class="fas fa-undo"></i> Reset to Default
+                    </button>
+                    <button class="btn btn-primary" onclick="saveTasks()">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        addPlatformManagerStyles();
+    }
+    
+    function closeTaskManager() {
+        const modal = document.getElementById('taskManagerModal');
+        if (modal) modal.remove();
+    }
+    
+    function addNewTask() {
+        const list = document.getElementById('tasksList');
+        if (!list) return;
+        
+        const currentItems = list.querySelectorAll('.platform-item').length;
+        
+        const newItem = document.createElement('div');
+        newItem.className = 'platform-item';
+        newItem.innerHTML = `
+            <input type="text" value="New Task" data-index="${currentItems}" class="task-input" autofocus />
+            <button class="btn-icon btn-danger" onclick="removeTask(${currentItems})">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        
+        list.appendChild(newItem);
+        newItem.querySelector('input').select();
+    }
+    
+    function removeTask(index) {
+        const list = document.getElementById('tasksList');
+        if (!list) return;
+        
+        const items = list.querySelectorAll('.platform-item');
+        if (items.length <= 1) {
+            showNotification('❌ At least one task is required', 'error');
+            return;
+        }
+        
+        if (items[index]) {
+            items[index].remove();
+            
+            // Re-index
+            list.querySelectorAll('.platform-item').forEach((item, i) => {
+                item.querySelector('input').setAttribute('data-index', i);
+                item.querySelector('button').setAttribute('onclick', `removeTask(${i})`);
+            });
+        }
+    }
+    
+    function saveTasks() {
+        const newTasks = [];
+        
+        document.querySelectorAll('.task-input').forEach(input => {
+            const value = input.value.trim();
+            if (value) {
+                newTasks.push(value);
+            }
+        });
+        
+        if (newTasks.length === 0) {
+            showNotification('❌ At least one task is required', 'error');
+            return;
+        }
+        
+        // Save to localStorage
+        localStorage.setItem(CUSTOM_TASKS_KEY, JSON.stringify(newTasks));
+        customTasks = newTasks;
+        
+        // Sync to Firebase
+        if (window.hasDatabase && window.hasDatabase()) {
+            database.ref('customAdditionalTasks').set(newTasks)
+                .then(() => console.log('☁️ Tasks saved to Firebase'))
+                .catch(err => console.warn('⚠️ Firebase save failed:', err.message));
+        }
+        
+        closeTaskManager();
+        showNotification('✅ Tasks saved successfully! Regenerating schedule...', 'success');
+        
+        // Regenerate schedule
+        setTimeout(() => {
+            const dateInput = document.getElementById('scheduleDate');
+            if (dateInput && dateInput.value) {
+                const currentDate = new Date(dateInput.value);
+                generateDailySchedule(currentDate);
+            }
+        }, 500);
+    }
+    
+    function resetTasksToDefault() {
+        if (!confirm('Reset all tasks to default?')) return;
+        
+        localStorage.removeItem(CUSTOM_TASKS_KEY);
+        customTasks = null;
+        
+        if (window.hasDatabase && window.hasDatabase()) {
+            database.ref('customAdditionalTasks').remove();
+        }
+        
+        closeTaskManager();
+        showNotification('✅ Tasks reset to default! Regenerating schedule...', 'success');
+        
+        setTimeout(() => {
+            const dateInput = document.getElementById('scheduleDate');
+            if (dateInput && dateInput.value) {
+                const currentDate = new Date(dateInput.value);
+                generateDailySchedule(currentDate);
+            }
+        }, 500);
+    }
+    
+    // Get custom tasks for schedule generation
+    function getAdditionalTasksList() {
+        return customTasks || [
+            "Email Handle",
+            "Follow Up Remainder",
+            "SIEM Device Status",
+            "HO PPT Update",
+            "Handover Presentation",
+            "Handover Summary"
+        ];
+    }
+    
+    // ========================================
+    // STYLES
+    // ========================================
+    
+    function addPlatformManagerStyles() {
+        if (document.getElementById('platformManagerStyles')) return;
+        
+        const styles = document.createElement('style');
+        styles.id = 'platformManagerStyles';
+        styles.textContent = `
+            .platform-section {
+                margin-bottom: 20px;
+            }
+            
+            .platform-list {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .platform-item {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                animation: slideIn 0.3s ease;
+            }
+            
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateX(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+            
+            .platform-input,
+            .task-input {
+                flex: 1;
+                padding: 10px;
+                border: 2px solid var(--border-color);
+                border-radius: 8px;
+                font-size: 14px;
+                background: var(--bg-primary);
+                color: var(--text-primary);
+                transition: all 0.2s ease;
+            }
+            
+            .platform-input:focus,
+            .task-input:focus {
+                outline: none;
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
+            
+            .btn-icon {
+                padding: 8px 12px;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .btn-icon:hover {
+                transform: scale(1.05);
+            }
+            
+            .btn-danger {
+                background: #ef4444;
+                color: white;
+            }
+            
+            .btn-danger:hover {
+                background: #dc2626;
+            }
+        `;
+        
+        document.head.appendChild(styles);
+    }
+    
+    // ========================================
+    // EXPORT FUNCTIONS
+    // ========================================
+    
+    window.openPlatformManager = openPlatformManager;
+    window.closePlatformManager = closePlatformManager;
+    window.addNewPlatform = addNewPlatform;
+    window.removePlatform = removePlatform;
+    window.savePlatforms = savePlatforms;
+    window.resetPlatformsToDefault = resetPlatformsToDefault;
+    
+    window.openTaskManager = openTaskManager;
+    window.closeTaskManager = closeTaskManager;
+    window.addNewTask = addNewTask;
+    window.removeTask = removeTask;
+    window.saveTasks = saveTasks;
+    window.resetTasksToDefault = resetTasksToDefault;
+    window.getAdditionalTasksList = getAdditionalTasksList;
+    
+    window.initPlatformTaskManager = initPlatformTaskManager;
+    
+    // Load from Firebase on init
+    if (window.hasDatabase && window.hasDatabase()) {
+        database.ref('customPlatforms').once('value').then(snapshot => {
+            const firebaseData = snapshot.val();
+            if (firebaseData) {
+                localStorage.setItem(CUSTOM_PLATFORMS_KEY, JSON.stringify(firebaseData));
+                customPlatforms = firebaseData;
+                applyCustomPlatforms();
+                console.log('☁️ Custom platforms loaded from Firebase');
+            }
+        });
+        
+        database.ref('customAdditionalTasks').once('value').then(snapshot => {
+            const firebaseData = snapshot.val();
+            if (firebaseData) {
+                localStorage.setItem(CUSTOM_TASKS_KEY, JSON.stringify(firebaseData));
+                customTasks = firebaseData;
+                console.log('☁️ Custom tasks loaded from Firebase');
+            }
+        });
+    }
+    
+    // Auto-initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initPlatformTaskManager, 1000);
+        });
+    } else {
+        setTimeout(initPlatformTaskManager, 1000);
+    }
+    
+    console.log('%c🎯 Platform & Task Manager Loaded', 'color: #10b981; font-weight: bold; font-size: 14px');
+    console.log('%c   Admin can now add/remove platforms and tasks', 'color: #3b82f6; font-size: 12px');
+    
+})();
