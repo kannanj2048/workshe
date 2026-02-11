@@ -236,84 +236,6 @@
     }
     
     // ========================================
-    // REAL-TIME PASSWORD SYNC
-    // ========================================
-    
-    function setupPasswordListener() {
-        if (!window.hasDatabase || !window.hasDatabase()) return;
-        
-        console.log('👂 Listening for password changes');
-        
-        // ✅ FIXED: Safely get password key with fallback detection
-        function getPasswordKey() {
-            // First: Try window.CURRENT_GROUP (set in script.js)
-            if (typeof window.CURRENT_GROUP !== 'undefined' && window.CURRENT_GROUP) {
-                return `passwords_${window.CURRENT_GROUP}`;
-            }
-            
-            // Second: Try to detect from Firebase URL
-            if (typeof firebaseConfig !== 'undefined' && firebaseConfig.databaseURL) {
-                const url = firebaseConfig.databaseURL;
-                const match = url.match(/workschedulemanager-gc(\d+)/i);
-                if (match) {
-                    const group = `gc${match[1]}`;
-                    console.log(`🔍 Detected group from Firebase URL: ${group}`);
-                    return `passwords_${group}`;
-                }
-                
-                // Check for direct mentions in URL
-                if (url.includes('gc1')) return 'passwords_gc1';
-                if (url.includes('gc2')) return 'passwords_gc2';
-                if (url.includes('gc3')) return 'passwords_gc3';
-            }
-            
-            // Third: Try to detect from page
-            const pageTitle = document.title || '';
-            const pageURL = window.location.pathname || '';
-            
-            if (pageTitle.includes('G1') || pageURL.includes('group1') || pageURL.includes('gc1')) {
-                return 'passwords_gc1';
-            }
-            if (pageTitle.includes('G2') || pageURL.includes('group2') || pageURL.includes('gc2')) {
-                return 'passwords_gc2';
-            }
-            if (pageTitle.includes('G3') || pageURL.includes('group3') || pageURL.includes('gc3')) {
-                return 'passwords_gc3';
-            }
-            
-            // Final fallback
-            console.warn('⚠️ Could not detect group, defaulting to gc1');
-            return 'passwords_gc1';
-        }
-        
-        const passwordKey = getPasswordKey();
-        console.log('🔑 Password Firebase key:', passwordKey);
-        
-        database.ref(passwordKey).on('value', (snapshot) => {
-            const firebasePasswords = snapshot.val();
-            
-            if (firebasePasswords && typeof userCredentials !== 'undefined' && userCredentials !== null) {
-                console.log('🔄 Passwords updated from Firebase');
-                
-                // Update local credentials
-                Object.assign(userCredentials, firebasePasswords);
-                
-                // Update localStorage with correct group key
-                const group = window.CURRENT_GROUP || passwordKey.replace('passwords_', '');
-                const storageKey = `userCredentials_${group}`;
-                localStorage.setItem(storageKey, JSON.stringify(userCredentials));
-                
-                // Show notification to non-admin users
-                if (typeof isAdmin !== 'undefined' && !isAdmin) {
-                    showNotification('🔐 Password settings updated', 'info');
-                }
-            }
-        }, (error) => {
-            console.error('❌ Password listener error:', error);
-        });
-    }
-    
-    // ========================================
     // INITIALIZE ALL LISTENERS
     // ========================================
     
@@ -335,7 +257,6 @@
         setupAvailabilityListener();
         setupMemberAvailabilityListener();
         setupLeaveManagementListener();
-        setupPasswordListener();  // ✅ Added password listener
         
         // Setup schedule listener for current date
         const dateInput = document.getElementById('scheduleDate');
@@ -401,21 +322,7 @@
             database.ref('teamData').off('value');
             database.ref('availabilityOverrides').off('value');
             database.ref('memberAvailabilitySettings').off('value');
-            database.ref('leaveSettings').off('value');  // ✅ Corrected path
-            
-            // ✅ Detach password listener
-            if (typeof window.CURRENT_GROUP !== 'undefined' && window.CURRENT_GROUP) {
-                database.ref(`passwords_${window.CURRENT_GROUP}`).off('value');
-            } else {
-                // Fallback: try to detect and detach
-                const url = firebaseConfig?.databaseURL || '';
-                const match = url.match(/workschedulemanager-gc(\d+)/i);
-                if (match) {
-                    database.ref(`passwords_gc${match[1]}`).off('value');
-                } else {
-                    database.ref('passwords_gc1').off('value');
-                }
-            }
+            database.ref('leaveSettings').off('value');
             
             if (currentScheduleListener) {
                 database.ref('schedules/' + currentScheduleListener).off('value');

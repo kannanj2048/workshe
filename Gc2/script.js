@@ -3064,44 +3064,23 @@ console.log('%c✨ Multi-color hover effect loaded', 'color:#f093fb;font-weight:
 // ===================
 
 // 🔒 GROUP-SPECIFIC PASSWORD SYSTEM
-// Detect current group for password isolation
-function detectGroupID() {
-    if (typeof firebaseConfig !== 'undefined' && firebaseConfig.databaseURL) {
-        const url = firebaseConfig.databaseURL;
-        const match = url.match(/workschedulemanager-gc(\d+)/i);
-        if (match) return 'gc' + match[1];
-        if (url.includes('gc1')) return 'gc1';
-        if (url.includes('gc2')) return 'gc2';
-        if (url.includes('gc3')) return 'gc3';
-    }
-    return 'gc1';
-}
+// Note: detectGroupID() is defined later at line 3649, CURRENT_GROUP at line 3680
 
-// Group-specific storage key
-const CURRENT_GROUP_ID = detectGroupID();
-const PASSWORD_STORAGE_KEY = `userCredentials_${CURRENT_GROUP_ID}`;
-console.log(`🔑 Password system initialized for group: ${CURRENT_GROUP_ID}`);
-
-// User credentials storage (group-specific)
-let userCredentials = JSON.parse(localStorage.getItem(PASSWORD_STORAGE_KEY)) || {
-    admin: {
-        password: 'admin123',
-        role: 'admin'
-    },
-    guest: {
-        password: 'guest123',
-        maxUsers: 2,
-        activeSessions: []
-    }
-};
+// Group-specific storage key (will be set after CURRENT_GROUP is defined)
+let PASSWORD_STORAGE_KEY;
+let userCredentials = null; // Will be initialized after CURRENT_GROUP is defined
 
 let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
 let isGuest = false;
 
 // Save credentials to localStorage (group-specific)
 function saveUserCredentials() {
+    if (!PASSWORD_STORAGE_KEY || !userCredentials) {
+        console.warn('⚠️ Password system not initialized yet');
+        return;
+    }
     localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
-    console.log(`💾 Passwords saved for ${CURRENT_GROUP_ID}`);
+    console.log(`💾 Passwords saved for group`);
 }
 
 // Generate unique session ID
@@ -3679,6 +3658,21 @@ function detectGroupID() {
 // Detect current group
 const CURRENT_GROUP = detectGroupID();
 console.log('🎯 Detected Group:', CURRENT_GROUP);
+
+// ✅ Initialize password system now that CURRENT_GROUP is defined
+PASSWORD_STORAGE_KEY = `userCredentials_${CURRENT_GROUP}`;
+userCredentials = JSON.parse(localStorage.getItem(PASSWORD_STORAGE_KEY)) || {
+    admin: {
+        password: 'admin123',
+        role: 'admin'
+    },
+    guest: {
+        password: 'guest123',
+        maxUsers: 2,
+        activeSessions: []
+    }
+};
+console.log(`🔑 Password system initialized for group: ${CURRENT_GROUP}`);
 
 // Default POC names
 const DEFAULT_POC_NAMES = {
