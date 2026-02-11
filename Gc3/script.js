@@ -3757,8 +3757,8 @@ window.savePasswordsToFirebase = savePasswordsToFirebase;
 
 // Default POC names
 const DEFAULT_POC_NAMES = {
-    team1: "Raja",
-    team2: "Vishali"
+    team1: "Selva",
+    team2: "Naveen"
 };
 
 // Storage key - NOW GROUP-SPECIFIC
@@ -4196,7 +4196,7 @@ function resetPOCNamesToDefault() {
         return;
     }
     
-    if (!confirm('Reset POC names to default values?\n\nTeam1: Gayathiri\nTeam2: Ajay')) {
+    if (!confirm('Reset POC names to default values?\n\nTeam1: Selva\nTeam2: Naveen')) {
         return;
     }
     
