@@ -3079,8 +3079,15 @@ function saveUserCredentials() {
         console.warn('⚠️ Password system not initialized yet');
         return;
     }
+    
+    // Save to localStorage
     localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
-    console.log(`💾 Passwords saved for group`);
+    console.log(`💾 Passwords saved to localStorage (${CURRENT_GROUP})`);
+    
+    // Save to Firebase for real-time sync
+    if (typeof savePasswordsToFirebase === 'function') {
+        savePasswordsToFirebase();
+    }
 }
 
 // Generate unique session ID
@@ -3674,6 +3681,112 @@ userCredentials = JSON.parse(localStorage.getItem(PASSWORD_STORAGE_KEY)) || {
 };
 console.log(`🔑 Password system initialized for group: ${CURRENT_GROUP}`);
 
+// ========================================
+// 🔒 FIREBASE PASSWORD SYNC FUNCTIONS
+// ========================================
+
+const PASSWORD_FIREBASE_KEY = `passwords_${CURRENT_GROUP}`;
+
+// Load passwords from Firebase
+function loadPasswordsFromFirebase(callback) {
+    if (!window.hasDatabase || !window.hasDatabase()) {
+        console.log('⚠️ Firebase not available for password sync');
+        if (callback) callback(null);
+        return;
+    }
+    
+    console.log(`🔍 Loading passwords from Firebase: ${PASSWORD_FIREBASE_KEY}`);
+    
+    database.ref(PASSWORD_FIREBASE_KEY).once('value')
+        .then((snapshot) => {
+            const firebasePasswords = snapshot.val();
+            if (firebasePasswords) {
+                console.log(`☁️ Passwords loaded from Firebase (${CURRENT_GROUP})`);
+                // Update local credentials
+                userCredentials = firebasePasswords;
+                // Update localStorage
+                localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
+                if (callback) callback(firebasePasswords);
+            } else {
+                console.log(`ℹ️ No passwords in Firebase yet, using defaults`);
+                // Save defaults to Firebase
+                savePasswordsToFirebase();
+                if (callback) callback(null);
+            }
+        })
+        .catch((error) => {
+            console.error('❌ Error loading passwords from Firebase:', error);
+            if (callback) callback(null);
+        });
+}
+
+// Save passwords to Firebase
+function savePasswordsToFirebase() {
+    if (!window.hasDatabase || !window.hasDatabase() || !userCredentials) {
+        console.log('⚠️ Firebase not available or userCredentials not initialized');
+        return;
+    }
+    
+    database.ref(PASSWORD_FIREBASE_KEY).set(userCredentials)
+        .then(() => {
+            console.log(`☁️ Passwords saved to Firebase (${CURRENT_GROUP})`);
+        })
+        .catch((error) => {
+            console.error('❌ Error saving passwords to Firebase:', error);
+        });
+}
+
+// Setup real-time password listener
+function setupPasswordSyncListener() {
+    if (!window.hasDatabase || !window.hasDatabase()) {
+        console.log('⚠️ Firebase not available - password sync disabled');
+        return;
+    }
+    
+    console.log(`👂 Setting up real-time password sync for ${CURRENT_GROUP}`);
+    
+    database.ref(PASSWORD_FIREBASE_KEY).on('value', (snapshot) => {
+        const firebasePasswords = snapshot.val();
+        
+        if (firebasePasswords) {
+            console.log(`🔄 Password updated from Firebase (${CURRENT_GROUP})`);
+            
+            // Update local credentials
+            userCredentials = firebasePasswords;
+            
+            // Update localStorage
+            localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
+            
+            // Show notification to non-admin users
+            if (typeof isAdmin !== 'undefined' && !isAdmin) {
+                showNotification('🔐 Password settings updated by admin', 'info');
+            }
+        }
+    }, (error) => {
+        console.error('❌ Password sync listener error:', error);
+    });
+}
+
+// Initialize password system with Firebase sync
+function initializePasswordSystem() {
+    console.log('🔑 Initializing password system with Firebase sync...');
+    
+    // Try to load from Firebase first
+    loadPasswordsFromFirebase((firebasePasswords) => {
+        if (firebasePasswords) {
+            console.log('✅ Using passwords from Firebase');
+        } else {
+            console.log('✅ Using local passwords');
+        }
+        
+        // Setup real-time sync listener
+        setupPasswordSyncListener();
+    });
+}
+
+// Make savePasswordsToFirebase globally available
+window.savePasswordsToFirebase = savePasswordsToFirebase;
+
 // Default POC names
 const DEFAULT_POC_NAMES = {
     team1: "Raja",
@@ -4146,6 +4259,29 @@ if (document.readyState === 'loading') {
 
 console.log('%c👤 POC Management System Loaded', 'color: #10b981; font-weight: bold; font-size: 14px');
 console.log(`%c   Group: ${CURRENT_GROUP} - Admin can edit POC names`, 'color: #3b82f6; font-size: 12px');
+
+// ==========================================
+// 🔒 INITIALIZE PASSWORD SYSTEM WITH FIREBASE SYNC
+// ==========================================
+
+// Wait for Firebase to be ready before initializing password system
+function tryInitializePasswordSystem() {
+    if (window.hasDatabase && window.hasDatabase()) {
+        console.log('🔥 Firebase ready - initializing password system with sync');
+        if (typeof initializePasswordSystem === 'function') {
+            initializePasswordSystem();
+        }
+    } else {
+        console.log('⏳ Waiting for Firebase for password sync... (retrying in 500ms)');
+        setTimeout(tryInitializePasswordSystem, 500);
+    }
+}
+
+// Start password system initialization
+setTimeout(tryInitializePasswordSystem, 1000);
+
+console.log('%c🔒 Password System with Firebase Sync Loading...', 'color: #10b981; font-weight: bold; font-size: 14px');
+console.log(`%c   Group: ${CURRENT_GROUP} - Passwords will sync in real-time`, 'color: #3b82f6; font-size: 12px');
 
 // ==========================================
 // FIREBASE LOADING TIMEOUT NOTIFICATION
