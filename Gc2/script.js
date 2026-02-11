@@ -3083,7 +3083,6 @@ let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
 // User credentials storage - LOAD FROM FIREBASE OR LOCALSTORAGE
 let userCredentials = null;
 
-let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
 let isGuest = false;
 
 // ✅ Initialize passwords from Firebase/localStorage
