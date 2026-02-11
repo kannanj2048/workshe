@@ -201,7 +201,7 @@ function toggleMemberAvailability(name, role) {
         showNotification(`${name} marked as unavailable`, "success");
     }
     localStorage.setItem("availabilityOverrides", JSON.stringify(availabilityOverrides));
-    if (hasDatabase()) {
+    if (typeof database !== 'undefined') {
         saveAvailabilityToFirebase();
     }
     updateAvailabilityStatus();
@@ -239,12 +239,12 @@ function editMemberInAvailability(oldName, role) {
             availabilityOverrides[newKey] = availabilityOverrides[oldKey];
             delete availabilityOverrides[oldKey];
             localStorage.setItem("availabilityOverrides", JSON.stringify(availabilityOverrides));
-            if (hasDatabase()) {
+            if (typeof database !== 'undefined') {
                 saveAvailabilityToFirebase();
             }
         }
         localStorage.setItem("teamData", JSON.stringify(teamData));
-        if (hasDatabase()) {
+        if (typeof database !== 'undefined') {
             saveTeamDataToFirebase();
         }
         updateAvailabilityStatus();
@@ -279,12 +279,12 @@ function removeMemberFromAvailability(name, role) {
         if (availabilityOverrides[key]) {
             delete availabilityOverrides[key];
             localStorage.setItem("availabilityOverrides", JSON.stringify(availabilityOverrides));
-            if (hasDatabase()) {
+            if (typeof database !== 'undefined') {
                 saveAvailabilityToFirebase();
             }
         }
         localStorage.setItem("teamData", JSON.stringify(teamData));
-        if (hasDatabase()) {
+        if (typeof database !== 'undefined') {
             // Delete user from Firebase
             deleteUserFromRole(name, role, () => {
                 console.log("User deleted from Firebase");
@@ -341,7 +341,7 @@ function addMemberFromAvailability(role) {
     localStorage.setItem("teamData", JSON.stringify(teamData));
     
     // Save to Firebase
-    if (hasDatabase()) {
+    if (typeof database !== 'undefined') {
         checkAndAddUser(name.trim(), role, (success, status) => {
             if (success) {
                 console.log(`✅ User ${name.trim()} added to Firebase`);
@@ -362,10 +362,14 @@ function saveMemberAvailabilitySettings() {
     localStorage.setItem('memberAvailabilitySettings', JSON.stringify(memberAvailabilitySettings));
     
     // ✅ Try Firebase sync silently - localStorage is the source of truth
-    if (typeof hasDatabase === 'function' && hasDatabase() && typeof database !== 'undefined') {
-        database.ref('memberAvailabilitySettings').set(memberAvailabilitySettings)
-            .then(() => console.log('✅ Availability settings saved to Firebase'))
-            .catch(() => {}); // Silent fail - localStorage already saved successfully
+    if (typeof database !== 'undefined') {
+        try {
+            database.ref('memberAvailabilitySettings').set(memberAvailabilitySettings)
+                .then(() => console.log('✅ Availability settings saved to Firebase'))
+                .catch(() => {}); // Silent fail - localStorage already saved successfully
+        } catch (error) {
+            // Silent fail - localStorage already saved successfully
+        }
     }
     console.log('✅ Member availability settings saved to localStorage');
 }
@@ -835,16 +839,25 @@ function assignAdditionalTasksSmart(sas, apprentices, date, recentHistory, mainP
     // ✅ Use only actual available members - no hardcoded fallback
     const safeSAs = sas.length > 0 ? sas : [];
     const safeApps = apprentices.length > 0 ? apprentices : [];
+    
+    // ✅ GET TASK LIST (custom or default)
+    const taskList = (typeof getAdditionalTasksList === 'function') 
+        ? getAdditionalTasksList() 
+        : [
+            "Email Handle",
+            "Follow Up Remainder",
+            "SIEM Device Status",
+            "HO PPT Update",
+            "Handover Presentation",
+            "Handover Summary"
+        ];
 
     // If no members available at all, show "No one available"
     if (safeSAs.length === 0 && safeApps.length === 0) {
         console.warn('⚠️ No SAs or Apprentices available - assigning "No one available"');
-        tasks["Email Handle"] = "No one available";
-        tasks["Follow Up Remainder"] = "No one available";
-        tasks["SIEM Device Status"] = "No one available";
-        tasks["HO PPT Update"] = "No one available";
-        tasks["Handover Presentation"] = "No one available";
-        tasks["Handover Summary"] = "No one available";
+        taskList.forEach(task => {
+            tasks[task] = "No one available";
+        });
         return tasks;
     }
 
@@ -867,108 +880,35 @@ function assignAdditionalTasksSmart(sas, apprentices, date, recentHistory, mainP
 
     console.log(`     - Task SAs Pool: ${taskSAs.join(', ') || 'Using all SAs'}`);
 
-    // ✅ TASK 1: Email Handle - ALWAYS ASSIGNED
-    if (taskSAs.length > 0 && sortedApps.length > 0) {
-        const emailSA = taskSAs[0] || sortedSAs[0];
-        const emailApp = sortedApps[0];
-        tasks["Email Handle"] = `${emailSA} / ${emailApp}`;
-    } else if (taskSAs.length > 0) {
-        tasks["Email Handle"] = taskSAs[0] || sortedSAs[0];
-    } else if (sortedApps.length > 0) {
-        tasks["Email Handle"] = sortedApps[0];
-    } else {
-        tasks["Email Handle"] = "All SA's";
-    }
-    console.log(`  ✉️ Email Handle: ${tasks["Email Handle"]}`);
-
-    // ✅ TASK 2: Follow Up Remainder - ALWAYS ASSIGNED
-    if (sortedApps.length > 0) {
-        tasks["Follow Up Remainder"] = sortedApps[1] || sortedApps[0];
-    } else if (taskSAs.length > 0) {
-        tasks["Follow Up Remainder"] = taskSAs[0];
-    } else {
-        tasks["Follow Up Remainder"] = "All Apprentice";
-    }
-    console.log(`  🔔 Follow Up Remainder: ${tasks["Follow Up Remainder"]}`);
-
-    // ✅ TASK 3: SIEM Device Status - ALWAYS ASSIGNED
-    if (taskSAs.length > 0 && sortedApps.length > 0) {
-        const siemSA = taskSAs[1] || taskSAs[0] || sortedSAs[0];
-        const siemApp = sortedApps[2] || sortedApps[1] || sortedApps[0];
-        tasks["SIEM Device Status"] = `${siemSA} / ${siemApp}`;
-    } else if (taskSAs.length > 0) {
-        tasks["SIEM Device Status"] = taskSAs[1] || taskSAs[0] || sortedSAs[0];
-    } else if (sortedApps.length > 0) {
-        tasks["SIEM Device Status"] = sortedApps[0];
-    } else {
-        tasks["SIEM Device Status"] = "All SA's";
-    }
-    console.log(`  🖥️ SIEM Device Status: ${tasks["SIEM Device Status"]}`);
-
-    // ✅ TASK 4: HO PPT Update - ALWAYS ASSIGNED
-    if (taskSAs.length > 0) {
-        const pptSA = taskSAs[0] || sortedSAs[0];
-        const pptAppsArray = [];
-        
-        if (sortedApps.length > 0) {
-            pptAppsArray.push(sortedApps[0]);
-        }
-        if (sortedApps.length > 1 && sortedApps[1] !== sortedApps[0]) {
-            pptAppsArray.push(sortedApps[1]);
-        }
-        
-        if (pptAppsArray.length > 0) {
-            tasks["HO PPT Update"] = `${pptSA} / ${pptAppsArray.join(' / ')}`;
+    // ✅ ASSIGN ALL TASKS DYNAMICALLY
+    taskList.forEach((taskName, index) => {
+        if (taskSAs.length > 0 && sortedApps.length > 0) {
+            const saIndex = index % taskSAs.length;
+            const appIndex = index % sortedApps.length;
+            const assignedSA = taskSAs[saIndex] || sortedSAs[0];
+            const assignedApp = sortedApps[appIndex];
+            tasks[taskName] = `${assignedSA} / ${assignedApp}`;
+        } else if (taskSAs.length > 0) {
+            const saIndex = index % taskSAs.length;
+            tasks[taskName] = taskSAs[saIndex] || sortedSAs[0];
+        } else if (sortedApps.length > 0) {
+            const appIndex = index % sortedApps.length;
+            tasks[taskName] = sortedApps[appIndex];
         } else {
-            tasks["HO PPT Update"] = pptSA;
+            tasks[taskName] = "All SA's";
         }
-    } else if (sortedApps.length > 0) {
-        tasks["HO PPT Update"] = sortedApps.join(' / ');
-    } else {
-        tasks["HO PPT Update"] = "All SA's";
-    }
-    console.log(`  📊 HO PPT Update: ${tasks["HO PPT Update"]}`);
+        console.log(`  📋 ${taskName}: ${tasks[taskName]}`);
+    });
 
-    // ✅ TASK 5: Handover Presentation - ALWAYS ASSIGNED
-    if (taskSAs.length > 0) {
-        const handoverSA = taskSAs[2] || taskSAs[1] || taskSAs[0] || sortedSAs[0];
-        tasks["Handover Presentation"] = handoverSA;
-    } else if (sortedApps.length > 0) {
-        tasks["Handover Presentation"] = sortedApps[0];
-    } else {
-        tasks["Handover Presentation"] = "All SA's";
-    }
-    console.log(`  🎤 Handover Presentation: ${tasks["Handover Presentation"]}`);
-
-    // ✅ TASK 6: Handover Summary - ALWAYS ASSIGNED
-    if (sortedApps.length > 0) {
-        const summaryApp = sortedApps[sortedApps.length - 1] || sortedApps[3] || sortedApps[2] || sortedApps[1] || sortedApps[0];
-        tasks["Handover Summary"] = summaryApp;
-    } else if (taskSAs.length > 0) {
-        tasks["Handover Summary"] = taskSAs[taskSAs.length - 1] || taskSAs[0];
-    } else {
-        tasks["Handover Summary"] = "All Apprentice";
-    }
-    console.log(`  📝 Handover Summary: ${tasks["Handover Summary"]}`);
-
-    // ✅ VERIFICATION: Ensure all 6 tasks are present
-    const requiredTasks = [
-        "Email Handle",
-        "Follow Up Remainder",
-        "SIEM Device Status",
-        "HO PPT Update",
-        "Handover Presentation",
-        "Handover Summary"
-    ];
-
-    requiredTasks.forEach(taskName => {
+    // ✅ VERIFICATION: Ensure all tasks are present
+    taskList.forEach(taskName => {
         if (!tasks[taskName]) {
             console.error(`❌ MISSING TASK: ${taskName} - Adding fallback`);
             tasks[taskName] = "All SA's";
         }
     });
 
-    console.log(`  ✅ All 6 tasks assigned successfully`);
+    console.log(`  ✅ All ${taskList.length} tasks assigned successfully`);
     
     // ✅ FINAL VERIFICATION: Log all tasks before returning
     console.log(`  📊 Final Task Summary (${Object.keys(tasks).length} tasks):`);
@@ -1183,7 +1123,7 @@ function generateDailySchedule(dateSGT) {
     updateCurrentShiftInfo(dateSGT);
     
     // Check if we have Firebase
-    if (typeof hasDatabase === 'function' && hasDatabase()) {
+    if (typeof database !== 'undefined') {
         // Try localStorage first for instant display
         let localSchedule = scheduleHistory[dateStr];
         
@@ -1305,15 +1245,17 @@ function displayAdditionalTasks(schedule) {
     
     tasksGrid.innerHTML = "";
     
-    // ✅ ENSURE ALL 6 TASKS ARE PRESENT
-    const requiredTasks = [
-        "Email Handle",
-        "Follow Up Remainder",
-        "SIEM Device Status",
-        "HO PPT Update",
-        "Handover Presentation",
-        "Handover Summary"
-    ];
+    // ✅ GET TASK LIST (custom or default)
+    const requiredTasks = (typeof getAdditionalTasksList === 'function') 
+        ? getAdditionalTasksList() 
+        : [
+            "Email Handle",
+            "Follow Up Remainder",
+            "SIEM Device Status",
+            "HO PPT Update",
+            "Handover Presentation",
+            "Handover Summary"
+        ];
     
     // Check for missing tasks and add them with fallback
     requiredTasks.forEach(taskName => {
@@ -1389,7 +1331,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initScrollAnimations();
 
     // Load team data from Firebase if available
-    if (typeof hasDatabase === 'function' && hasDatabase()) {
+    if (typeof database !== 'undefined') {
         if (typeof loadTeamDataFromFirebase === 'function') {
             loadTeamDataFromFirebase(() => {
                 // Callback after Firebase load completes
@@ -1694,6 +1636,11 @@ if (adminLoginForm) {
         } 
         // 2) Check Guest Password
         else if (password === userCredentials.guest.password) {
+            // Initialize activeSessions if it doesn't exist
+            if (!userCredentials.guest.activeSessions) {
+                userCredentials.guest.activeSessions = [];
+            }
+            
             if (userCredentials.guest.activeSessions.length >= userCredentials.guest.maxUsers) {
                 showNotification("❌ Unauthorized access", "error");
                 return;
@@ -2278,7 +2225,7 @@ function openAddMemberModal(type) {
         teamData[category].push(name);
         localStorage.setItem("teamData", JSON.stringify(teamData));
         
-        if (typeof hasDatabase === 'function' && hasDatabase() && typeof checkAndAddUser === 'function') {
+        if (typeof database !== 'undefined' && typeof checkAndAddUser === 'function') {
             checkAndAddUser(name, type, (success) => {
                 if (success) {
                     console.log(`✅ User ${name} added to Firebase`);
@@ -2310,7 +2257,7 @@ function editMember(category, oldName) {
         teamData[category][idx] = newName.trim();
         localStorage.setItem("teamData", JSON.stringify(teamData));
         
-        if (typeof hasDatabase === 'function' && hasDatabase()) {
+        if (typeof database !== 'undefined') {
             const role = category === "SAs" ? "SA" : "Apprentice";
             if (typeof deleteUserFromRole === 'function' && typeof checkAndAddUser === 'function') {
                 deleteUserFromRole(oldName, role, () => {
@@ -2334,7 +2281,7 @@ function deleteMember(category, name) {
         teamData[category].splice(idx, 1);
         localStorage.setItem("teamData", JSON.stringify(teamData));
         
-        if (typeof hasDatabase === 'function' && hasDatabase()) {
+        if (typeof database !== 'undefined') {
             const role = category === "SAs" ? "SA" : "Apprentice";
             if (typeof deleteUserFromRole === 'function') {
                 deleteUserFromRole(name, role, () => {
@@ -2554,7 +2501,7 @@ if (!isAdmin && !isGuest) {
             const dateKey = schedule.date;
             scheduleHistory[dateKey] = schedule;
             localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-            if (typeof hasDatabase === 'function' && hasDatabase() && typeof saveScheduleToFirebase === 'function') {
+            if (typeof database !== 'undefined' && typeof saveScheduleToFirebase === 'function') {
                 saveScheduleToFirebase(schedule);
             }
             displaySchedule(schedule);
@@ -2595,7 +2542,7 @@ if (!isAdmin && !isGuest) {
             const dateKey = schedule.date;
             scheduleHistory[dateKey] = schedule;
             localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-            if (typeof hasDatabase === 'function' && hasDatabase() && typeof saveScheduleToFirebase === 'function') {
+            if (typeof database !== 'undefined' && typeof saveScheduleToFirebase === 'function') {
                 saveScheduleToFirebase(schedule);
             }
             displaySchedule(schedule);
@@ -2650,7 +2597,7 @@ function openEditShiftModal() {
                 // Handle shift override based on checkbox state
                 if (applyToDate) {
                     // Checkbox checked: Apply to this date only, no override
-                    if (typeof hasDatabase === 'function' && hasDatabase() && typeof saveScheduleToFirebase === 'function') {
+                    if (typeof database !== 'undefined' && typeof saveScheduleToFirebase === 'function') {
                         saveScheduleToFirebase(schedule);
                     }
                     displaySchedule(schedule);
@@ -2680,7 +2627,7 @@ function openEditShiftModal() {
                     }
                     localStorage.setItem('scheduleHistory', JSON.stringify(scheduleHistory));
                     
-                    if (typeof hasDatabase === 'function' && hasDatabase() && typeof saveScheduleToFirebase === 'function') {
+                    if (typeof database !== 'undefined' && typeof saveScheduleToFirebase === 'function') {
                         saveScheduleToFirebase(schedule);
                     }
                     displaySchedule(schedule);
@@ -2724,7 +2671,7 @@ function openEditShiftModal() {
                 scheduleHistory[dateStr] = newSchedule;
                 localStorage.setItem('scheduleHistory', JSON.stringify(scheduleHistory));
                 
-                if (typeof hasDatabase === 'function' && hasDatabase() && typeof saveScheduleToFirebase === 'function') {
+                if (typeof database !== 'undefined' && typeof saveScheduleToFirebase === 'function') {
                     saveScheduleToFirebase(newSchedule);
                 }
                 
@@ -3063,25 +3010,31 @@ console.log('%c✨ Multi-color hover effect loaded', 'color:#f093fb;font-weight:
 // GUEST USER SYSTEM 
 // ===================
 
-// User credentials storage
-let userCredentials = JSON.parse(localStorage.getItem('userCredentials')) || {
-    admin: {
-        password: 'admin123',
-        role: 'admin'
-    },
-    guest: {
-        password: 'guest123',
-        maxUsers: 2,
-        activeSessions: []
-    }
-};
+// 🔒 GROUP-SPECIFIC PASSWORD SYSTEM
+// Note: detectGroupID() is defined later at line 3649, CURRENT_GROUP at line 3680
+
+// Group-specific storage key (will be set after CURRENT_GROUP is defined)
+let PASSWORD_STORAGE_KEY;
+let userCredentials = null; // Will be initialized after CURRENT_GROUP is defined
 
 let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
 let isGuest = false;
 
-// Save credentials to localStorage
+// Save credentials to localStorage (group-specific)
 function saveUserCredentials() {
-    localStorage.setItem('userCredentials', JSON.stringify(userCredentials));
+    if (!PASSWORD_STORAGE_KEY || !userCredentials) {
+        console.warn('⚠️ Password system not initialized yet');
+        return;
+    }
+    
+    // Save to localStorage
+    localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
+    console.log(`💾 Passwords saved to localStorage (${CURRENT_GROUP})`);
+    
+    // Save to Firebase for real-time sync
+    if (typeof savePasswordsToFirebase === 'function') {
+        savePasswordsToFirebase();
+    }
 }
 
 // Generate unique session ID
@@ -3096,6 +3049,10 @@ function initUserSystem() {
             setAdminMode(true);
             isGuest = false;
         } else if (currentUser.role === 'guest') {
+            // Initialize activeSessions if it doesn't exist
+            if (!userCredentials.guest.activeSessions) {
+                userCredentials.guest.activeSessions = [];
+            }
             const sessionValid = userCredentials.guest.activeSessions.includes(currentUser.sessionId);
             if (sessionValid) {
                 setGuestMode(true);
@@ -3375,7 +3332,7 @@ function toggleMemberAvailabilityGuest(name, role) {
     }
     
     localStorage.setItem("availabilityOverrides", JSON.stringify(availabilityOverrides));
-    if (hasDatabase()) {
+    if (typeof database !== 'undefined') {
         saveAvailabilityToFirebase();
     }
     enableGuestAvailabilityManagement();
@@ -3442,6 +3399,10 @@ function logoutUser() {
     if (currentUser) {
         if (currentUser.role === 'guest') {
             const sessionId = currentUser.sessionId;
+            // Initialize activeSessions if it doesn't exist
+            if (!userCredentials.guest.activeSessions) {
+                userCredentials.guest.activeSessions = [];
+            }
             const index = userCredentials.guest.activeSessions.indexOf(sessionId);
             if (index > -1) {
                 userCredentials.guest.activeSessions.splice(index, 1);
@@ -3660,6 +3621,140 @@ function detectGroupID() {
 const CURRENT_GROUP = detectGroupID();
 console.log('🎯 Detected Group:', CURRENT_GROUP);
 
+// ✅ Initialize password system now that CURRENT_GROUP is defined
+PASSWORD_STORAGE_KEY = `userCredentials_${CURRENT_GROUP}`;
+userCredentials = JSON.parse(localStorage.getItem(PASSWORD_STORAGE_KEY)) || {
+    admin: {
+        password: 'admin123',
+        role: 'admin'
+    },
+    guest: {
+        password: 'guest123',
+        maxUsers: 2,
+        activeSessions: []
+    }
+};
+console.log(`🔑 Password system initialized for group: ${CURRENT_GROUP}`);
+
+// ========================================
+// 🔒 FIREBASE PASSWORD SYNC FUNCTIONS
+// ========================================
+
+const PASSWORD_FIREBASE_KEY = `passwords_${CURRENT_GROUP}`;
+
+// Load passwords from Firebase
+function loadPasswordsFromFirebase(callback) {
+    if (typeof window.database === 'undefined' || typeof database === 'undefined') {
+        console.log('⚠️ Firebase not available for password sync');
+        if (callback) callback(null);
+        return;
+    }
+    
+    console.log(`🔍 Loading passwords from Firebase: ${PASSWORD_FIREBASE_KEY}`);
+    
+    try {
+        database.ref(PASSWORD_FIREBASE_KEY).once('value')
+        .then((snapshot) => {
+            const firebasePasswords = snapshot.val();
+            if (firebasePasswords) {
+                console.log(`☁️ Passwords loaded from Firebase (${CURRENT_GROUP})`);
+                // Update local credentials
+                userCredentials = firebasePasswords;
+                // Update localStorage
+                localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
+                if (callback) callback(firebasePasswords);
+            } else {
+                console.log(`ℹ️ No passwords in Firebase yet, using defaults`);
+                // Save defaults to Firebase
+                savePasswordsToFirebase();
+                if (callback) callback(null);
+            }
+        })
+        .catch((error) => {
+            console.error('❌ Error loading passwords from Firebase:', error);
+            if (callback) callback(null);
+        });
+    } catch (error) {
+        console.error('❌ Failed to access Firebase for passwords:', error);
+        if (callback) callback(null);
+    }
+}
+
+// Save passwords to Firebase
+function savePasswordsToFirebase() {
+    if (typeof window.database === 'undefined' || typeof database === 'undefined' || !userCredentials) {
+        console.log('⚠️ Firebase not available or userCredentials not initialized');
+        return;
+    }
+    
+    try {
+        database.ref(PASSWORD_FIREBASE_KEY).set(userCredentials)
+            .then(() => {
+                console.log(`☁️ Passwords saved to Firebase (${CURRENT_GROUP})`);
+            })
+            .catch((error) => {
+                console.error('❌ Error saving passwords to Firebase:', error);
+            });
+    } catch (error) {
+        console.error('❌ Failed to access Firebase for saving passwords:', error);
+    }
+}
+
+// Setup real-time password listener
+function setupPasswordSyncListener() {
+    if (typeof window.database === 'undefined' || typeof database === 'undefined') {
+        console.log('⚠️ Firebase not available - password sync disabled');
+        return;
+    }
+    
+    console.log(`👂 Setting up real-time password sync for ${CURRENT_GROUP}`);
+    
+    try {
+        database.ref(PASSWORD_FIREBASE_KEY).on('value', (snapshot) => {
+            const firebasePasswords = snapshot.val();
+            
+            if (firebasePasswords) {
+                console.log(`🔄 Password updated from Firebase (${CURRENT_GROUP})`);
+                
+                // Update local credentials
+                userCredentials = firebasePasswords;
+                
+                // Update localStorage
+                localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
+                
+                // Show notification to non-admin users
+                if (typeof isAdmin !== 'undefined' && !isAdmin) {
+                    showNotification('🔐 Password settings updated by admin', 'info');
+                }
+            }
+        }, (error) => {
+            console.error('❌ Password sync listener error:', error);
+        });
+    } catch (error) {
+        console.error('❌ Failed to setup password sync listener:', error);
+    }
+}
+
+// Initialize password system with Firebase sync
+function initializePasswordSystem() {
+    console.log('🔑 Initializing password system with Firebase sync...');
+    
+    // Try to load from Firebase first
+    loadPasswordsFromFirebase((firebasePasswords) => {
+        if (firebasePasswords) {
+            console.log('✅ Using passwords from Firebase');
+        } else {
+            console.log('✅ Using local passwords');
+        }
+        
+        // Setup real-time sync listener
+        setupPasswordSyncListener();
+    });
+}
+
+// Make savePasswordsToFirebase globally available
+window.savePasswordsToFirebase = savePasswordsToFirebase;
+
 // Default POC names
 const DEFAULT_POC_NAMES = {
     team1: "Raja",
@@ -3702,23 +3797,28 @@ function initializePOCSystem() {
 // ========================================
 function loadPOCNamesFromStorage() {
     // Try Firebase first
-    if (typeof window.hasDatabase === 'function' && window.hasDatabase()) {
-        database.ref(POC_FIREBASE_KEY).once('value')
-            .then(snapshot => {
-                const data = snapshot.val();
-                if (data) {
-                    pocNames = data;
-                    console.log(`☁️ POC names loaded from Firebase (${CURRENT_GROUP}):`, pocNames);
-                    updatePOCDisplay();
-                } else {
-                    // Try localStorage
+    if (typeof window.database !== 'undefined' && typeof database !== 'undefined') {
+        try {
+            database.ref(POC_FIREBASE_KEY).once('value')
+                .then(snapshot => {
+                    const data = snapshot.val();
+                    if (data) {
+                        pocNames = data;
+                        console.log(`☁️ POC names loaded from Firebase (${CURRENT_GROUP}):`, pocNames);
+                        updatePOCDisplay();
+                    } else {
+                        // Try localStorage
+                        loadPOCFromLocalStorage();
+                    }
+                })
+                .catch(err => {
+                    console.warn('⚠️ Firebase POC load failed, using localStorage:', err);
                     loadPOCFromLocalStorage();
-                }
-            })
-            .catch(err => {
-                console.warn('⚠️ Firebase POC load failed, using localStorage:', err);
-                loadPOCFromLocalStorage();
-            });
+                });
+        } catch (error) {
+            console.warn('⚠️ Failed to access Firebase for POC, using localStorage:', error);
+            loadPOCFromLocalStorage();
+        }
     } else {
         // Use localStorage only
         loadPOCFromLocalStorage();
@@ -3751,14 +3851,18 @@ function savePOCNamesToStorage() {
     console.log(`💾 POC names saved to localStorage (${CURRENT_GROUP})`);
     
     // Save to Firebase if available
-    if (typeof window.hasDatabase === 'function' && window.hasDatabase()) {
-        database.ref(POC_FIREBASE_KEY).set(pocNames)
-            .then(() => {
-                console.log(`☁️ POC names saved to Firebase (${CURRENT_GROUP})`);
-            })
-            .catch(err => {
-                console.error('❌ Firebase POC save failed:', err);
-            });
+    if (typeof window.database !== 'undefined' && typeof database !== 'undefined') {
+        try {
+            database.ref(POC_FIREBASE_KEY).set(pocNames)
+                .then(() => {
+                    console.log(`☁️ POC names saved to Firebase (${CURRENT_GROUP})`);
+                })
+                .catch(err => {
+                    console.error('❌ Firebase POC save failed:', err);
+                });
+        } catch (error) {
+            console.error('❌ Failed to access Firebase for POC save:', error);
+        }
     }
 }
 
@@ -4132,6 +4236,29 @@ if (document.readyState === 'loading') {
 
 console.log('%c👤 POC Management System Loaded', 'color: #10b981; font-weight: bold; font-size: 14px');
 console.log(`%c   Group: ${CURRENT_GROUP} - Admin can edit POC names`, 'color: #3b82f6; font-size: 12px');
+
+// ==========================================
+// 🔒 INITIALIZE PASSWORD SYSTEM WITH FIREBASE SYNC
+// ==========================================
+
+// Wait for Firebase to be ready before initializing password system
+function tryInitializePasswordSystem() {
+    if (typeof window.database !== 'undefined') {
+        console.log('🔥 Firebase ready - initializing password system with sync');
+        if (typeof initializePasswordSystem === 'function') {
+            initializePasswordSystem();
+        }
+    } else {
+        console.log('⏳ Waiting for Firebase for password sync... (retrying in 500ms)');
+        setTimeout(tryInitializePasswordSystem, 500);
+    }
+}
+
+// Start password system initialization
+setTimeout(tryInitializePasswordSystem, 1000);
+
+console.log('%c🔒 Password System with Firebase Sync Loading...', 'color: #10b981; font-weight: bold; font-size: 14px');
+console.log(`%c   Group: ${CURRENT_GROUP} - Passwords will sync in real-time`, 'color: #3b82f6; font-size: 12px');
 
 // ==========================================
 // FIREBASE LOADING TIMEOUT NOTIFICATION
@@ -4563,5 +4690,621 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Admin can edit POC names`, 'color: #
     } else {
         setTimeout(startMonitoring, 500);
     }
+    
+})();
+
+// ==========================================
+// PLATFORM & TASK MANAGER (ADMIN ONLY)
+// Add/Remove Platforms and Additional Tasks
+// ==========================================
+
+(function() {
+    'use strict';
+    
+    // Storage keys
+    const CUSTOM_PLATFORMS_KEY = 'customPlatforms';
+    const CUSTOM_TASKS_KEY = 'customAdditionalTasks';
+    
+    // Load custom platforms and tasks from localStorage
+    let customPlatforms = JSON.parse(localStorage.getItem(CUSTOM_PLATFORMS_KEY)) || null;
+    let customTasks = JSON.parse(localStorage.getItem(CUSTOM_TASKS_KEY)) || null;
+    
+    // Apply custom platforms if they exist
+    function applyCustomPlatforms() {
+        if (customPlatforms && typeof platforms !== 'undefined') {
+            platforms.main = customPlatforms.main || platforms.main;
+            platforms.common = customPlatforms.common || platforms.common;
+            platforms.grouped = customPlatforms.grouped || platforms.grouped;
+            console.log('✅ Custom platforms applied:', platforms);
+        }
+    }
+    
+    // Initialize on page load
+    function initPlatformTaskManager() {
+        if (!isAdmin) return;
+        
+        // Apply custom platforms
+        applyCustomPlatforms();
+        
+        // Add management buttons
+        addManagementButtons();
+        
+        console.log('🔧 Platform & Task Manager initialized (Admin Mode)');
+    }
+    
+    // Add management buttons to the UI
+    function addManagementButtons() {
+        const scheduleControls = document.querySelector('.schedule-controls .schedule-actions');
+        if (!scheduleControls) return;
+        
+        // Check if buttons already exist
+        if (document.getElementById('managePlatformsBtn')) return;
+        
+        // Platform Management Button
+        const platformBtn = document.createElement('button');
+        platformBtn.id = 'managePlatformsBtn';
+        platformBtn.className = 'btn btn-primary btn-small admin-only';
+        platformBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Manage Platforms';
+        platformBtn.onclick = openPlatformManager;
+        platformBtn.style.marginLeft = '10px';
+        scheduleControls.appendChild(platformBtn);
+        
+        // Task Management Button
+        const taskBtn = document.createElement('button');
+        taskBtn.id = 'manageTasksBtn';
+        taskBtn.className = 'btn btn-primary btn-small admin-only';
+        taskBtn.innerHTML = '<i class="fas fa-tasks"></i> Manage Tasks';
+        taskBtn.onclick = openTaskManager;
+        taskBtn.style.marginLeft = '10px';
+        scheduleControls.appendChild(taskBtn);
+    }
+    
+    // ========================================
+    // PLATFORM MANAGER MODAL
+    // ========================================
+    
+    function openPlatformManager() {
+        // Get current platforms
+        const currentPlatforms = customPlatforms || {
+            main: [...platforms.main],
+            common: [...platforms.common],
+            grouped: [...platforms.grouped]
+        };
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal show';
+        modal.id = 'platformManagerModal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+                <div class="modal-header">
+                    <h3><i class="fas fa-server"></i> Manage Platforms</h3>
+                    <button class="modal-close" onclick="closePlatformManager()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <!-- Main Platforms -->
+                    <div class="platform-section">
+                        <h4 style="color: var(--primary-color); margin-bottom: 15px;">
+                            <i class="fas fa-star"></i> Main Platforms
+                        </h4>
+                        <div id="mainPlatformsList" class="platform-list">
+                            ${currentPlatforms.main.map((p, i) => `
+                                <div class="platform-item">
+                                    <input type="text" value="${p}" data-category="main" data-index="${i}" 
+                                           class="platform-input" />
+                                    <button class="btn-icon btn-danger" onclick="removePlatform('main', ${i})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="btn btn-secondary btn-small" onclick="addNewPlatform('main')" style="margin-top: 10px;">
+                            <i class="fas fa-plus"></i> Add Main Platform
+                        </button>
+                    </div>
+                    
+                    <hr style="margin: 25px 0; border-color: var(--border-color);">
+                    
+                    <!-- Common Platforms -->
+                    <div class="platform-section">
+                        <h4 style="color: var(--primary-color); margin-bottom: 15px;">
+                            <i class="fas fa-layer-group"></i> Common Platforms
+                        </h4>
+                        <div id="commonPlatformsList" class="platform-list">
+                            ${currentPlatforms.common.map((p, i) => `
+                                <div class="platform-item">
+                                    <input type="text" value="${p}" data-category="common" data-index="${i}" 
+                                           class="platform-input" />
+                                    <button class="btn-icon btn-danger" onclick="removePlatform('common', ${i})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="btn btn-secondary btn-small" onclick="addNewPlatform('common')" style="margin-top: 10px;">
+                            <i class="fas fa-plus"></i> Add Common Platform
+                        </button>
+                    </div>
+                    
+                    <hr style="margin: 25px 0; border-color: var(--border-color);">
+                    
+                    <!-- Grouped Platforms -->
+                    <div class="platform-section">
+                        <h4 style="color: var(--primary-color); margin-bottom: 15px;">
+                            <i class="fas fa-object-group"></i> Grouped Platforms
+                        </h4>
+                        <div id="groupedPlatformsList" class="platform-list">
+                            ${currentPlatforms.grouped.map((p, i) => `
+                                <div class="platform-item">
+                                    <input type="text" value="${p}" data-category="grouped" data-index="${i}" 
+                                           class="platform-input" />
+                                    <button class="btn-icon btn-danger" onclick="removePlatform('grouped', ${i})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="btn btn-secondary btn-small" onclick="addNewPlatform('grouped')" style="margin-top: 10px;">
+                            <i class="fas fa-plus"></i> Add Grouped Platform
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closePlatformManager()">Cancel</button>
+                    <button class="btn btn-danger" onclick="resetPlatformsToDefault()">
+                        <i class="fas fa-undo"></i> Reset to Default
+                    </button>
+                    <button class="btn btn-primary" onclick="savePlatforms()">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Add custom styles
+        addPlatformManagerStyles();
+    }
+    
+    function closePlatformManager() {
+        const modal = document.getElementById('platformManagerModal');
+        if (modal) modal.remove();
+    }
+    
+    function addNewPlatform(category) {
+        const listId = category + 'PlatformsList';
+        const list = document.getElementById(listId);
+        if (!list) return;
+        
+        const currentItems = list.querySelectorAll('.platform-item').length;
+        
+        const newItem = document.createElement('div');
+        newItem.className = 'platform-item';
+        newItem.innerHTML = `
+            <input type="text" value="New Platform" data-category="${category}" data-index="${currentItems}" 
+                   class="platform-input" autofocus />
+            <button class="btn-icon btn-danger" onclick="removePlatform('${category}', ${currentItems})">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        
+        list.appendChild(newItem);
+        newItem.querySelector('input').select();
+    }
+    
+    function removePlatform(category, index) {
+        const listId = category + 'PlatformsList';
+        const list = document.getElementById(listId);
+        if (!list) return;
+        
+        const items = list.querySelectorAll('.platform-item');
+        if (items[index]) {
+            items[index].remove();
+            
+            // Re-index remaining items
+            list.querySelectorAll('.platform-item').forEach((item, i) => {
+                item.querySelector('input').setAttribute('data-index', i);
+                item.querySelector('button').setAttribute('onclick', `removePlatform('${category}', ${i})`);
+            });
+        }
+    }
+    
+    function savePlatforms() {
+        const newPlatforms = {
+            main: [],
+            common: [],
+            grouped: []
+        };
+        
+        // Collect all platform values
+        document.querySelectorAll('.platform-input').forEach(input => {
+            const category = input.getAttribute('data-category');
+            const value = input.value.trim();
+            if (value && newPlatforms[category]) {
+                newPlatforms[category].push(value);
+            }
+        });
+        
+        // Validate
+        if (newPlatforms.main.length === 0) {
+            showNotification('❌ At least one main platform is required', 'error');
+            return;
+        }
+        
+        // Save to localStorage
+        localStorage.setItem(CUSTOM_PLATFORMS_KEY, JSON.stringify(newPlatforms));
+        customPlatforms = newPlatforms;
+        
+        // Apply to global platforms object
+        platforms.main = newPlatforms.main;
+        platforms.common = newPlatforms.common;
+        platforms.grouped = newPlatforms.grouped;
+        
+        // Sync to Firebase if available
+        if (window.hasDatabase && window.hasDatabase()) {
+            database.ref('customPlatforms').set(newPlatforms)
+                .then(() => console.log('☁️ Platforms saved to Firebase'))
+                .catch(err => console.warn('⚠️ Firebase save failed:', err.message));
+        }
+        
+        closePlatformManager();
+        showNotification('✅ Platforms saved successfully! Regenerating schedule...', 'success');
+        
+        // Regenerate current schedule
+        setTimeout(() => {
+            const dateInput = document.getElementById('scheduleDate');
+            if (dateInput && dateInput.value) {
+                const currentDate = new Date(dateInput.value);
+                generateDailySchedule(currentDate);
+            }
+        }, 500);
+    }
+    
+    function resetPlatformsToDefault() {
+        if (!confirm('Reset all platforms to default? This will remove all custom platforms.')) return;
+        
+        localStorage.removeItem(CUSTOM_PLATFORMS_KEY);
+        customPlatforms = null;
+        
+        // Reset to original defaults
+        platforms.main = ["SIEM", "XDR", "Forti EDR"];
+        platforms.common = ["CrowdStrike EDR", "NDR", "Netskope"];
+        platforms.grouped = ["Sophos XDR", "Trend Vision One", "Cloudflare", "Acronis EDR"];
+        
+        // Remove from Firebase
+        if (window.hasDatabase && window.hasDatabase()) {
+            database.ref('customPlatforms').remove();
+        }
+        
+        closePlatformManager();
+        showNotification('✅ Platforms reset to default! Regenerating schedule...', 'success');
+        
+        // Regenerate schedule
+        setTimeout(() => {
+            const dateInput = document.getElementById('scheduleDate');
+            if (dateInput && dateInput.value) {
+                const currentDate = new Date(dateInput.value);
+                generateDailySchedule(currentDate);
+            }
+        }, 500);
+    }
+    
+    // ========================================
+    // TASK MANAGER MODAL
+    // ========================================
+    
+    function openTaskManager() {
+        // Get current tasks (default tasks)
+        const defaultTasks = [
+            "Email Handle",
+            "Follow Up Remainder",
+            "SIEM Device Status",
+            "HO PPT Update",
+            "Handover Presentation",
+            "Handover Summary"
+        ];
+        
+        const currentTasks = customTasks || [...defaultTasks];
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal show';
+        modal.id = 'taskManagerModal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+                <div class="modal-header">
+                    <h3><i class="fas fa-tasks"></i> Manage Additional Tasks</h3>
+                    <button class="modal-close" onclick="closeTaskManager()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                        <i class="fas fa-info-circle"></i> Add, remove, or rename additional tasks
+                    </p>
+                    <div id="tasksList" class="platform-list">
+                        ${currentTasks.map((t, i) => `
+                            <div class="platform-item">
+                                <input type="text" value="${t}" data-index="${i}" class="task-input" />
+                                <button class="btn-icon btn-danger" onclick="removeTask(${i})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="btn btn-secondary btn-small" onclick="addNewTask()" style="margin-top: 15px;">
+                        <i class="fas fa-plus"></i> Add New Task
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeTaskManager()" style="margin-top: 15px;">Cancel</button>
+                    <button class="btn btn-danger" onclick="resetTasksToDefault()">
+                        <i class="fas fa-undo"></i> Reset to Default
+                    </button>
+                    <button class="btn btn-primary" onclick="saveTasks()">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        addPlatformManagerStyles();
+    }
+    
+    function closeTaskManager() {
+        const modal = document.getElementById('taskManagerModal');
+        if (modal) modal.remove();
+    }
+    
+    function addNewTask() {
+        const list = document.getElementById('tasksList');
+        if (!list) return;
+        
+        const currentItems = list.querySelectorAll('.platform-item').length;
+        
+        const newItem = document.createElement('div');
+        newItem.className = 'platform-item';
+        newItem.innerHTML = `
+            <input type="text" value="New Task" data-index="${currentItems}" class="task-input" autofocus />
+            <button class="btn-icon btn-danger" onclick="removeTask(${currentItems})">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        
+        list.appendChild(newItem);
+        newItem.querySelector('input').select();
+    }
+    
+    function removeTask(index) {
+        const list = document.getElementById('tasksList');
+        if (!list) return;
+        
+        const items = list.querySelectorAll('.platform-item');
+        if (items.length <= 1) {
+            showNotification('❌ At least one task is required', 'error');
+            return;
+        }
+        
+        if (items[index]) {
+            items[index].remove();
+            
+            // Re-index
+            list.querySelectorAll('.platform-item').forEach((item, i) => {
+                item.querySelector('input').setAttribute('data-index', i);
+                item.querySelector('button').setAttribute('onclick', `removeTask(${i})`);
+            });
+        }
+    }
+    
+    function saveTasks() {
+        const newTasks = [];
+        
+        document.querySelectorAll('.task-input').forEach(input => {
+            const value = input.value.trim();
+            if (value) {
+                newTasks.push(value);
+            }
+        });
+        
+        if (newTasks.length === 0) {
+            showNotification('❌ At least one task is required', 'error');
+            return;
+        }
+        
+        // Save to localStorage
+        localStorage.setItem(CUSTOM_TASKS_KEY, JSON.stringify(newTasks));
+        customTasks = newTasks;
+        
+        // Sync to Firebase
+        if (window.hasDatabase && window.hasDatabase()) {
+            database.ref('customAdditionalTasks').set(newTasks)
+                .then(() => console.log('☁️ Tasks saved to Firebase'))
+                .catch(err => console.warn('⚠️ Firebase save failed:', err.message));
+        }
+        
+        closeTaskManager();
+        showNotification('✅ Tasks saved successfully! Regenerating schedule...', 'success');
+        
+        // Regenerate schedule
+        setTimeout(() => {
+            const dateInput = document.getElementById('scheduleDate');
+            if (dateInput && dateInput.value) {
+                const currentDate = new Date(dateInput.value);
+                generateDailySchedule(currentDate);
+            }
+        }, 500);
+    }
+    
+    function resetTasksToDefault() {
+        if (!confirm('Reset all tasks to default?')) return;
+        
+        localStorage.removeItem(CUSTOM_TASKS_KEY);
+        customTasks = null;
+        
+        if (window.hasDatabase && window.hasDatabase()) {
+            database.ref('customAdditionalTasks').remove();
+        }
+        
+        closeTaskManager();
+        showNotification('✅ Tasks reset to default! Regenerating schedule...', 'success');
+        
+        setTimeout(() => {
+            const dateInput = document.getElementById('scheduleDate');
+            if (dateInput && dateInput.value) {
+                const currentDate = new Date(dateInput.value);
+                generateDailySchedule(currentDate);
+            }
+        }, 500);
+    }
+    
+    // Get custom tasks for schedule generation
+    function getAdditionalTasksList() {
+        return customTasks || [
+            "Email Handle",
+            "Follow Up Remainder",
+            "SIEM Device Status",
+            "HO PPT Update",
+            "Handover Presentation",
+            "Handover Summary"
+        ];
+    }
+    
+    // ========================================
+    // STYLES
+    // ========================================
+    
+    function addPlatformManagerStyles() {
+        if (document.getElementById('platformManagerStyles')) return;
+        
+        const styles = document.createElement('style');
+        styles.id = 'platformManagerStyles';
+        styles.textContent = `
+            .platform-section {
+                margin-bottom: 20px;
+            }
+            
+            .platform-list {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .platform-item {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                animation: slideIn 0.3s ease;
+            }
+            
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateX(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+            
+            .platform-input,
+            .task-input {
+                flex: 1;
+                padding: 10px;
+                border: 2px solid var(--border-color);
+                border-radius: 8px;
+                font-size: 14px;
+                background: var(--bg-primary);
+                color: var(--text-primary);
+                transition: all 0.2s ease;
+            }
+            
+            .platform-input:focus,
+            .task-input:focus {
+                outline: none;
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
+            
+            .btn-icon {
+                padding: 8px 12px;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .btn-icon:hover {
+                transform: scale(1.05);
+            }
+            
+            .btn-danger {
+                background: #ef4444;
+                color: white;
+            }
+            
+            .btn-danger:hover {
+                background: #dc2626;
+            }
+        `;
+        
+        document.head.appendChild(styles);
+    }
+    
+    // ========================================
+    // EXPORT FUNCTIONS
+    // ========================================
+    
+    window.openPlatformManager = openPlatformManager;
+    window.closePlatformManager = closePlatformManager;
+    window.addNewPlatform = addNewPlatform;
+    window.removePlatform = removePlatform;
+    window.savePlatforms = savePlatforms;
+    window.resetPlatformsToDefault = resetPlatformsToDefault;
+    
+    window.openTaskManager = openTaskManager;
+    window.closeTaskManager = closeTaskManager;
+    window.addNewTask = addNewTask;
+    window.removeTask = removeTask;
+    window.saveTasks = saveTasks;
+    window.resetTasksToDefault = resetTasksToDefault;
+    window.getAdditionalTasksList = getAdditionalTasksList;
+    
+    window.initPlatformTaskManager = initPlatformTaskManager;
+    
+    // Load from Firebase on init
+    if (window.hasDatabase && window.hasDatabase()) {
+        database.ref('customPlatforms').once('value').then(snapshot => {
+            const firebaseData = snapshot.val();
+            if (firebaseData) {
+                localStorage.setItem(CUSTOM_PLATFORMS_KEY, JSON.stringify(firebaseData));
+                customPlatforms = firebaseData;
+                applyCustomPlatforms();
+                console.log('☁️ Custom platforms loaded from Firebase');
+            }
+        });
+        
+        database.ref('customAdditionalTasks').once('value').then(snapshot => {
+            const firebaseData = snapshot.val();
+            if (firebaseData) {
+                localStorage.setItem(CUSTOM_TASKS_KEY, JSON.stringify(firebaseData));
+                customTasks = firebaseData;
+                console.log('☁️ Custom tasks loaded from Firebase');
+            }
+        });
+    }
+    
+    // Auto-initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initPlatformTaskManager, 1000);
+        });
+    } else {
+        setTimeout(initPlatformTaskManager, 1000);
+    }
+    
+    console.log('%c🎯 Platform & Task Manager Loaded', 'color: #10b981; font-weight: bold; font-size: 14px');
+    console.log('%c   Admin can now add/remove platforms and tasks', 'color: #3b82f6; font-size: 12px');
     
 })();

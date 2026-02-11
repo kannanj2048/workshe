@@ -322,7 +322,7 @@
             database.ref('teamData').off('value');
             database.ref('availabilityOverrides').off('value');
             database.ref('memberAvailabilitySettings').off('value');
-            database.ref('leaveSettings').off('value');  // ✅ Corrected path
+            database.ref('leaveSettings').off('value');
             
             if (currentScheduleListener) {
                 database.ref('schedules/' + currentScheduleListener).off('value');
