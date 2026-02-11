@@ -839,16 +839,25 @@ function assignAdditionalTasksSmart(sas, apprentices, date, recentHistory, mainP
     // ✅ Use only actual available members - no hardcoded fallback
     const safeSAs = sas.length > 0 ? sas : [];
     const safeApps = apprentices.length > 0 ? apprentices : [];
+    
+    // ✅ GET TASK LIST (custom or default)
+    const taskList = (typeof getAdditionalTasksList === 'function') 
+        ? getAdditionalTasksList() 
+        : [
+            "Email Handle",
+            "Follow Up Remainder",
+            "SIEM Device Status",
+            "HO PPT Update",
+            "Handover Presentation",
+            "Handover Summary"
+        ];
 
     // If no members available at all, show "No one available"
     if (safeSAs.length === 0 && safeApps.length === 0) {
         console.warn('⚠️ No SAs or Apprentices available - assigning "No one available"');
-        tasks["Email Handle"] = "No one available";
-        tasks["Follow Up Remainder"] = "No one available";
-        tasks["SIEM Device Status"] = "No one available";
-        tasks["HO PPT Update"] = "No one available";
-        tasks["Handover Presentation"] = "No one available";
-        tasks["Handover Summary"] = "No one available";
+        taskList.forEach(task => {
+            tasks[task] = "No one available";
+        });
         return tasks;
     }
 
@@ -871,108 +880,35 @@ function assignAdditionalTasksSmart(sas, apprentices, date, recentHistory, mainP
 
     console.log(`     - Task SAs Pool: ${taskSAs.join(', ') || 'Using all SAs'}`);
 
-    // ✅ TASK 1: Email Handle - ALWAYS ASSIGNED
-    if (taskSAs.length > 0 && sortedApps.length > 0) {
-        const emailSA = taskSAs[0] || sortedSAs[0];
-        const emailApp = sortedApps[0];
-        tasks["Email Handle"] = `${emailSA} / ${emailApp}`;
-    } else if (taskSAs.length > 0) {
-        tasks["Email Handle"] = taskSAs[0] || sortedSAs[0];
-    } else if (sortedApps.length > 0) {
-        tasks["Email Handle"] = sortedApps[0];
-    } else {
-        tasks["Email Handle"] = "All SA's";
-    }
-    console.log(`  ✉️ Email Handle: ${tasks["Email Handle"]}`);
-
-    // ✅ TASK 2: Follow Up Remainder - ALWAYS ASSIGNED
-    if (sortedApps.length > 0) {
-        tasks["Follow Up Remainder"] = sortedApps[1] || sortedApps[0];
-    } else if (taskSAs.length > 0) {
-        tasks["Follow Up Remainder"] = taskSAs[0];
-    } else {
-        tasks["Follow Up Remainder"] = "All Apprentice";
-    }
-    console.log(`  🔔 Follow Up Remainder: ${tasks["Follow Up Remainder"]}`);
-
-    // ✅ TASK 3: SIEM Device Status - ALWAYS ASSIGNED
-    if (taskSAs.length > 0 && sortedApps.length > 0) {
-        const siemSA = taskSAs[1] || taskSAs[0] || sortedSAs[0];
-        const siemApp = sortedApps[2] || sortedApps[1] || sortedApps[0];
-        tasks["SIEM Device Status"] = `${siemSA} / ${siemApp}`;
-    } else if (taskSAs.length > 0) {
-        tasks["SIEM Device Status"] = taskSAs[1] || taskSAs[0] || sortedSAs[0];
-    } else if (sortedApps.length > 0) {
-        tasks["SIEM Device Status"] = sortedApps[0];
-    } else {
-        tasks["SIEM Device Status"] = "All SA's";
-    }
-    console.log(`  🖥️ SIEM Device Status: ${tasks["SIEM Device Status"]}`);
-
-    // ✅ TASK 4: HO PPT Update - ALWAYS ASSIGNED
-    if (taskSAs.length > 0) {
-        const pptSA = taskSAs[0] || sortedSAs[0];
-        const pptAppsArray = [];
-        
-        if (sortedApps.length > 0) {
-            pptAppsArray.push(sortedApps[0]);
-        }
-        if (sortedApps.length > 1 && sortedApps[1] !== sortedApps[0]) {
-            pptAppsArray.push(sortedApps[1]);
-        }
-        
-        if (pptAppsArray.length > 0) {
-            tasks["HO PPT Update"] = `${pptSA} / ${pptAppsArray.join(' / ')}`;
+    // ✅ ASSIGN ALL TASKS DYNAMICALLY
+    taskList.forEach((taskName, index) => {
+        if (taskSAs.length > 0 && sortedApps.length > 0) {
+            const saIndex = index % taskSAs.length;
+            const appIndex = index % sortedApps.length;
+            const assignedSA = taskSAs[saIndex] || sortedSAs[0];
+            const assignedApp = sortedApps[appIndex];
+            tasks[taskName] = `${assignedSA} / ${assignedApp}`;
+        } else if (taskSAs.length > 0) {
+            const saIndex = index % taskSAs.length;
+            tasks[taskName] = taskSAs[saIndex] || sortedSAs[0];
+        } else if (sortedApps.length > 0) {
+            const appIndex = index % sortedApps.length;
+            tasks[taskName] = sortedApps[appIndex];
         } else {
-            tasks["HO PPT Update"] = pptSA;
+            tasks[taskName] = "All SA's";
         }
-    } else if (sortedApps.length > 0) {
-        tasks["HO PPT Update"] = sortedApps.join(' / ');
-    } else {
-        tasks["HO PPT Update"] = "All SA's";
-    }
-    console.log(`  📊 HO PPT Update: ${tasks["HO PPT Update"]}`);
+        console.log(`  📋 ${taskName}: ${tasks[taskName]}`);
+    });
 
-    // ✅ TASK 5: Handover Presentation - ALWAYS ASSIGNED
-    if (taskSAs.length > 0) {
-        const handoverSA = taskSAs[2] || taskSAs[1] || taskSAs[0] || sortedSAs[0];
-        tasks["Handover Presentation"] = handoverSA;
-    } else if (sortedApps.length > 0) {
-        tasks["Handover Presentation"] = sortedApps[0];
-    } else {
-        tasks["Handover Presentation"] = "All SA's";
-    }
-    console.log(`  🎤 Handover Presentation: ${tasks["Handover Presentation"]}`);
-
-    // ✅ TASK 6: Handover Summary - ALWAYS ASSIGNED
-    if (sortedApps.length > 0) {
-        const summaryApp = sortedApps[sortedApps.length - 1] || sortedApps[3] || sortedApps[2] || sortedApps[1] || sortedApps[0];
-        tasks["Handover Summary"] = summaryApp;
-    } else if (taskSAs.length > 0) {
-        tasks["Handover Summary"] = taskSAs[taskSAs.length - 1] || taskSAs[0];
-    } else {
-        tasks["Handover Summary"] = "All Apprentice";
-    }
-    console.log(`  📝 Handover Summary: ${tasks["Handover Summary"]}`);
-
-    // ✅ VERIFICATION: Ensure all 6 tasks are present
-    const requiredTasks = [
-        "Email Handle",
-        "Follow Up Remainder",
-        "SIEM Device Status",
-        "HO PPT Update",
-        "Handover Presentation",
-        "Handover Summary"
-    ];
-
-    requiredTasks.forEach(taskName => {
+    // ✅ VERIFICATION: Ensure all tasks are present
+    taskList.forEach(taskName => {
         if (!tasks[taskName]) {
             console.error(`❌ MISSING TASK: ${taskName} - Adding fallback`);
             tasks[taskName] = "All SA's";
         }
     });
 
-    console.log(`  ✅ All 6 tasks assigned successfully`);
+    console.log(`  ✅ All ${taskList.length} tasks assigned successfully`);
     
     // ✅ FINAL VERIFICATION: Log all tasks before returning
     console.log(`  📊 Final Task Summary (${Object.keys(tasks).length} tasks):`);
@@ -1309,15 +1245,17 @@ function displayAdditionalTasks(schedule) {
     
     tasksGrid.innerHTML = "";
     
-    // ✅ ENSURE ALL 6 TASKS ARE PRESENT
-    const requiredTasks = [
-        "Email Handle",
-        "Follow Up Remainder",
-        "SIEM Device Status",
-        "HO PPT Update",
-        "Handover Presentation",
-        "Handover Summary"
-    ];
+    // ✅ GET TASK LIST (custom or default)
+    const requiredTasks = (typeof getAdditionalTasksList === 'function') 
+        ? getAdditionalTasksList() 
+        : [
+            "Email Handle",
+            "Follow Up Remainder",
+            "SIEM Device Status",
+            "HO PPT Update",
+            "Handover Presentation",
+            "Handover Summary"
+        ];
     
     // Check for missing tasks and add them with fallback
     requiredTasks.forEach(taskName => {
