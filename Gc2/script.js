@@ -141,14 +141,15 @@ function getWorkingHoursDisplay() {
 let availabilityOverrides = JSON.parse(localStorage.getItem("availabilityOverrides")) || {};
 // ---------- TEAM DATA ----------
 let teamData = JSON.parse(localStorage.getItem("teamData")) || {
-    SAs: [ "Raja", "Vishali", "Elakkia", "Priyanga", "Yuva", "Stephan", "Sahasraa", "Deepak", "NaveenRaj"],
-    apprentices: [ "Sriharan"],
+    SAs: [ "Selva", "Naveen", "Kannan", "Midhun", "Prem", "Logesh", "Linith"],
+    apprentices: [ "Sanjay", "Vishal", "Subash"],
     responsibilities: {
-        Raja: " ",
-        Vishali: " ",
-        Elakkia: " ",
-        Priyanga: "Sriharan",
-        Yuva: " ",
+        Selva: "Vishal",
+        Naveen: "Vishal",
+        Kannan: "Karl / Subash",
+        Midhun: "Sanjay",
+        Prem: "Karl / Subash",
+        Idris: "All Apprentice"
     }
 };
 
@@ -169,16 +170,16 @@ let isAdmin = false;
 let memberAvailabilitySettings = JSON.parse(localStorage.getItem('memberAvailabilitySettings')) || {
     SAs: {
         "Idris": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], isPOC: true },
-        "Raja": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Vishali": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Elakkia": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Priyanga": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Yuva": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Stephan": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
+        "Selva": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Naveen": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Kannan": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Midhun": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Prem": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Logesh": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
     },
     apprentices: {
-        "Sahasraa": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Sriharan": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Linith": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Sanjay": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Vishal": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Subash": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] }
     }
@@ -3062,13 +3063,27 @@ console.log('%c✨ Multi-color hover effect loaded', 'color:#f093fb;font-weight:
 // GUEST USER SYSTEM 
 // ===================
 
-// User credentials storage
-// 🔑 Password storage keys - GROUP-SPECIFIC
-const PASSWORD_STORAGE_KEY = `userCredentials_${CURRENT_GROUP}`;
-const PASSWORD_FIREBASE_KEY = `passwords_${CURRENT_GROUP}`;
+// 🔒 GROUP-SPECIFIC PASSWORD SYSTEM
+// Detect current group for password isolation
+function detectGroupID() {
+    if (typeof firebaseConfig !== 'undefined' && firebaseConfig.databaseURL) {
+        const url = firebaseConfig.databaseURL;
+        const match = url.match(/workschedulemanager-gc(\d+)/i);
+        if (match) return 'gc' + match[1];
+        if (url.includes('gc1')) return 'gc1';
+        if (url.includes('gc2')) return 'gc2';
+        if (url.includes('gc3')) return 'gc3';
+    }
+    return 'gc1';
+}
 
-// Default passwords for this group
-let userCredentials = JSON.parse(localStorage.getItem('userCredentials')) || {
+// Group-specific storage key
+const CURRENT_GROUP_ID = detectGroupID();
+const PASSWORD_STORAGE_KEY = `userCredentials_${CURRENT_GROUP_ID}`;
+console.log(`🔑 Password system initialized for group: ${CURRENT_GROUP_ID}`);
+
+// User credentials storage (group-specific)
+let userCredentials = JSON.parse(localStorage.getItem(PASSWORD_STORAGE_KEY)) || {
     admin: {
         password: 'admin123',
         role: 'admin'
@@ -3079,100 +3094,14 @@ let userCredentials = JSON.parse(localStorage.getItem('userCredentials')) || {
         activeSessions: []
     }
 };
-let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
-// User credentials storage - LOAD FROM FIREBASE OR LOCALSTORAGE
-let userCredentials = null;
 
+let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
 let isGuest = false;
 
-// ✅ Initialize passwords from Firebase/localStorage
-function initializePasswords() {
-    console.log(`🔑 Initializing passwords for ${CURRENT_GROUP}...`);
-    
-    // Try Firebase first
-    if (window.hasDatabase && window.hasDatabase()) {
-        loadPasswordsFromFirebase((firebasePasswords) => {
-            if (firebasePasswords) {
-                console.log(`☁️ Passwords loaded from Firebase (${CURRENT_GROUP})`);
-                userCredentials = firebasePasswords;
-                
-                // Sync to localStorage
-                localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
-            } else {
-                // Try localStorage
-                loadPasswordsFromLocalStorage();
-            }
-        });
-    } else {
-        // No Firebase - use localStorage only
-        loadPasswordsFromLocalStorage();
-    }
-}
-
-// Load passwords from localStorage
-function loadPasswordsFromLocalStorage() {
-    const stored = localStorage.getItem(PASSWORD_STORAGE_KEY);
-    
-    if (stored) {
-        userCredentials = JSON.parse(stored);
-        console.log(`💾 Passwords loaded from localStorage (${CURRENT_GROUP})`);
-        
-        // Sync to Firebase if available
-        if (window.hasDatabase && window.hasDatabase()) {
-            savePasswordsToFirebase();
-        }
-    } else {
-        // Use defaults
-        userCredentials = JSON.parse(JSON.stringify(DEFAULT_PASSWORDS));
-        console.log(`ℹ️ Using default passwords for ${CURRENT_GROUP}`);
-        saveUserCredentials();
-    }
-}
-
-// Load passwords from Firebase
-function loadPasswordsFromFirebase(callback) {
-    if (!window.hasDatabase || !window.hasDatabase()) {
-        callback(null);
-        return;
-    }
-    
-    database.ref(PASSWORD_FIREBASE_KEY).once('value')
-        .then((snapshot) => {
-            const passwords = snapshot.val();
-            if (callback) callback(passwords);
-        })
-        .catch((error) => {
-            console.error('❌ Error loading passwords from Firebase:', error);
-            if (callback) callback(null);
-        });
-}
-
-// Save passwords to Firebase
-function savePasswordsToFirebase() {
-    if (!window.hasDatabase || !window.hasDatabase() || !userCredentials) return;
-    
-    database.ref(PASSWORD_FIREBASE_KEY).set(userCredentials)
-        .then(() => {
-            console.log(`☁️ Passwords saved to Firebase (${CURRENT_GROUP})`);
-        })
-        .catch((error) => {
-            console.error('❌ Error saving passwords to Firebase:', error);
-        });
-}
-
-// Save credentials to localStorage AND Firebase
+// Save credentials to localStorage (group-specific)
 function saveUserCredentials() {
-    if (!userCredentials) {
-        console.error('❌ Cannot save - userCredentials not initialized');
-        return;
-    }
-    
-    // Save to localStorage
     localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
-    console.log(`💾 Passwords saved to localStorage (${CURRENT_GROUP})`);
-    
-    // Save to Firebase
-    savePasswordsToFirebase();
+    console.log(`💾 Passwords saved for ${CURRENT_GROUP_ID}`);
 }
 
 // Generate unique session ID
@@ -3750,130 +3679,6 @@ function detectGroupID() {
 // Detect current group
 const CURRENT_GROUP = detectGroupID();
 console.log('🎯 Detected Group:', CURRENT_GROUP);
-const CURRENT_GROUP = detectGroupID();
-console.log('🎯 Detected Group:', CURRENT_GROUP);
-
-// ========================================
-// 🔒 PASSWORD MANAGEMENT SYSTEM
-// ========================================
-
-// 🔑 Password storage keys - GROUP-SPECIFIC
-const PASSWORD_STORAGE_KEY = `userCredentials_${CURRENT_GROUP}`;
-const PASSWORD_FIREBASE_KEY = `passwords_${CURRENT_GROUP}`;
-
-// Default passwords for this group
-const DEFAULT_PASSWORDS = {
-    admin: {
-        password: 'admin123',
-        role: 'admin'
-    },
-    guest: {
-        password: 'guest123',
-        maxUsers: 2,
-        activeSessions: []
-    }
-};
-
-// ✅ Initialize passwords from Firebase/localStorage
-function initializePasswords() {
-    console.log(`🔑 Initializing passwords for ${CURRENT_GROUP}...`);
-    
-    // Try Firebase first
-    if (window.hasDatabase && window.hasDatabase()) {
-        loadPasswordsFromFirebase((firebasePasswords) => {
-            if (firebasePasswords) {
-                console.log(`☁️ Passwords loaded from Firebase (${CURRENT_GROUP})`);
-                userCredentials = firebasePasswords;
-                
-                // Sync to localStorage
-                localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
-            } else {
-                // Try localStorage
-                loadPasswordsFromLocalStorage();
-            }
-        });
-    } else {
-        // No Firebase - use localStorage only
-        loadPasswordsFromLocalStorage();
-    }
-}
-
-// Load passwords from localStorage
-function loadPasswordsFromLocalStorage() {
-    const stored = localStorage.getItem(PASSWORD_STORAGE_KEY);
-    
-    if (stored) {
-        userCredentials = JSON.parse(stored);
-        console.log(`💾 Passwords loaded from localStorage (${CURRENT_GROUP})`);
-        
-        // Sync to Firebase if available
-        if (window.hasDatabase && window.hasDatabase()) {
-            savePasswordsToFirebase();
-        }
-    } else {
-        // Use defaults
-        userCredentials = JSON.parse(JSON.stringify(DEFAULT_PASSWORDS));
-        console.log(`ℹ️ Using default passwords for ${CURRENT_GROUP}`);
-        saveUserCredentials();
-    }
-}
-
-// Load passwords from Firebase
-function loadPasswordsFromFirebase(callback) {
-    if (!window.hasDatabase || !window.hasDatabase()) {
-        callback(null);
-        return;
-    }
-    
-    database.ref(PASSWORD_FIREBASE_KEY).once('value')
-        .then((snapshot) => {
-            const passwords = snapshot.val();
-            if (callback) callback(passwords);
-        })
-        .catch((error) => {
-            console.error('❌ Error loading passwords from Firebase:', error);
-            if (callback) callback(null);
-        });
-}
-
-// Save passwords to Firebase
-function savePasswordsToFirebase() {
-    if (!window.hasDatabase || !window.hasDatabase() || !userCredentials) return;
-    
-    database.ref(PASSWORD_FIREBASE_KEY).set(userCredentials)
-        .then(() => {
-            console.log(`☁️ Passwords saved to Firebase (${CURRENT_GROUP})`);
-        })
-        .catch((error) => {
-            console.error('❌ Error saving passwords to Firebase:', error);
-        });
-}
-
-// Save credentials to localStorage AND Firebase
-function saveUserCredentials() {
-    if (!userCredentials) {
-        console.error('❌ Cannot save - userCredentials not initialized');
-        return;
-    }
-    
-    // Save to localStorage
-    localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
-    console.log(`💾 Passwords saved to localStorage (${CURRENT_GROUP})`);
-    
-    // Save to Firebase
-    savePasswordsToFirebase();
-}
-// ✅ Initialize passwords when page loads
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(initializePasswords, 500);
-    });
-} else {
-    setTimeout(initializePasswords, 500);
-}
-
-console.log('%c🔒 Group-Specific Password System Loaded', 'color: #10b981; font-weight: bold; font-size: 14px');
-console.log(`%c   Group: ${CURRENT_GROUP} - Passwords sync across all devices`, 'color: #3b82f6; font-size: 12px');
 
 // Default POC names
 const DEFAULT_POC_NAMES = {
