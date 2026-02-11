@@ -3689,7 +3689,7 @@ const PASSWORD_FIREBASE_KEY = `passwords_${CURRENT_GROUP}`;
 
 // Load passwords from Firebase
 function loadPasswordsFromFirebase(callback) {
-    if (!window.hasDatabase || !window.hasDatabase()) {
+    if (typeof window.database === 'undefined') {
         console.log('⚠️ Firebase not available for password sync');
         if (callback) callback(null);
         return;
@@ -3722,7 +3722,7 @@ function loadPasswordsFromFirebase(callback) {
 
 // Save passwords to Firebase
 function savePasswordsToFirebase() {
-    if (!window.hasDatabase || !window.hasDatabase() || !userCredentials) {
+    if (typeof window.database === 'undefined' || !userCredentials) {
         console.log('⚠️ Firebase not available or userCredentials not initialized');
         return;
     }
@@ -3738,7 +3738,7 @@ function savePasswordsToFirebase() {
 
 // Setup real-time password listener
 function setupPasswordSyncListener() {
-    if (!window.hasDatabase || !window.hasDatabase()) {
+    if (typeof window.database === 'undefined') {
         console.log('⚠️ Firebase not available - password sync disabled');
         return;
     }
@@ -4266,7 +4266,7 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Admin can edit POC names`, 'color: #
 
 // Wait for Firebase to be ready before initializing password system
 function tryInitializePasswordSystem() {
-    if (window.hasDatabase && window.hasDatabase()) {
+    if (typeof window.database !== 'undefined') {
         console.log('🔥 Firebase ready - initializing password system with sync');
         if (typeof initializePasswordSystem === 'function') {
             initializePasswordSystem();
