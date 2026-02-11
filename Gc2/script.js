@@ -1698,6 +1698,11 @@ if (adminLoginForm) {
         } 
         // 2) Check Guest Password
         else if (password === userCredentials.guest.password) {
+            // Initialize activeSessions if it doesn't exist
+            if (!userCredentials.guest.activeSessions) {
+                userCredentials.guest.activeSessions = [];
+            }
+            
             if (userCredentials.guest.activeSessions.length >= userCredentials.guest.maxUsers) {
                 showNotification("❌ Unauthorized access", "error");
                 return;
@@ -3106,6 +3111,10 @@ function initUserSystem() {
             setAdminMode(true);
             isGuest = false;
         } else if (currentUser.role === 'guest') {
+            // Initialize activeSessions if it doesn't exist
+            if (!userCredentials.guest.activeSessions) {
+                userCredentials.guest.activeSessions = [];
+            }
             const sessionValid = userCredentials.guest.activeSessions.includes(currentUser.sessionId);
             if (sessionValid) {
                 setGuestMode(true);
@@ -3452,6 +3461,10 @@ function logoutUser() {
     if (currentUser) {
         if (currentUser.role === 'guest') {
             const sessionId = currentUser.sessionId;
+            // Initialize activeSessions if it doesn't exist
+            if (!userCredentials.guest.activeSessions) {
+                userCredentials.guest.activeSessions = [];
+            }
             const index = userCredentials.guest.activeSessions.indexOf(sessionId);
             if (index > -1) {
                 userCredentials.guest.activeSessions.splice(index, 1);
