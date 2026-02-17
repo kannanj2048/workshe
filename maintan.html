@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Under Maintenance</title>
+    <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.11/dist/dotlottie-wc.js" type="module"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* The main wrapper for everything */
+        .maintenance-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* This container holds the phone and the cat */
+        .phone-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* The Cat Animation - Positioned "Inside" the phone */
+        .cat-animation {
+            position: absolute;
+            bottom: 10px; /* cat up/down inside the phone */
+            width: 160px !important;
+            height: 170px !important;
+            z-index: 2;
+        }
+
+        .line {
+            position: absolute;
+            bottom: 70px; 
+            width: 89px;
+            height: 0.1px;
+            background-color: #ccc;
+            border-radius: 10px;
+            z-index: 2;
+        }
+
+        /* The Gray Home Bar (iOS/Mobile style line) */
+        .mobile-line {
+            position: absolute;
+            bottom: 40px; /* Positions it below the cat */
+            width: 80px;
+            height: 5px;
+            background-color: #ccc;
+            border-radius: 10px;
+            z-index: 3;
+            overflow: hidden;
+        }
+        /*h2 {
+            color: #4c4d4d;
+            font-size: 1.2rem;
+            margin-top: -70px;
+            z-index: 3;
+        }
+
+        .fade-in {
+            animation: fadeIn 1.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }*/
+    /* for the countdown text */
+        #timer {
+            position: absolute;
+            display: inline-block;
+            font-weight: bold;
+            color: #03b320;
+            font-size: 1.1rem;
+            bottom: 150px;
+            z-index: 2;
+        }
+
+        p { color: #666; margin-top: 5px; }
+
+        .fade-in { animation: fadeIn 1.5s ease-in; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /*.mobile-line::after {
+            content: "";
+            display: block;
+            width: 40px;
+            height: 100%;
+            background-color: #999;
+            border-radius: 10px;
+            animation: slide 2s infinite ease-in-out;
+        }
+
+        @keyframes slide {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }*/
+
+        h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-top: 10px;
+        }
+
+        p {
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .fade-in {
+            animation: fadeIn 1.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .element-class {
+    background-image: url('logo.jpg');
+}
+
+.logo {
+    position: absolute;
+    top: 70px; 
+    width: 60px; 
+    height: auto;
+    z-index: 2;
+    opacity: 0.8; /* makes it look more like a screen element */
+}
+
+    </style>
+</head>
+<body>
+
+    <div class="maintenance-wrapper fade-in">
+        
+        <div class="phone-container">
+            <dotlottie-wc 
+                src="https://lottie.host/fe77f928-ae78-4dbc-bf27-f70f75e53275/KEz2Rg0Fah.lottie" 
+                style="width: 200%; height: 100%" 
+                autoplay 
+                loop>
+            </dotlottie-wc>
+
+                <img src="logoon.png" class="logo" alt="Logo">
+                        <span id="timer">30:00</span>
+
+            <dotlottie-wc 
+                class="cat-animation"
+                src="https://lottie.host/f6b9ba83-f587-4858-8228-20f708f23965/MGYUCSr7Da.lottie" 
+                autoplay 
+                loop>
+            </dotlottie-wc>
+
+            <div class="mobile-line"></div>
+            <div class="line"></div>
+        </div>
+
+        <h1>We'll Be Right Back!</h1>
+        <p>Our site is currently undergoing scheduled maintenance.</p>
+    </div>
+
+<script>
+    // 1. Define the Global End Time in UTC
+    // This is Feb 17, 2026, at 10:00 AM IST (which is 04:30:00 UTC)
+    const MAINTENANCE_END_TIME = "2026-02-19T10:50:00Z"; 
+    
+    const REDIRECT_URL = "index.html"; 
+
+    function updateSyncTimer() {
+        const timerElement = document.getElementById("timer");
+        
+        // Date.parse() with "Z" at the end forces UTC on all browsers
+        const target = Date.parse(MAINTENANCE_END_TIME);
+        const now = new Date().getTime();
+        const distance = target - now;
+
+        if (distance <= 0) {
+            timerElement.innerHTML = "00:00";
+            window.location.href = REDIRECT_URL;
+            return;
+        }
+
+        const mins = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((distance % (1000 * 60)) / 1000);
+
+        timerElement.innerHTML = 
+            (mins < 10 ? "0" : "") + mins + ":" + 
+            (secs < 10 ? "0" : "") + secs;
+    }
+
+    setInterval(updateSyncTimer, 1000);
+    updateSyncTimer(); 
+</script>
+</body>
+</html>
+
+
