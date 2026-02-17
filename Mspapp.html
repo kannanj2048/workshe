@@ -1,0 +1,3881 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Insightz MSP Team – Cybersecurity Task Management System for Deployment & Operations" />
+  <meta name="keywords" content="MSP, cybersecurity, task management, deployment, operations, Insightz" />
+  <title>Insightz MSP | Task Management</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- SheetJS for Excel export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- Styles -->
+  <style>
+/* ═══════════════════════════════════════════════════════════════
+   INSIGHTZ MSP — CYBERSECURITY TASK MANAGEMENT
+   Professional Dark Cyberpunk + Light Mode Design System
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── GOOGLE FONTS (preloaded in HTML) ─── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+
+/* ══════════════════════════════════════════
+   1. DESIGN TOKENS / CSS VARIABLES
+══════════════════════════════════════════ */
+:root {
+  /* Brand Colors — from existing project */
+  --primary-color: #3b82f6;
+  --primary-dark: #2563eb;
+  --secondary-color: #8b5cf6;
+  --accent-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
+
+  /* Light Theme */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --border-color: #e2e8f0;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --footer-bg: #fdfeff;
+  --footer-text: rgb(121, 119, 121);
+  
+
+  /* Card & Glass */
+  --card-bg: #ffffff;
+  --card-border: rgba(59, 130, 246, 0.15);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(59, 130, 246, 0.2);
+
+  /* Nav */
+  --nav-bg: rgba(255, 255, 255, 0.9);
+  --nav-shadow: 0 1px 30px rgba(59, 130, 246, 0.1);
+
+  /* Fonts */
+  --font-primary: "Inter", sans-serif;
+  --font-heading: "Poppins", sans-serif;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  /* Radii */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.3s ease;
+  --transition-slow: 0.5s ease;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 var(--shadow-color);
+  --shadow-md: 0 4px 6px -1px var(--shadow-color);
+  --shadow-lg: 0 10px 15px -3px var(--shadow-color);
+  --shadow-xl: 0 20px 40px -10px var(--shadow-color);
+  --shadow-glow-primary: 0 0 20px rgba(59, 130, 246, 0.25);
+  --shadow-glow-accent: 0 0 20px rgba(16, 185, 129, 0.25);
+
+  /* Team Colors */
+  --deploy-color: #3b82f6;
+  --deploy-light: rgba(59, 130, 246, 0.12);
+  --ops-color: #8b5cf6;
+  --ops-light: rgba(139, 92, 246, 0.12);
+
+  /* Status Colors */
+  --status-not-started: #64748b;
+  --status-in-progress: #3b82f6;
+  --status-on-hold: #f59e0b;
+  --status-completed: #10b981;
+  --status-review: #8b5cf6;
+}
+
+/* ── DARK THEME ── */
+[data-theme="dark"] {
+  --bg-primary: #070b14;
+  --bg-secondary: #0d1424;
+  --bg-tertiary: #111827;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: rgba(59, 130, 246, 0.15);
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --footer-bg: #070b14;
+  --footer-text: #64748b;
+
+  --card-bg: rgba(13, 20, 36, 0.9);
+  --card-border: rgba(59, 130, 246, 0.2);
+  --glass-bg: rgba(13, 20, 36, 0.7);
+  --glass-border: rgba(59, 130, 246, 0.25);
+
+  --nav-bg: rgba(7, 11, 20, 0.92);
+  --nav-shadow: 0 1px 30px rgba(59, 130, 246, 0.15);
+
+  --deploy-light: rgba(59, 130, 246, 0.08);
+  --ops-light: rgba(139, 92, 246, 0.08);
+}
+
+/* ══════════════════════════════════════════
+   2. RESET & BASE
+══════════════════════════════════════════ */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-primary);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+  transition: background-color var(--transition-slow), color var(--transition-slow);
+}
+
+body.loading { overflow: hidden; }
+
+img { max-width: 100%; height: auto; }
+
+a { text-decoration: none; color: inherit; }
+
+ul { list-style: none; }
+
+button { cursor: pointer; border: none; background: none; font-family: inherit; }
+
+input, select, textarea {
+  font-family: var(--font-primary);
+  font-size: 0.9rem;
+}
+
+[contenteditable="true"] {
+  outline: none;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+[contenteditable="true"]:hover {
+  background: rgba(59, 130, 246, 0.06);
+}
+
+[contenteditable="true"]:focus {
+  background: rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+  padding: 2px 6px;
+}
+
+/* ══════════════════════════════════════════
+   3. SCROLLBAR
+══════════════════════════════════════════ */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+  border-radius: 99px;
+}
+
+/* ══════════════════════════════════════════
+   4. SCROLL PROGRESS
+══════════════════════════════════════════ */
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+  z-index: 9999;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 8px var(--primary-color);
+}
+
+/* ══════════════════════════════════════════
+   5. BACKGROUND CANVAS
+══════════════════════════════════════════ */
+#bg-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+[data-theme="light"] #bg-canvas { opacity: 0.15; }
+
+/* ══════════════════════════════════════════
+   6. LOADING SCREEN
+══════════════════════════════════════════ */
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+#loading-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-inner {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+.loader-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  letter-spacing: 0.05em;
+}
+
+.loader-icon {
+  font-size: 2.5rem;
+  animation: loaderPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes loaderPulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px var(--primary-color)); }
+  50% { transform: scale(1.15); filter: drop-shadow(0 0 20px var(--primary-color)); }
+}
+
+.loader-bar-wrap {
+  width: 280px;
+  height: 4px;
+  background: var(--bg-tertiary);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.loader-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+  border-radius: 99px;
+  animation: loaderFill 2s ease forwards;
+}
+
+@keyframes loaderFill {
+  0% { width: 0%; }
+  60% { width: 75%; }
+  80% { width: 88%; }
+  100% { width: 100%; }
+}
+
+.loader-text {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  animation: blink 1.2s ease infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ══════════════════════════════════════════
+   7. NAVIGATION
+══════════════════════════════════════════ */
+#navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  background: var(--nav-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--nav-shadow);
+  transition: all var(--transition-base);
+}
+
+#navbar.scrolled {
+  padding: 0;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+}
+
+.nav-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-xl);
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xl);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  transition: color var(--transition-fast);
+}
+
+.nav-brand i {
+  font-size: 1.4rem;
+  filter: drop-shadow(0 0 6px var(--primary-color));
+}
+
+.nav-brand:hover { color: var(--primary-dark); }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex: 1;
+  justify-content: center;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  position: relative;
+  white-space: nowrap;
+}
+
+.nav-link i { font-size: 0.8rem; }
+
+.nav-link:hover, .nav-link.active {
+  color: var(--primary-color);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-left: auto;
+}
+
+#theme-toggle {
+  width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+}
+
+#theme-toggle:hover {
+  color: var(--primary-color);
+  background: rgba(59, 130, 246, 0.1);
+  border-color: var(--primary-color);
+}
+
+.btn-primary-sm {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.45rem 1rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: #fff;
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn-primary-sm:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-glow-primary);
+}
+
+/* Hamburger */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px;
+}
+
+.hamburger span {
+  display: block;
+  width: 22px; height: 2px;
+  background: var(--text-primary);
+  border-radius: 99px;
+  transition: all var(--transition-fast);
+}
+
+.hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Mobile Menu */
+.mobile-menu {
+  display: none;
+  flex-direction: column;
+  padding: var(--spacing-md) var(--spacing-xl) var(--spacing-lg);
+  gap: var(--spacing-xs);
+  border-top: 1px solid var(--border-color);
+}
+
+.mobile-menu.open { display: flex; }
+
+.mobile-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 0.65rem var(--spacing-md);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.mobile-link:hover {
+  color: var(--primary-color);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* ══════════════════════════════════════════
+   8. HERO SECTION
+══════════════════════════════════════════ */
+#hero {
+  min-height: 100vh;
+  padding: 7rem var(--spacing-xl) var(--spacing-2xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2xl);
+  position: relative;
+  overflow: hidden;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.hero-content {
+  flex: 1;
+  max-width: 640px;
+  animation: heroFadeIn 1s ease 0.3s both;
+}
+
+@keyframes heroFadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 0.4rem 1rem;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 99px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent-color);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-lg);
+}
+
+.pulse-dot {
+  animation: pulseDot 1.5s ease infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.hero-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: var(--spacing-lg);
+  color: var(--text-dark);
+  min-height: 5rem;
+}
+
+.cursor {
+  animation: cursorBlink 0.8s step-end infinite;
+  color: var(--primary-color);
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.hero-subtitle {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xl);
+  line-height: 1.7;
+  max-width: 520px;
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.stat-card {
+  text-align: center;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  transition: all var(--transition-base);
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-glow-primary);
+  border-color: var(--primary-color);
+}
+
+.stat-num {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hero-cta {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.btn-hero-primary {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.85rem 2rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: #fff;
+  border-radius: var(--radius-lg);
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-glow-primary);
+}
+
+.btn-hero-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+}
+
+.btn-hero-secondary {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.85rem 2rem;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all var(--transition-base);
+}
+
+.btn-hero-secondary:hover {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+/* ── Hero Visual: Hex Grid ── */
+.hero-visual {
+  flex-shrink: 0;
+  width: 340px;
+  animation: heroFadeIn 1s ease 0.6s both;
+}
+
+.hex-grid {
+  position: relative;
+  width: 340px;
+  height: 380px;
+}
+
+.hex {
+  position: absolute;
+  width: 90px; height: 90px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem;
+  color: var(--primary-color);
+  transition: all var(--transition-base);
+  animation: hexFloat 4s ease-in-out infinite;
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,0.1);
+  transform-style: preserve-3d;
+}
+
+.hex:hover {
+  transform: translateY(-8px) rotateY(15deg) scale(1.05);
+  box-shadow: var(--shadow-glow-primary);
+  border-color: var(--primary-color);
+  z-index: 10;
+}
+
+.hex-1 { top: 0; left: 50%; transform: translateX(-50%); color: var(--primary-color); animation-delay: 0s; }
+.hex-2 { top: 110px; left: 10px; color: var(--secondary-color); animation-delay: 0.5s; }
+.hex-3 { top: 110px; right: 10px; color: var(--accent-color); animation-delay: 1s; }
+.hex-4 { top: 220px; left: 50%; transform: translateX(-50%); color: var(--warning-color); animation-delay: 1.5s; }
+.hex-5 { top: 220px; left: 10px; color: var(--danger-color); animation-delay: 0.3s; }
+.hex-6 { top: 0; left: 10px; color: var(--accent-color); animation-delay: 0.8s; }
+
+@keyframes hexFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.hex-1 { animation-name: hexFloat1; }
+@keyframes hexFloat1 {
+  0%, 100% { top: 0; left: 50%; transform: translateX(-50%) translateY(0); }
+  50% { top: 0; left: 50%; transform: translateX(-50%) translateY(-8px); }
+}
+
+/* ══════════════════════════════════════════
+   9. SECTION BASE
+══════════════════════════════════════════ */
+.section {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--spacing-2xl) var(--spacing-xl);
+  position: relative;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 0.35rem 1rem;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-md);
+}
+
+.deploy-badge {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: var(--deploy-color);
+}
+
+.ops-badge {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.3);
+  color: var(--ops-color);
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
+  line-height: 1.2;
+}
+
+.section-desc {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ══════════════════════════════════════════
+   10. REVEAL ANIMATIONS
+══════════════════════════════════════════ */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ══════════════════════════════════════════
+   11. GLASS UTILITY
+══════════════════════════════════════════ */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+}
+
+/* ══════════════════════════════════════════
+   12. DASHBOARD SWIMLANES
+══════════════════════════════════════════ */
+.swimlanes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xl);
+}
+
+.team-lane {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-2xl);
+  padding: var(--spacing-xl);
+  transition: all var(--transition-base);
+}
+
+.team-lane:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.lane-deploy { border-top: 3px solid var(--deploy-color); }
+.lane-ops { border-top: 3px solid var(--ops-color); }
+
+.lane-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-lg);
+}
+
+.lane-add-btn {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-md);
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  color: var(--primary-color);
+  font-size: 0.9rem;
+  transition: all var(--transition-fast);
+}
+
+.lane-add-btn:hover {
+  background: var(--primary-color);
+  color: #fff;
+  transform: scale(1.1);
+}
+
+.lane-members {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+/* Mini member row in swimlane */
+.lane-member-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: 0.6rem 0.85rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.lane-member-row:hover {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: var(--primary-color);
+  transform: translateX(4px);
+}
+
+.lane-member-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  font-family: var(--font-heading);
+}
+
+.lane-member-info { flex: 1; min-width: 0; }
+.lane-member-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.lane-member-sub {
+  font-size: 0.73rem;
+  color: var(--text-muted);
+}
+
+.lane-member-status {
+  padding: 0.18rem 0.55rem;
+  border-radius: 99px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════
+   13. MEMBER CARDS
+══════════════════════════════════════════ */
+.member-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-xl);
+  perspective: 1200px;
+}
+
+/* On medium screens: 2 columns */
+@media (max-width: 1100px) and (min-width: 769px) {
+  .member-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* On mobile: 1 column, no ghost */
+@media (max-width: 768px) {
+  .member-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.member-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-2xl);
+  padding: var(--spacing-xl);
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-base);
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.member-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--deploy-color), var(--secondary-color));
+}
+
+.member-card.ops-card::before {
+  background: linear-gradient(90deg, var(--ops-color), var(--accent-color));
+}
+
+.member-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 70% 30%, rgba(59,130,246,0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.member-card:hover {
+  transform: translateY(-6px) rotateX(2deg);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25), var(--shadow-glow-primary);
+  border-color: var(--primary-color);
+}
+
+.member-card.ops-card:hover {
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25), 0 0 20px rgba(139,92,246,0.25);
+  border-color: var(--ops-color);
+}
+
+/* Card Header */
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.member-avatar {
+  width: 52px; height: 52px;
+  border-radius: var(--radius-lg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  font-family: var(--font-heading);
+  flex-shrink: 0;
+  box-shadow: var(--shadow-md);
+}
+
+.card-info { flex: 1; min-width: 0; }
+
+.card-name {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 0.15rem;
+}
+
+.card-role {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-sm);
+}
+
+.card-badges {
+  display: flex; gap: 0.35rem; flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  padding: 0.18rem 0.6rem;
+  border-radius: 99px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.badge-lead {
+  background: rgba(59,130,246,0.15); color: var(--primary-color);
+  border: 1px solid rgba(59,130,246,0.3);
+}
+.badge-ops {
+  background: rgba(139,92,246,0.15); color: var(--secondary-color);
+  border: 1px solid rgba(139,92,246,0.3);
+}
+.badge-deploy {
+  background: rgba(59,130,246,0.12); color: var(--deploy-color);
+  border: 1px solid rgba(59,130,246,0.25);
+}
+.badge-parser {
+  background: rgba(16,185,129,0.12); color: var(--accent-color);
+  border: 1px solid rgba(16,185,129,0.25);
+}
+
+.card-actions {
+  display: flex; gap: var(--spacing-xs);
+}
+
+.card-btn {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem;
+  transition: all var(--transition-fast);
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+}
+
+.card-btn:hover { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+.card-btn.danger:hover { background: var(--danger-color); border-color: var(--danger-color); }
+
+/* Task Labels */
+.card-tasks-section {
+  margin-bottom: var(--spacing-md);
+}
+
+.card-tasks-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 0.5rem;
+  display: flex; align-items: center; gap: 0.35rem;
+}
+
+.tasks-tags {
+  display: flex; flex-wrap: wrap; gap: 0.4rem;
+}
+
+.task-tag {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.22rem 0.65rem;
+  background: rgba(59,130,246,0.08);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 99px;
+  font-size: 0.72rem;
+  color: var(--primary-color);
+  transition: all var(--transition-fast);
+  cursor: default;
+}
+
+.task-tag.addl {
+  background: rgba(139,92,246,0.08);
+  border-color: rgba(139,92,246,0.2);
+  color: var(--secondary-color);
+}
+
+.task-tag .remove-tag {
+  background: none; border: none;
+  color: inherit; opacity: 0.6;
+  font-size: 0.65rem;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity var(--transition-fast);
+  line-height: 1;
+}
+
+.task-tag .remove-tag:hover { opacity: 1; }
+
+.task-empty {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Card Date Row */
+.card-dates {
+  display: flex; gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.card-date-item {
+  display: flex; align-items: center; gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.card-date-item i { color: var(--primary-color); font-size: 0.7rem; }
+
+/* Status Row */
+.card-status-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-color);
+}
+
+.status-pill {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 99px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.status-not-started { background: rgba(100,116,139,0.15); color: var(--status-not-started); }
+.status-in-progress { background: rgba(59,130,246,0.15); color: var(--status-in-progress); }
+.status-on-hold { background: rgba(245,158,11,0.15); color: var(--status-on-hold); }
+.status-completed { background: rgba(16,185,129,0.15); color: var(--status-completed); }
+.status-review { background: rgba(139,92,246,0.15); color: var(--status-review); }
+
+.open-task-btn {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.35rem 0.85rem;
+  background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.25);
+  border-radius: var(--radius-md);
+  color: var(--primary-color);
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.open-task-btn:hover {
+  background: var(--primary-color);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* ══════════════════════════════════════════
+   14. EVENTS SECTION
+══════════════════════════════════════════ */
+/* events-layout defined in section 22d below */
+
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.event-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-lg);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.event-card:hover {
+  transform: translateX(4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-color);
+}
+
+.event-date-block {
+  min-width: 64px;
+  text-align: center;
+  padding: 0.5rem;
+  background: rgba(59,130,246,0.1);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(59,130,246,0.2);
+}
+
+.event-day {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  line-height: 1;
+}
+
+.event-month {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.event-info { flex: 1; min-width: 0; }
+
+.event-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.3rem;
+}
+
+.event-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+
+.event-type-badge {
+  display: inline-block;
+  padding: 0.18rem 0.6rem;
+  border-radius: 99px;
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.event-type-deployment { background: rgba(59,130,246,0.12); color: var(--deploy-color); }
+.event-type-operations { background: rgba(139,92,246,0.12); color: var(--ops-color); }
+.event-type-review { background: rgba(16,185,129,0.12); color: var(--accent-color); }
+.event-type-training { background: rgba(245,158,11,0.12); color: var(--warning-color); }
+.event-type-meeting { background: rgba(100,116,139,0.12); color: var(--text-secondary); }
+
+.event-remove-btn {
+  width: 28px; height: 28px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  transition: all var(--transition-fast);
+  border: 1px solid var(--border-color);
+  align-self: center;
+}
+
+.event-remove-btn:hover {
+  background: var(--danger-color);
+  color: #fff;
+  border-color: var(--danger-color);
+}
+
+.event-empty {
+  text-align: center;
+  padding: var(--spacing-2xl);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.event-empty i { font-size: 2rem; margin-bottom: var(--spacing-md); display: block; opacity: 0.4; }
+
+/* Event Add Card — styles in section 22d */
+
+/* ══════════════════════════════════════════
+   15. REPORTS
+══════════════════════════════════════════ */
+.reports-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--spacing-xl);
+  align-items: flex-start;
+}
+
+.report-filters {
+  padding: var(--spacing-xl);
+  position: sticky;
+  top: 80px;
+}
+
+.report-filters h3 {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-lg);
+  display: flex; align-items: center; gap: 0.5rem;
+}
+
+.report-preview {
+  padding: var(--spacing-xl);
+  min-height: 400px;
+}
+
+.report-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  min-height: 360px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.report-empty i { font-size: 3rem; opacity: 0.3; }
+
+/* Report Table */
+.report-table-wrap { overflow-x: auto; }
+
+.report-meta {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap; gap: var(--spacing-sm);
+}
+
+.report-meta h3 {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.report-table th {
+  padding: 0.65rem 0.85rem;
+  background: var(--bg-tertiary);
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.report-table td {
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  vertical-align: top;
+}
+
+.report-table tr:hover td {
+  background: rgba(59,130,246,0.04);
+}
+
+/* ══════════════════════════════════════════
+   16. FORM ELEMENTS
+══════════════════════════════════════════ */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.form-group label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.6rem 0.85rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.form-group select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  padding-right: 2.2rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.req { color: var(--danger-color); }
+
+/* ══════════════════════════════════════════
+   17. BUTTONS
+══════════════════════════════════════════ */
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;
+  padding: 0.65rem 1.4rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: #fff;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  border: none; cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow-primary);
+}
+
+.btn-secondary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;
+  padding: 0.65rem 1.4rem;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-secondary:hover {
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+
+.btn-danger {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;
+  padding: 0.65rem 1.4rem;
+  background: var(--danger-color);
+  color: #fff;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  border: none; cursor: pointer;
+}
+
+.btn-danger:hover { opacity: 0.88; transform: translateY(-1px); }
+
+.full-width { width: 100%; }
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-lg { margin-top: var(--spacing-lg); }
+
+/* ══════════════════════════════════════════
+   18. MODALS
+══════════════════════════════════════════ */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.modal.open {
+  visibility: visible;
+  pointer-events: all;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.modal.open .modal-backdrop { opacity: 1; }
+
+.modal-box {
+  position: relative;
+  background: var(--bg-secondary);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-2xl);
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: scale(0.9) translateY(20px);
+  opacity: 0;
+  transition: transform var(--transition-base), opacity var(--transition-base);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+}
+
+.modal.open .modal-box {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+.modal-wide { max-width: 800px; }
+.modal-sm { max-width: 420px; }
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.modal-header h2 {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex; align-items: center; gap: 0.5rem;
+}
+
+.modal-close {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+}
+
+.modal-close:hover {
+  background: var(--danger-color);
+  color: #fff;
+  border-color: var(--danger-color);
+}
+
+.modal-body {
+  padding: var(--spacing-xl);
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.modal-footer {
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+/* ── Task Modal ── */
+.task-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xl);
+}
+
+.task-col-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-md);
+  display: flex; align-items: center; gap: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.task-input-wrap {
+  margin-bottom: var(--spacing-sm);
+}
+
+.task-input-wrap input {
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.task-input-wrap input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+
+.tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.task-list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  animation: taskItemIn 0.2s ease;
+}
+
+@keyframes taskItemIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.task-list-item span { flex: 1; }
+
+.task-list-item .remove-task {
+  background: none; border: none;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.task-list-item .remove-task:hover {
+  background: var(--danger-color);
+  color: #fff;
+}
+
+.autosave-indicator {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--accent-color);
+  margin-right: auto;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.autosave-indicator.visible { opacity: 1; }
+
+/* ══════════════════════════════════════════
+   19. FOOTER
+══════════════════════════════════════════ */
+#footer {
+  background: var(--footer-bg);
+  border-top: 1px solid var(--border-color);
+  padding: var(--spacing-xl);
+  margin-top: var(--spacing-2xl);
+}
+
+.footer-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.footer-brand {
+  display: flex; align-items: center; gap: var(--spacing-sm);
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  letter-spacing: 0.05em;
+}
+
+.footer-brand i { filter: drop-shadow(0 0 4px var(--primary-color)); }
+
+.footer-copy {
+  font-size: 0.8rem;
+  color: var(--footer-text);
+}
+
+.footer-meta {
+  display: flex; align-items: center; gap: var(--spacing-md);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.pulse-dot-sm {
+  color: var(--accent-color);
+  animation: pulseDot 2s ease infinite;
+  font-size: 0.5rem;
+}
+
+/* ══════════════════════════════════════════
+   20. BACK TO TOP
+══════════════════════════════════════════ */
+#back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: #fff;
+  border-radius: var(--radius-lg);
+  font-size: 0.9rem;
+  box-shadow: var(--shadow-glow-primary);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all var(--transition-base);
+  pointer-events: none;
+  z-index: 900;
+}
+
+#back-to-top.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+#back-to-top:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 25px rgba(59,130,246,0.5);
+}
+
+/* ══════════════════════════════════════════
+   21. TOAST NOTIFICATIONS — TOP RIGHT
+══════════════════════════════════════════ */
+#toast-container {
+  position: fixed;
+  top: 80px;
+  right: 1.5rem;
+  bottom: auto;
+  left: auto;
+  transform: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  z-index: 10000;
+  pointer-events: none;
+  max-width: 340px;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 0.65rem 1.25rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(12px);
+  animation: toastIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  pointer-events: all;
+  white-space: nowrap;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(30px) scale(0.9); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+.toast.fade-out {
+  animation: toastOut 0.3s ease forwards;
+}
+
+@keyframes toastOut {
+  to { opacity: 0; transform: translateX(20px) scale(0.95); }
+}
+
+.toast-success i { color: var(--accent-color); }
+.toast-error i { color: var(--danger-color); }
+.toast-info i { color: var(--primary-color); }
+.toast-warning i { color: var(--warning-color); }
+
+/* ══════════════════════════════════════════
+   22. UTILITY CLASSES
+══════════════════════════════════════════ */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ══════════════════════════════════════════
+   22b. HOME NAV LINK SEPARATOR
+══════════════════════════════════════════ */
+.nav-home {
+  position: relative;
+  margin-right: 0.4rem;
+}
+
+.nav-home::after {
+  content: '';
+  position: absolute;
+  right: -0.6rem;
+  top: 20%;
+  height: 60%;
+  width: 1px;
+  background: var(--border-color);
+}
+
+/* ══════════════════════════════════════════
+   22c. GHOST / PHANTOM BOXES — Dashboard & Cards
+   Hidden on mobile, visible on large screens
+══════════════════════════════════════════ */
+.ghost-box {
+  border-radius: var(--radius-xl);
+  border: 2px dashed var(--border-color);
+  background: transparent;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.4;
+  transition: opacity var(--transition-base);
+}
+
+/* Ghost box in swimlane */
+/* ── GHOST PLACEHOLDERS ── */
+.ghost-card {
+  min-height: 300px;
+  border-radius: 20px;
+  border: 2px dashed rgba(59, 130, 246, 0.4);
+  background: rgba(59, 130, 246, 0.03);
+  pointer-events: none;
+  user-select: none;
+}
+
+.ghost-lane-member {
+  height: 56px;
+  border-radius: 12px;
+  border: 1px dashed rgba(59, 130, 246, 0.3);
+  background: rgba(59, 130, 246, 0.02);
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .ghost-card        { display: none !important; }
+  .ghost-lane-member { display: none !important; }
+}
+
+/* ══════════════════════════════════════════
+   22d. EVENTS LAYOUT — Centered add panel
+══════════════════════════════════════════ */
+/* Override the first events-layout declared in section 14 */
+.events-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: var(--spacing-xl);
+  align-items: center;   /* key: vertically centers the two columns */
+}
+
+/* The left events list — stretches naturally */
+.events-list-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  align-self: center;
+}
+
+/* Right panel — sticky + centered */
+.events-add-wrap {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  position: sticky;
+  top: 80px;
+}
+
+.event-add-card {
+  padding: var(--spacing-xl);
+  width: 100%;
+}
+
+.event-add-card h3 {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-lg);
+  display: flex; align-items: center; gap: 0.5rem;
+}
+
+/* ══════════════════════════════════════════
+   22e. DATE INPUT — Calendar icon white in dark mode
+══════════════════════════════════════════ */
+/* Base: light mode */
+input[type="date"],
+input[type="month"] {
+  color-scheme: light;
+  position: relative;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.55;
+  width: 16px;
+  height: 16px;
+}
+
+/* Dark mode: color-scheme: dark makes the browser render the icon white natively */
+[data-theme="dark"] input[type="date"],
+[data-theme="dark"] input[type="month"] {
+  color-scheme: White;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+}
+
+/* Additionally force invert as backup for browsers that don't respect color-scheme on picker */
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="dark"] input[type="month"]::-webkit-calendar-picker-indicator {
+  filter: invert(100%) !important;
+  opacity: 0.9 !important;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+/* Light mode explicitly */
+[data-theme="light"] input[type="date"],
+[data-theme="light"] input[type="month"] {
+  color-scheme: light;
+  color: var(--text-primary);
+}
+
+[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="light"] input[type="month"]::-webkit-calendar-picker-indicator {
+  filter: none !important;
+  opacity: 0.55;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+/* ══════════════════════════════════════════
+   23. RESPONSIVE
+══════════════════════════════════════════ */
+@media (max-width: 1200px) {
+  .hero-visual { display: none; }
+  #hero { justify-content: center; text-align: center; }
+  .hero-content { max-width: 700px; }
+  .hero-cta { justify-content: center; }
+  .hero-stats { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (max-width: 1024px) {
+  .swimlanes { grid-template-columns: 1fr; }
+  .events-layout { grid-template-columns: 1fr; }
+  .events-add-wrap { position: static; }
+  .reports-layout { grid-template-columns: 1fr; }
+  .report-filters { position: static; }
+  .task-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .hamburger { display: flex; }
+  #hero { padding-top: 5rem; padding-bottom: var(--spacing-xl); }
+  .hero-stats { grid-template-columns: repeat(2, 1fr); }
+  .modal-box { max-width: 100%; margin: 0; border-radius: var(--radius-xl) var(--radius-xl) 0 0; align-self: flex-end; }
+  .modal { align-items: flex-end; padding: 0; }
+  .nav-inner { padding: 0 var(--spacing-md); }
+  .section { padding: var(--spacing-xl) var(--spacing-md); }
+  .btn-primary-sm span { display: none; }
+  .form-row { grid-template-columns: 1fr; }
+  #toast-container { right: 0.75rem; top: 72px; max-width: calc(100vw - 1.5rem); }
+}
+
+@media (max-width: 480px) {
+  .hero-stats { grid-template-columns: repeat(2, 1fr); }
+  .hero-cta { flex-direction: column; align-items: center; }
+  .footer-inner { flex-direction: column; text-align: center; }
+  .footer-meta { justify-content: center; }
+  #back-to-top { bottom: 1rem; right: 1rem; }
+}
+
+/* ══════════════════════════════════════════
+   24. 3D CARD PERSPECTIVE
+══════════════════════════════════════════ */
+/* perspective is now set directly on .member-cards-grid in section 13 */
+
+/* ══════════════════════════════════════════
+   25. PARALLAX WRAPPER
+══════════════════════════════════════════ */
+.parallax-hero { will-change: transform; }
+
+/* ══════════════════════════════════════════
+   26. FOCUS VISIBLE
+══════════════════════════════════════════ */
+:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* ══════════════════════════════════════════
+   27. PRINT STYLES
+══════════════════════════════════════════ */
+@media print {
+  #navbar, #loading-screen, #back-to-top, #scroll-progress, #bg-canvas { display: none; }
+  body { background: #fff; color: #000; }
+  .section { page-break-inside: avoid; }
+}
+
+
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════ LOADING SCREEN ═══════════════════════ -->
+  <div id="loading-screen" aria-hidden="true">
+    <div class="loader-inner">
+      <div class="loader-logo">
+        <span class="loader-icon"><i class="fa-solid fa-shield-halved"></i></span>
+        <span class="loader-brand">INSIGHTZ MSP</span>
+      </div>
+      <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+      <p class="loader-text">Initializing Secure Environment…</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ SCROLL PROGRESS ═══════════════════════ -->
+  <div id="scroll-progress" aria-hidden="true"></div>
+
+  <!-- ═══════════════════════ BACKGROUND CANVAS ═══════════════════════ -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <!-- ═══════════════════════ NAVIGATION ═══════════════════════ -->
+  <nav id="navbar" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="#hero" class="nav-brand" aria-label="Insightz MSP Home">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>INSIGHTZ <strong>MSP</strong></span>
+      </a>
+
+      <ul class="nav-links" role="list">
+        <li><a href="index.html" class="nav-link nav-home" data-section="home"><i class="fa-solid fa-house"></i> Home</a></li>
+        <li><a href="#dashboard" class="nav-link" data-section="dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a></li>
+        <li><a href="#deployment" class="nav-link" data-section="deployment"><i class="fa-solid fa-rocket"></i> Deployment</a></li>
+        <li><a href="#operations" class="nav-link" data-section="operations"><i class="fa-solid fa-gears"></i> Operations</a></li>
+        <li><a href="#events" class="nav-link" data-section="events"><i class="fa-solid fa-calendar-days"></i> Events</a></li>
+        <li><a href="#reports" class="nav-link" data-section="reports"><i class="fa-solid fa-chart-line"></i> Reports</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button id="theme-toggle" aria-label="Toggle dark/light theme" title="Toggle Theme">
+          <i class="fa-solid fa-moon" id="theme-icon"></i>
+        </button>
+        <button id="add-member-btn" class="btn-primary-sm" aria-label="Add team member">
+          <i class="fa-solid fa-user-plus"></i> Add Member
+        </button>
+        <button id="hamburger" class="hamburger" aria-label="Toggle mobile menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="mobile-menu" aria-hidden="true">
+      <a href="index.html" class="mobile-link"><i class="fa-solid fa-house"></i> Home</a>
+      <a href="#dashboard" class="mobile-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="#deployment" class="mobile-link"><i class="fa-solid fa-rocket"></i> Deployment</a>
+      <a href="#operations" class="mobile-link"><i class="fa-solid fa-gears"></i> Operations</a>
+      <a href="#events" class="mobile-link"><i class="fa-solid fa-calendar-days"></i> Events</a>
+      <a href="#reports" class="mobile-link"><i class="fa-solid fa-chart-line"></i> Reports</a>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════ HERO ═══════════════════════ -->
+  <section id="hero" aria-label="Hero banner">
+    <div class="hero-content">
+      <div class="hero-badge"><i class="fa-solid fa-circle-dot pulse-dot"></i> Live Operations Active</div>
+      <h1 class="hero-title">
+        <span id="hero-typing" aria-live="polite"></span><span class="cursor">|</span>
+      </h1>
+      <p class="hero-subtitle" contenteditable="true" data-save-key="hero-subtitle">
+        Centralized task management for Deployment &amp; Operations.
+      </p>
+      <div class="hero-stats" role="list">
+        <div class="stat-card glass" role="listitem">
+          <span class="stat-num" data-target="6">0</span>
+          <span class="stat-label">Team Members</span>
+        </div>
+        <div class="stat-card glass" role="listitem">
+          <span class="stat-num" id="active-tasks-stat">0</span>
+          <span class="stat-label">Active Tasks</span>
+        </div>
+        <div class="stat-card glass" role="listitem">
+          <span class="stat-num" id="completed-tasks-stat">0</span>
+          <span class="stat-label">Completed</span>
+        </div>
+        <div class="stat-card glass" role="listitem">
+          <span class="stat-num" id="events-stat">0</span>
+          <span class="stat-label">Upcoming Events</span>
+        </div>
+      </div>
+      <div class="hero-cta">
+        <a href="#dashboard" class="btn-hero-primary"><i class="fa-solid fa-gauge-high"></i> Open Dashboard</a>
+        <a href="#reports" class="btn-hero-secondary"><i class="fa-solid fa-file-arrow-down"></i> Download Report</a>
+      </div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="hex-grid">
+        <div class="hex hex-1"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="hex hex-2"><i class="fa-solid fa-network-wired"></i></div>
+        <div class="hex hex-3"><i class="fa-solid fa-lock"></i></div>
+        <div class="hex hex-4"><i class="fa-solid fa-bug-slash"></i></div>
+        <div class="hex hex-5"><i class="fa-solid fa-terminal"></i></div>
+        <div class="hex hex-6"><i class="fa-solid fa-satellite-dish"></i></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ DASHBOARD ═══════════════════════ -->
+  <section id="dashboard" class="section" aria-label="Team dashboard">
+    <div class="section-header reveal">
+      <div class="section-badge"><i class="fa-solid fa-gauge-high"></i> Dashboard</div>
+      <h2 class="section-title" contenteditable="true" data-save-key="dashboard-title">MSP Team Overview</h2>
+      <p class="section-desc" contenteditable="true" data-save-key="dashboard-desc">Real-time visibility across Deployment &amp; Operations teams.</p>
+    </div>
+
+    <!-- Team Swimlanes -->
+    <div class="swimlanes reveal">
+      <!-- Deployment Team -->
+      <div class="team-lane lane-deploy" id="deploy-lane">
+        <div class="lane-header">
+          <div class="lane-badge deploy-badge"><i class="fa-solid fa-rocket"></i> Deployment Team</div>
+          <button class="lane-add-btn" data-team="deployment" aria-label="Add deployment member">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
+        <div class="lane-members" id="deploy-members">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+      <!-- Operations Team -->
+      <div class="team-lane lane-ops" id="ops-lane">
+        <div class="lane-header">
+          <div class="lane-badge ops-badge"><i class="fa-solid fa-gears"></i> Operations Team</div>
+          <button class="lane-add-btn" data-team="operations" aria-label="Add operations member">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
+        <div class="lane-members" id="ops-members">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ DEPLOYMENT SECTION ═══════════════════════ -->
+  <section id="deployment" class="section" aria-label="Deployment team tasks">
+    <div class="section-header reveal">
+      <div class="section-badge deploy-badge"><i class="fa-solid fa-rocket"></i> Deployment</div>
+      <h2 class="section-title" contenteditable="true" data-save-key="deploy-title">Deployment Team Tasks</h2>
+      <p class="section-desc" contenteditable="true" data-save-key="deploy-desc">Lead: <strong>Jagan</strong> — All active deployment assignments and project tracking.</p>
+    </div>
+    <div class="member-cards-grid" id="deploy-cards">
+      <!-- Populated by JS -->
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ OPERATIONS SECTION ═══════════════════════ -->
+  <section id="operations" class="section" aria-label="Operations team tasks">
+    <div class="section-header reveal">
+      <div class="section-badge ops-badge"><i class="fa-solid fa-gears"></i> Operations</div>
+      <h2 class="section-title" contenteditable="true" data-save-key="ops-title">Operations Team Tasks</h2>
+      <p class="section-desc" contenteditable="true" data-save-key="ops-desc">Lead: <strong>Siva Kumar</strong> — All active operations assignments and status tracking.</p>
+    </div>
+    <div class="member-cards-grid" id="ops-cards">
+      <!-- Populated by JS -->
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ UPCOMING EVENTS ═══════════════════════ -->
+  <section id="events" class="section" aria-label="Upcoming events">
+    <div class="section-header reveal">
+      <div class="section-badge"><i class="fa-solid fa-calendar-days"></i> Upcoming Events</div>
+      <h2 class="section-title" contenteditable="true" data-save-key="events-title">Project Calendar &amp; Events</h2>
+      <p class="section-desc" contenteditable="true" data-save-key="events-desc">Track key milestones, deployments, reviews, and team events.</p>
+    </div>
+    <div class="events-layout reveal">
+      <!-- Left: events list -->
+      <div class="events-list-wrap">
+        <div class="events-list" id="events-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+      <!-- Right: add event card — self-aligns to center relative to list -->
+      <div class="events-add-wrap">
+        <div class="event-add-card glass">
+          <h3><i class="fa-solid fa-circle-plus"></i> Add New Event</h3>
+          <div class="form-group">
+            <label for="evt-title">Event Title</label>
+            <input type="text" id="evt-title" placeholder="e.g. Client Security Audit" />
+          </div>
+          <div class="form-group">
+            <label for="evt-date">Date</label>
+            <input type="date" id="evt-date" />
+          </div>
+          <div class="form-group">
+            <label for="evt-type">Type</label>
+            <select id="evt-type">
+              <option value="deployment">Deployment</option>
+              <option value="operations">Operations</option>
+              <option value="review">Review</option>
+              <option value="training">Training</option>
+              <option value="meeting">Meeting</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="evt-desc">Description</label>
+            <textarea id="evt-desc" rows="3" placeholder="Brief description…"></textarea>
+          </div>
+          <button class="btn-primary full-width" id="add-event-btn">
+            <i class="fa-solid fa-plus"></i> Save Event
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ REPORTS ═══════════════════════ -->
+  <section id="reports" class="section" aria-label="Reports and analytics">
+    <div class="section-header reveal">
+      <div class="section-badge"><i class="fa-solid fa-chart-line"></i> Reports</div>
+      <h2 class="section-title" contenteditable="true" data-save-key="reports-title">Monthly Task Reports</h2>
+      <p class="section-desc" contenteditable="true" data-save-key="reports-desc">Track team performance over the month. Download as CSV with company branding.</p>
+    </div>
+    <div class="reports-layout reveal">
+      <div class="report-filters glass">
+        <h3><i class="fa-solid fa-filter"></i> Report Filters</h3>
+        <div class="form-group">
+          <label for="report-month">Month</label>
+          <input type="month" id="report-month" />
+        </div>
+        <div class="form-group">
+          <label for="report-team">Team</label>
+          <select id="report-team">
+            <option value="all">All Teams</option>
+            <option value="deployment">Deployment</option>
+            <option value="operations">Operations</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="report-member">Member</label>
+          <select id="report-member">
+            <option value="all">All Members</option>
+          </select>
+        </div>
+        <button class="btn-primary full-width" id="generate-report-btn">
+          <i class="fa-solid fa-magnifying-glass-chart"></i> Generate Report
+        </button>
+        <button class="btn-secondary full-width mt-sm" id="download-csv-btn">
+          <i class="fa-solid fa-file-csv"></i> Download CSV
+        </button>
+        <button class="btn-secondary full-width mt-sm" id="download-xlsx-btn" style="border-color:rgba(16,185,129,0.3);color:var(--accent-color)">
+          <i class="fa-solid fa-file-excel"></i> Download Excel (.xlsx)
+        </button>
+      </div>
+      <div class="report-preview glass" id="report-preview">
+        <div class="report-empty">
+          <i class="fa-solid fa-chart-bar"></i>
+          <p>Generate a report to view data here</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+  <footer id="footer" aria-label="Site footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>INSIGHTZ MSP</span>
+      </div>
+      <p class="footer-copy">All rights reserved for Insightz MSP Team</p>
+      <div class="footer-meta">
+        <span><i class="fa-solid fa-circle-dot pulse-dot-sm"></i> System Online</span>
+        <span id="footer-time"></span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════ BACK TO TOP ═══════════════════════ -->
+  <button id="back-to-top" aria-label="Back to top" title="Back to top">
+    <i class="fa-solid fa-chevron-up"></i>
+  </button>
+
+  <!-- ═══════════════════════ MODALS ═══════════════════════ -->
+
+  <!-- Add/Edit Member Modal -->
+  <div id="member-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="member-modal-title" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="member-modal-title"><i class="fa-solid fa-user-gear"></i> <span id="member-modal-label">Add Team Member</span></h2>
+        <button class="modal-close" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="member-edit-id" />
+        <div class="form-row">
+          <div class="form-group">
+            <label for="member-name">Full Name <span class="req">*</span></label>
+            <input type="text" id="member-name" placeholder="e.g. John Doe" required />
+          </div>
+          <div class="form-group">
+            <label for="member-role">Role</label>
+            <input type="text" id="member-role" placeholder="e.g. Security Engineer" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="member-team">Team <span class="req">*</span></label>
+            <select id="member-team" required>
+              <option value="">Select team…</option>
+              <option value="deployment">Deployment</option>
+              <option value="operations">Operations</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="member-position">Position</label>
+            <select id="member-position">
+              <option value="member">Member</option>
+              <option value="lead">Team Lead</option>
+              <option value="parser">Parser</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="member-cancel-btn">Cancel</button>
+        <button class="btn-primary" id="member-save-btn"><i class="fa-solid fa-floppy-disk"></i> Save Member</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Task Card Modal (full detail) -->
+  <div id="task-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="task-modal-title" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <h2 id="task-modal-title"><i class="fa-solid fa-list-check"></i> Task Manager — <span id="task-modal-name"></span></h2>
+        <button class="modal-close" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="task-member-id" />
+
+        <div class="task-grid">
+          <!-- Main Task Column -->
+          <div class="task-col">
+            <h3 class="task-col-title"><i class="fa-solid fa-briefcase"></i> Main Tasks</h3>
+            <div class="task-input-wrap">
+              <input type="text" id="main-task-input" placeholder="Type task and press Enter…" aria-label="Add main task" />
+            </div>
+            <div id="main-tasks-list" class="tasks-list"></div>
+          </div>
+
+          <!-- Additional Task Column -->
+          <div class="task-col">
+            <h3 class="task-col-title"><i class="fa-solid fa-circle-plus"></i> Additional Tasks</h3>
+            <div class="task-input-wrap">
+              <input type="text" id="addl-task-input" placeholder="Type additional task and press Enter…" aria-label="Add additional task" />
+            </div>
+            <div id="addl-tasks-list" class="tasks-list"></div>
+          </div>
+        </div>
+
+        <!-- Date & Status Row -->
+        <div class="form-row mt-lg">
+          <div class="form-group">
+            <label for="task-start-date"><i class="fa-regular fa-calendar"></i> Start Date</label>
+            <input type="date" id="task-start-date" />
+          </div>
+          <div class="form-group">
+            <label for="task-end-date"><i class="fa-regular fa-calendar-check"></i> End Date</label>
+            <input type="date" id="task-end-date" />
+          </div>
+          <div class="form-group">
+            <label for="task-work-status"><i class="fa-solid fa-toggle-on"></i> Working In</label>
+            <select id="task-work-status">
+              <option value="deployment">Deployment</option>
+              <option value="operations">Operations</option>
+              <option value="both">Both</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="task-project-status"><i class="fa-solid fa-signal"></i> Project Status</label>
+            <select id="task-project-status">
+              <option value="not-started">Not Started</option>
+              <option value="in-progress">In Progress</option>
+              <option value="on-hold">On Hold</option>
+              <option value="completed">Completed</option>
+              <option value="review">Under Review</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="autosave-indicator" id="autosave-indicator">
+          <i class="fa-solid fa-circle-check"></i> All changes saved
+        </div>
+        <button class="btn-secondary modal-close-btn">Close</button>
+        <button class="btn-primary" id="task-save-btn"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Delete Modal -->
+  <div id="confirm-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-box modal-sm">
+      <div class="modal-header">
+        <h2 id="confirm-modal-title"><i class="fa-solid fa-triangle-exclamation"></i> Confirm Action</h2>
+        <button class="modal-close" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-modal-msg">Are you sure you want to proceed?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary modal-close-btn">Cancel</button>
+        <button class="btn-danger" id="confirm-ok-btn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * INSIGHTZ MSP — CYBERSECURITY TASK MANAGEMENT SYSTEM
+ * script.js — Full Application Logic (ES6+)
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+'use strict';
+
+/* ══════════════════════════════════════════
+   1. DATA STORE — localStorage-backed state
+══════════════════════════════════════════ */
+const DB_KEY = {
+  MEMBERS: 'insightz_members',
+  TASKS:   'insightz_tasks',
+  EVENTS:  'insightz_events',
+  CONTENT: 'insightz_content',
+  THEME:   'insightz_theme',
+};
+
+/** Read JSON from localStorage (fallback to `def`) */
+function dbRead(key, def = null) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : def;
+  } catch { return def; }
+}
+
+/** Write JSON to localStorage */
+function dbWrite(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) { console.warn('Storage error:', e); }
+}
+
+/* ── Default seed members ── */
+const SEED_MEMBERS = [
+  { id: 'jagan',    name: 'Jagan',     role: 'Deployment Lead',  team: 'deployment', position: 'lead',   color: '#3b82f6' },
+  { id: 'sivakumar',name: 'Siva Kumar',role: 'Operations Lead',  team: 'operations', position: 'lead',   color: '#8b5cf6' },
+  { id: 'vimal',    name: 'Vimal',     role: 'Security Engineer', team: 'deployment', position: 'member', color: '#10b981' },
+  { id: 'suriya',   name: 'Suriya',    role: 'Security Analyst',  team: 'operations', position: 'member', color: '#f59e0b' },
+  { id: 'idris',    name: 'Idris',     role: 'Security Analyst',team: 'operations', position: 'member', color: '#ef4444' },
+  { id: 'sanmugam', name: 'Sanmugam',  role: 'Security Analyst', team: 'deployment', position: 'parser', color: '#06b6d4' },
+];
+
+/* ── Default seed events ── */
+const SEED_EVENTS = [
+  { id: 'e1', title: 'Security Audit Review',      date: getFutureDate(5),  type: 'review',     desc: 'Monthly client security infrastructure review.' },
+  { id: 'e2', title: 'Firewall Deployment – Phase 2', date: getFutureDate(12), type: 'deployment', desc: 'Deploy next-gen firewall rules for client cluster.' },
+  { id: 'e3', title: 'SOC Team Training Session',   date: getFutureDate(20), type: 'training',   desc: 'Threat intelligence and incident response workshop.' },
+];
+
+function getFutureDate(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+}
+
+/* ── Initialize state ── */
+let members = dbRead(DB_KEY.MEMBERS) || structuredClone(SEED_MEMBERS);
+let tasks   = dbRead(DB_KEY.TASKS)   || {};
+let events  = dbRead(DB_KEY.EVENTS)  || structuredClone(SEED_EVENTS);
+let content = dbRead(DB_KEY.CONTENT) || {};
+
+function saveMembers() { dbWrite(DB_KEY.MEMBERS, members); }
+function saveTasks()   { dbWrite(DB_KEY.TASKS, tasks); }
+function saveEvents()  { dbWrite(DB_KEY.EVENTS, events); }
+function saveContent() { dbWrite(DB_KEY.CONTENT, content); }
+
+/* Ensure every member has a task entry */
+function ensureTaskEntry(id) {
+  if (!tasks[id]) {
+    tasks[id] = {
+      mainTasks:    [],
+      addlTasks:    [],
+      startDate:    '',
+      endDate:      '',
+      workStatus:   'deployment',
+      projectStatus:'not-started',
+    };
+    saveTasks();
+  }
+}
+members.forEach(m => ensureTaskEntry(m.id));
+
+/* ══════════════════════════════════════════
+   2. LOADING SCREEN
+══════════════════════════════════════════ */
+document.body.classList.add('loading');
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const ls = document.getElementById('loading-screen');
+    ls.classList.add('hidden');
+    document.body.classList.remove('loading');
+  }, 2200);
+});
+
+/* ══════════════════════════════════════════
+   3. BACKGROUND CANVAS (Animated Particles)
+══════════════════════════════════════════ */
+(function initCanvas() {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, particles = [], lines = [];
+  const PARTICLE_COUNT = 60;
+  const LINE_DIST = 140;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  class Particle {
+    constructor() { this.reset(true); }
+    reset(init) {
+      this.x  = Math.random() * W;
+      this.y  = init ? Math.random() * H : -10;
+      this.vx = (Math.random() - 0.5) * 0.3;
+      this.vy = Math.random() * 0.2 + 0.1;
+      this.r  = Math.random() * 2 + 1;
+      this.a  = Math.random() * 0.5 + 0.2;
+    }
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      if (this.y > H + 10) this.reset(false);
+      if (this.x < 0) this.x = W;
+      if (this.x > W) this.x = 0;
+    }
+    draw() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fillStyle = isDark
+        ? `rgba(59,130,246,${this.a})`
+        : `rgba(37,99,235,${this.a * 0.5})`;
+      ctx.fill();
+    }
+  }
+
+  function initParticles() {
+    particles = [];
+    for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
+  }
+
+  function drawLines() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < LINE_DIST) {
+          const alpha = (1 - dist / LINE_DIST) * (isDark ? 0.15 : 0.06);
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = isDark
+            ? `rgba(59,130,246,${alpha})`
+            : `rgba(37,99,235,${alpha})`;
+          ctx.lineWidth = 0.6;
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => { p.update(); p.draw(); });
+    drawLines();
+    requestAnimationFrame(animate);
+  }
+
+  resize();
+  initParticles();
+  animate();
+  window.addEventListener('resize', () => { resize(); initParticles(); });
+})();
+
+/* ══════════════════════════════════════════
+   4. THEME TOGGLE
+══════════════════════════════════════════ */
+const themeToggle = document.getElementById('theme-toggle');
+const themeIcon   = document.getElementById('theme-icon');
+const html        = document.documentElement;
+
+const savedTheme = dbRead(DB_KEY.THEME) || 'dark';
+html.setAttribute('data-theme', savedTheme);
+updateThemeIcon(savedTheme);
+
+themeToggle.addEventListener('click', () => {
+  const current = html.getAttribute('data-theme');
+  const next    = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  dbWrite(DB_KEY.THEME, next);
+  updateThemeIcon(next);
+  showToast(`Switched to ${next} mode`, 'info', 'fa-circle-half-stroke');
+});
+
+function updateThemeIcon(theme) {
+  themeIcon.className = theme === 'dark'
+    ? 'fa-solid fa-sun'
+    : 'fa-solid fa-moon';
+}
+
+/* ══════════════════════════════════════════
+   5. SCROLL PROGRESS BAR
+══════════════════════════════════════════ */
+const scrollProgress = document.getElementById('scroll-progress');
+window.addEventListener('scroll', () => {
+  const max  = document.documentElement.scrollHeight - window.innerHeight;
+  const pct  = max > 0 ? (window.scrollY / max) * 100 : 0;
+  scrollProgress.style.width = pct + '%';
+}, { passive: true });
+
+/* ══════════════════════════════════════════
+   6. NAVBAR SCROLL & ACTIVE LINKS
+══════════════════════════════════════════ */
+const navbar   = document.getElementById('navbar');
+const navLinks = document.querySelectorAll('.nav-link');
+
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 60);
+  highlightNav();
+}, { passive: true });
+
+function highlightNav() {
+  const sections = ['hero', 'dashboard', 'deployment', 'operations', 'events', 'reports'];
+  let current = 'hero';
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.getBoundingClientRect().top <= 100) current = id;
+  });
+  navLinks.forEach(link => {
+    link.classList.toggle('active', link.dataset.section === current);
+  });
+}
+
+/* ══════════════════════════════════════════
+   7. SMOOTH SCROLLING
+══════════════════════════════════════════ */
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+  link.addEventListener('click', e => {
+    const href = link.getAttribute('href');
+    // Skip if not an anchor link on this page
+    if (!href.startsWith('#')) return;
+    const target = document.querySelector(href);
+    if (!target) return;
+    e.preventDefault();
+    const offset = 72;
+    const y = target.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+    // Close mobile menu
+    closeMobileMenu();
+  });
+});
+
+/* ══════════════════════════════════════════
+   8. MOBILE MENU
+══════════════════════════════════════════ */
+const hamburger  = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobile-menu');
+
+hamburger.addEventListener('click', () => {
+  const isOpen = mobileMenu.classList.toggle('open');
+  hamburger.classList.toggle('open', isOpen);
+  hamburger.setAttribute('aria-expanded', isOpen);
+  mobileMenu.setAttribute('aria-hidden', !isOpen);
+});
+
+function closeMobileMenu() {
+  mobileMenu.classList.remove('open');
+  hamburger.classList.remove('open');
+  hamburger.setAttribute('aria-expanded', 'false');
+  mobileMenu.setAttribute('aria-hidden', 'true');
+}
+
+/* ══════════════════════════════════════════
+   9. HERO TYPING ANIMATION
+══════════════════════════════════════════ */
+(function initTyping() {
+  const el = document.getElementById('hero-typing');
+  const phrases = [
+    'Insightz MSP\nTask Management',
+    'Cybersecurity\nOperations Hub',
+    'Deploy. Operate.\nSecure.',
+  ];
+  let pIdx = 0, cIdx = 0, deleting = false;
+  const DELAY_TYPE = 65, DELAY_DEL = 35, DELAY_PAUSE = 2200;
+
+  function type() {
+    const phrase = phrases[pIdx];
+    if (!deleting) {
+      el.innerHTML = phrase.slice(0, ++cIdx).replace('\n', '<br>');
+      if (cIdx === phrase.length) {
+        deleting = true;
+        setTimeout(type, DELAY_PAUSE);
+        return;
+      }
+    } else {
+      el.innerHTML = phrase.slice(0, --cIdx).replace('\n', '<br>');
+      if (cIdx === 0) {
+        deleting = false;
+        pIdx = (pIdx + 1) % phrases.length;
+      }
+    }
+    setTimeout(type, deleting ? DELAY_DEL : DELAY_TYPE);
+  }
+  setTimeout(type, 800);
+})();
+
+/* ══════════════════════════════════════════
+   10. REVEAL ON SCROLL
+══════════════════════════════════════════ */
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.08 });
+
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+/* ══════════════════════════════════════════
+   11. ANIMATED COUNTERS
+══════════════════════════════════════════ */
+function animateCounter(el, target, duration = 1200) {
+  const start = performance.now();
+  function update(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(target * ease);
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+function updateStats() {
+  const activeTasks = members.reduce((acc, m) => {
+    const t = tasks[m.id];
+    if (!t) return acc;
+    return acc + (t.mainTasks ? t.mainTasks.length : 0) + (t.addlTasks ? t.addlTasks.length : 0);
+  }, 0);
+
+  // Completed: members whose projectStatus === 'completed' this month
+  const now = new Date();
+  const completedTasks = members.reduce((acc, m) => {
+    const t = tasks[m.id];
+    if (!t) return acc;
+    return acc + (t.projectStatus === 'completed' ? 1 : 0);
+  }, 0);
+
+  const statActive = document.getElementById('active-tasks-stat');
+  const statComp   = document.getElementById('completed-tasks-stat');
+  const statEvt    = document.getElementById('events-stat');
+  const statMembers = document.querySelector('[data-target]'); // hero members stat
+
+  // Update without animation for live changes (animation only on first load)
+  function setCount(el, val) {
+    if (!el) return;
+    const current = parseInt(el.textContent) || 0;
+    if (current !== val) animateCounter(el, val, 600);
+  }
+
+  setCount(statActive, activeTasks);
+  setCount(statComp, completedTasks);
+  setCount(statEvt, events.length);
+
+  // Update member count dynamically
+  const memberStatEl = document.querySelector('.stat-num[data-target]');
+  if (memberStatEl) {
+    const currentCount = parseInt(memberStatEl.textContent) || 0;
+    if (currentCount !== members.length) animateCounter(memberStatEl, members.length, 600);
+    memberStatEl.dataset.target = members.length;
+  }
+}
+
+/* Hero static counter (6 members) */
+setTimeout(() => {
+  document.querySelectorAll('[data-target]').forEach(el => {
+    animateCounter(el, parseInt(el.dataset.target));
+  });
+  updateStats();
+}, 2400);
+
+/* ══════════════════════════════════════════
+   12. BACK TO TOP
+══════════════════════════════════════════ */
+const backToTop = document.getElementById('back-to-top');
+window.addEventListener('scroll', () => {
+  backToTop.classList.toggle('visible', window.scrollY > 400);
+}, { passive: true });
+backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+/* ══════════════════════════════════════════
+   13. TOAST NOTIFICATIONS
+══════════════════════════════════════════ */
+function showToast(message, type = 'info', icon = 'fa-circle-info') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('fade-out');
+    toast.addEventListener('animationend', () => toast.remove());
+  }, 3000);
+}
+
+/* ══════════════════════════════════════════
+   14. MODAL SYSTEM
+══════════════════════════════════════════ */
+function openModal(id) {
+  const modal = document.getElementById(id);
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  // Focus first input
+  setTimeout(() => {
+    const first = modal.querySelector('input, select, textarea, button.modal-close');
+    if (first) first.focus();
+  }, 150);
+}
+
+function closeModal(id) {
+  const modal = document.getElementById(id);
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+// Close on backdrop click or .modal-close button
+document.querySelectorAll('.modal').forEach(modal => {
+  modal.querySelector('.modal-backdrop').addEventListener('click', () => closeModal(modal.id));
+  modal.querySelectorAll('.modal-close, .modal-close-btn').forEach(btn => {
+    btn.addEventListener('click', () => closeModal(modal.id));
+  });
+});
+
+// Close on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal.open').forEach(m => closeModal(m.id));
+  }
+});
+
+/* ══════════════════════════════════════════
+   15. MEMBER MANAGEMENT
+══════════════════════════════════════════ */
+const addMemberBtn    = document.getElementById('add-member-btn');
+const memberSaveBtn   = document.getElementById('member-save-btn');
+const memberCancelBtn = document.getElementById('member-cancel-btn');
+
+addMemberBtn.addEventListener('click', () => openAddMemberModal());
+document.querySelectorAll('.lane-add-btn').forEach(btn => {
+  btn.addEventListener('click', () => openAddMemberModal(btn.dataset.team));
+});
+
+memberCancelBtn.addEventListener('click', () => closeModal('member-modal'));
+
+function openAddMemberModal(team = '') {
+  document.getElementById('member-modal-label').textContent = 'Add Team Member';
+  document.getElementById('member-edit-id').value  = '';
+  document.getElementById('member-name').value     = '';
+  document.getElementById('member-role').value     = '';
+  document.getElementById('member-team').value     = team;
+  document.getElementById('member-position').value = 'member';
+  openModal('member-modal');
+}
+
+function openEditMemberModal(id) {
+  const m = members.find(x => x.id === id);
+  if (!m) return;
+  document.getElementById('member-modal-label').textContent = 'Edit Member';
+  document.getElementById('member-edit-id').value  = m.id;
+  document.getElementById('member-name').value     = m.name;
+  document.getElementById('member-role').value     = m.role;
+  document.getElementById('member-team').value     = m.team;
+  document.getElementById('member-position').value = m.position;
+  openModal('member-modal');
+}
+
+memberSaveBtn.addEventListener('click', saveMember);
+
+function saveMember() {
+  const editId   = document.getElementById('member-edit-id').value.trim();
+  const name     = document.getElementById('member-name').value.trim();
+  const role     = document.getElementById('member-role').value.trim();
+  const team     = document.getElementById('member-team').value;
+  const position = document.getElementById('member-position').value;
+
+  if (!name) { showToast('Name is required.', 'error', 'fa-circle-exclamation'); return; }
+  if (!team) { showToast('Please select a team.', 'error', 'fa-circle-exclamation'); return; }
+
+  const COLORS = ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#ec4899','#f97316'];
+
+  if (editId) {
+    const idx = members.findIndex(m => m.id === editId);
+    if (idx !== -1) {
+      members[idx] = { ...members[idx], name, role, team, position };
+      saveMembers();
+      showToast(`${name} updated successfully.`, 'success', 'fa-circle-check');
+    }
+  } else {
+    const id = 'member_' + Date.now();
+    const color = COLORS[members.length % COLORS.length];
+    members.push({ id, name, role, team, position, color });
+    ensureTaskEntry(id);
+    saveMembers();
+    showToast(`${name} added to ${team} team!`, 'success', 'fa-user-plus');
+  }
+
+  closeModal('member-modal');
+  renderAll();
+  updateStats();
+}
+
+function confirmDeleteMember(id) {
+  const m = members.find(x => x.id === id);
+  if (!m) return;
+  document.getElementById('confirm-modal-msg').textContent =
+    `Are you sure you want to remove "${m.name}" from the team? This will also delete their task data.`;
+  openModal('confirm-modal');
+
+  const okBtn = document.getElementById('confirm-ok-btn');
+  okBtn.onclick = () => {
+    members = members.filter(x => x.id !== id);
+    delete tasks[id];
+    saveMembers();
+    saveTasks();
+    closeModal('confirm-modal');
+    renderAll();
+    updateStats();
+    showToast(`${m.name} removed.`, 'warning', 'fa-user-minus');
+  };
+}
+
+/* ══════════════════════════════════════════
+   16. RENDERING — SWIMLANE & CARDS
+══════════════════════════════════════════ */
+function getInitials(name) {
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function renderAll() {
+  renderSwimlanes();
+  renderDeployCards();
+  renderOpsCards();
+  renderReportMemberSelect();
+  // Re-observe new reveal elements
+  document.querySelectorAll('.reveal:not(.visible)').forEach(el => revealObserver.observe(el));
+}
+
+function renderSwimlanes() {
+  const deployEl = document.getElementById('deploy-members');
+  const opsEl    = document.getElementById('ops-members');
+
+  deployEl.innerHTML = '';
+  opsEl.innerHTML    = '';
+
+  const deployMembers = members.filter(m => m.team === 'deployment');
+  const opsMembers    = members.filter(m => m.team === 'operations');
+
+  deployMembers.forEach(m => {
+    const t   = tasks[m.id] || {};
+    const row = buildLaneRow(m, t);
+    deployEl.appendChild(row);
+  });
+
+  opsMembers.forEach(m => {
+    const t   = tasks[m.id] || {};
+    const row = buildLaneRow(m, t);
+    opsEl.appendChild(row);
+  });
+
+  // Add ghost rows to balance unequal counts (hidden on mobile via CSS)
+  const diff = deployMembers.length - opsMembers.length;
+  if (diff > 0) {
+    injectGhostLaneRows('ops-members', diff);
+  } else if (diff < 0) {
+    injectGhostLaneRows('deploy-members', Math.abs(diff));
+  }
+
+  if (!deployMembers.length) deployEl.innerHTML = '<p class="task-empty" style="padding:.5rem 0">No deployment members yet.</p>';
+  if (!opsMembers.length)    opsEl.innerHTML    = '<p class="task-empty" style="padding:.5rem 0">No operations members yet.</p>';
+}
+
+function buildLaneRow(m, t) {
+  const div = document.createElement('div');
+  div.className = 'lane-member-row';
+  div.setAttribute('tabindex', '0');
+  div.setAttribute('role', 'button');
+  div.setAttribute('aria-label', `Open tasks for ${m.name}`);
+
+  const statusClass = `status-${(t.projectStatus || 'not-started').replace(' ', '-')}`;
+  const statusLabel = statusLabels[t.projectStatus] || 'Not Started';
+
+  div.innerHTML = `
+    <div class="lane-member-avatar" style="background:${m.color}">${getInitials(m.name)}</div>
+    <div class="lane-member-info">
+      <div class="lane-member-name">${m.name}</div>
+      <div class="lane-member-sub">${m.role || 'Team Member'}</div>
+    </div>
+    <span class="lane-member-status status-pill ${statusClass}">${statusLabel}</span>
+  `;
+
+  div.addEventListener('click', () => openTaskModal(m.id));
+  div.addEventListener('keydown', e => e.key === 'Enter' && openTaskModal(m.id));
+  return div;
+}
+
+/**
+ * Get current column count matching the CSS grid breakpoints exactly:
+ * ≤768px  → 1 col (mobile, ghost hidden)
+ * 769–1100px → 2 cols
+ * >1100px → 3 cols
+ */
+
+/** Append ghost placeholder cards to fill the last row */
+
+/** Add ghost lane rows to swimlane to balance counts */
+
+function renderDeployCards() {
+  const grid = document.getElementById('deploy-cards');
+  grid.innerHTML = '';
+  const deployList = members.filter(m => m.team === 'deployment');
+  if (!deployList.length) {
+    grid.innerHTML = '<p class="task-empty" style="text-align:center;padding:2rem;width:100%">No deployment members yet.</p>';
+    return;
+  }
+  deployList.forEach((m, i) => {
+    const card = buildMemberCard(m, 'deploy');
+    card.style.transitionDelay = `${i * 60}ms`;
+    grid.appendChild(card);
+  });
+  injectGhostCards(grid, deployList.length);
+}
+
+function renderOpsCards() {
+  const grid = document.getElementById('ops-cards');
+  grid.innerHTML = '';
+  const opsList = members.filter(m => m.team === 'operations');
+  if (!opsList.length) {
+    grid.innerHTML = '<p class="task-empty" style="text-align:center;padding:2rem;width:100%">No operations members yet.</p>';
+    return;
+  }
+  opsList.forEach((m, i) => {
+    const card = buildMemberCard(m, 'ops');
+    card.style.transitionDelay = `${i * 60}ms`;
+    grid.appendChild(card);
+  });
+  injectGhostCards(grid, opsList.length);
+}
+
+/* Inject ghost cards to fill last grid row */
+function injectGhostCards(grid, total) {
+  /* Remove stale ghosts */
+  grid.querySelectorAll('.ghost-card').forEach(g => g.remove());
+  if (window.innerWidth <= 768) return;
+  /* Determine col count from CSS breakpoints */
+  const cols = window.innerWidth <= 1100 ? 2 : 3;
+  const rem  = total % cols;
+  if (rem === 0) return;          /* already fills the row */
+  const needed = cols - rem;
+  for (let i = 0; i < needed; i++) {
+    const g = document.createElement('div');
+    g.className = 'ghost-card';
+    g.setAttribute('aria-hidden', 'true');
+    grid.appendChild(g);
+  }
+}
+
+/* Inject ghost lane rows to balance swimlane counts */
+function injectGhostLaneRows(containerId, count) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.querySelectorAll('.ghost-lane-member').forEach(g => g.remove());
+  if (window.innerWidth <= 768 || count <= 0) return;
+  for (let i = 0; i < count; i++) {
+    const g = document.createElement('div');
+    g.className = 'ghost-lane-member';
+    g.setAttribute('aria-hidden', 'true');
+    el.appendChild(g);
+  }
+}
+
+/* Recompute ghost cards on resize */
+let _resizeGhostTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(_resizeGhostTimer);
+  _resizeGhostTimer = setTimeout(() => {
+    const dList = members.filter(m => m.team === 'deployment');
+    const oList = members.filter(m => m.team === 'operations');
+    injectGhostCards(document.getElementById('deploy-cards'), dList.length);
+    injectGhostCards(document.getElementById('ops-cards'),    oList.length);
+    /* Swimlane ghost */
+    const diff = dList.length - oList.length;
+    if (diff > 0)      injectGhostLaneRows('ops-members',    diff);
+    else if (diff < 0) injectGhostLaneRows('deploy-members', Math.abs(diff));
+  }, 200);
+}, { passive: true });
+
+
+
+const statusLabels = {
+  'not-started': 'Not Started',
+  'in-progress': 'In Progress',
+  'on-hold':     'On Hold',
+  'completed':   'Completed',
+  'review':      'Under Review',
+};
+
+const statusIcons = {
+  'not-started': 'fa-circle',
+  'in-progress': 'fa-spinner',
+  'on-hold':     'fa-pause-circle',
+  'completed':   'fa-circle-check',
+  'review':      'fa-magnifying-glass',
+};
+
+function buildMemberCard(m, type) {
+  const t = tasks[m.id] || {};
+  const card = document.createElement('div');
+  card.className = `member-card ${type === 'ops' ? 'ops-card' : ''} reveal`;
+  card.dataset.memberId = m.id;
+
+  const statusClass = `status-${t.projectStatus || 'not-started'}`;
+  const statusLabel = statusLabels[t.projectStatus] || 'Not Started';
+  const statusIcon  = statusIcons[t.projectStatus]  || 'fa-circle';
+
+  const positionBadge = m.position === 'lead'
+    ? `<span class="badge badge-lead"><i class="fa-solid fa-crown"></i> Lead</span>`
+    : m.position === 'parser'
+    ? `<span class="badge badge-parser"><i class="fa-solid fa-code"></i> Parser</span>`
+    : '';
+
+  const teamBadge = m.team === 'deployment'
+    ? `<span class="badge badge-deploy"><i class="fa-solid fa-rocket"></i> Deployment</span>`
+    : `<span class="badge badge-ops"><i class="fa-solid fa-gears"></i> Operations</span>`;
+
+  // Main tasks tags
+  const mainTagsHtml = t.mainTasks && t.mainTasks.length
+    ? t.mainTasks.map(task =>
+        `<span class="task-tag" title="${escapeHtml(task)}">${escapeHtml(truncate(task, 20))}</span>`
+      ).join('')
+    : '<span class="task-empty">No tasks assigned</span>';
+
+  // Additional tasks tags
+  const addlTagsHtml = t.addlTasks && t.addlTasks.length
+    ? t.addlTasks.map(task =>
+        `<span class="task-tag addl" title="${escapeHtml(task)}">${escapeHtml(truncate(task, 20))}</span>`
+      ).join('')
+    : '<span class="task-empty">None</span>';
+
+  const dateHtml = (t.startDate || t.endDate) ? `
+    <div class="card-dates">
+      ${t.startDate ? `<div class="card-date-item"><i class="fa-solid fa-calendar-plus"></i> ${formatDate(t.startDate)}</div>` : ''}
+      ${t.endDate   ? `<div class="card-date-item"><i class="fa-solid fa-calendar-check"></i> ${formatDate(t.endDate)}</div>` : ''}
+    </div>` : '';
+
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="member-avatar" style="background:${m.color}">${getInitials(m.name)}</div>
+      <div class="card-info">
+        <div class="card-name">${escapeHtml(m.name)}</div>
+        <div class="card-role">${escapeHtml(m.role || 'Team Member')}</div>
+        <div class="card-badges">${positionBadge} ${teamBadge}</div>
+      </div>
+      <div class="card-actions">
+        <button class="card-btn edit-member-btn" title="Edit Member" aria-label="Edit ${m.name}">
+          <i class="fa-solid fa-pen"></i>
+        </button>
+        <button class="card-btn danger delete-member-btn" title="Remove Member" aria-label="Remove ${m.name}">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="card-tasks-section">
+      <div class="card-tasks-label"><i class="fa-solid fa-briefcase"></i> Main Tasks</div>
+      <div class="tasks-tags main-tags">${mainTagsHtml}</div>
+    </div>
+
+    <div class="card-tasks-section">
+      <div class="card-tasks-label"><i class="fa-solid fa-circle-plus"></i> Additional Tasks</div>
+      <div class="tasks-tags addl-tags">${addlTagsHtml}</div>
+    </div>
+
+    ${dateHtml}
+
+    <div class="card-status-row">
+      <span class="status-pill ${statusClass}">
+        <i class="fa-solid ${statusIcon}"></i> ${statusLabel}
+      </span>
+      <button class="open-task-btn">
+        <i class="fa-solid fa-list-check"></i> Manage Tasks
+      </button>
+    </div>
+  `;
+
+  // Event listeners
+  card.querySelector('.edit-member-btn').addEventListener('click', e => {
+    e.stopPropagation(); openEditMemberModal(m.id);
+  });
+  card.querySelector('.delete-member-btn').addEventListener('click', e => {
+    e.stopPropagation(); confirmDeleteMember(m.id);
+  });
+  card.querySelector('.open-task-btn').addEventListener('click', e => {
+    e.stopPropagation(); openTaskModal(m.id);
+  });
+  card.addEventListener('click', () => openTaskModal(m.id));
+
+  return card;
+}
+
+/* ══════════════════════════════════════════
+   17. TASK MODAL
+══════════════════════════════════════════ */
+let currentMemberId = null;
+let autosaveTimer   = null;
+
+function openTaskModal(memberId) {
+  const m = members.find(x => x.id === memberId);
+  if (!m) return;
+
+  currentMemberId = memberId;
+  ensureTaskEntry(memberId);
+  const t = tasks[memberId];
+
+  document.getElementById('task-modal-name').textContent = m.name;
+  document.getElementById('task-member-id').value        = memberId;
+  document.getElementById('task-start-date').value       = t.startDate    || '';
+  document.getElementById('task-end-date').value         = t.endDate      || '';
+  document.getElementById('task-work-status').value      = t.workStatus   || 'deployment';
+  document.getElementById('task-project-status').value   = t.projectStatus || 'not-started';
+
+  renderTaskList('main-tasks-list', t.mainTasks, 'main');
+  renderTaskList('addl-tasks-list', t.addlTasks, 'addl');
+
+  hideAutosaveIndicator();
+  openModal('task-modal');
+}
+
+function renderTaskList(containerId, taskArr, type) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  (taskArr || []).forEach((task, i) => {
+    const item = buildTaskItem(task, i, type);
+    container.appendChild(item);
+  });
+}
+
+function buildTaskItem(taskText, index, type) {
+  const div = document.createElement('div');
+  div.className = 'task-list-item';
+  div.innerHTML = `
+    <i class="fa-solid fa-grip-dots" style="color:var(--text-muted);font-size:0.7rem"></i>
+    <span>${escapeHtml(taskText)}</span>
+    <button class="remove-task" aria-label="Remove task: ${escapeHtml(taskText)}" data-index="${index}" data-type="${type}">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  `;
+  div.querySelector('.remove-task').addEventListener('click', e => {
+    e.stopPropagation();
+    removeTask(parseInt(e.currentTarget.dataset.index), e.currentTarget.dataset.type);
+  });
+  return div;
+}
+
+function removeTask(index, type) {
+  if (!currentMemberId) return;
+  const t = tasks[currentMemberId];
+  if (type === 'main') t.mainTasks.splice(index, 1);
+  else t.addlTasks.splice(index, 1);
+  saveTasks();
+  renderTaskList('main-tasks-list', t.mainTasks, 'main');
+  renderTaskList('addl-tasks-list', t.addlTasks, 'addl');
+  showAutosaveIndicator();
+  renderAll();
+  updateStats();
+}
+
+// Add task on Enter or blur-away click
+function setupTaskInput(inputId, type) {
+  const input = document.getElementById(inputId);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addTask(input.value, type);
+      input.value = '';
+    }
+  });
+  // Also save on blur if has content
+  document.addEventListener('click', e => {
+    if (input.value.trim() && !input.contains(e.target) && !e.target.closest('#task-modal')) {
+      addTask(input.value, type);
+      input.value = '';
+    }
+  });
+}
+
+function addTask(text, type) {
+  const val = text.trim();
+  if (!val || !currentMemberId) return;
+  const t = tasks[currentMemberId];
+  if (type === 'main') t.mainTasks.push(val);
+  else t.addlTasks.push(val);
+  saveTasks();
+  renderTaskList('main-tasks-list', t.mainTasks, 'main');
+  renderTaskList('addl-tasks-list', t.addlTasks, 'addl');
+  showAutosaveIndicator();
+  scheduleCardRefresh();
+}
+
+setupTaskInput('main-task-input', 'main');
+setupTaskInput('addl-task-input', 'addl');
+
+// Auto-save date/status changes
+['task-start-date','task-end-date','task-work-status','task-project-status'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => {
+    if (!currentMemberId) return;
+    const t = tasks[currentMemberId];
+    t.startDate     = document.getElementById('task-start-date').value;
+    t.endDate       = document.getElementById('task-end-date').value;
+    t.workStatus    = document.getElementById('task-work-status').value;
+    t.projectStatus = document.getElementById('task-project-status').value;
+    saveTasks();
+    showAutosaveIndicator();
+    scheduleCardRefresh();
+  });
+});
+
+document.getElementById('task-save-btn').addEventListener('click', () => {
+  if (!currentMemberId) return;
+  const t = tasks[currentMemberId];
+  t.startDate     = document.getElementById('task-start-date').value;
+  t.endDate       = document.getElementById('task-end-date').value;
+  t.workStatus    = document.getElementById('task-work-status').value;
+  t.projectStatus = document.getElementById('task-project-status').value;
+  saveTasks();
+  renderAll();
+  updateStats();
+  showToast('Task data saved!', 'success', 'fa-floppy-disk');
+  // Auto-close modal after saving
+  closeModal('task-modal');
+});
+
+function showAutosaveIndicator() {
+  const el = document.getElementById('autosave-indicator');
+  el.classList.add('visible');
+}
+
+function hideAutosaveIndicator() {
+  document.getElementById('autosave-indicator').classList.remove('visible');
+}
+
+function scheduleCardRefresh() {
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(() => { renderAll(); updateStats(); }, 500);
+}
+
+/* ══════════════════════════════════════════
+   18. EVENTS SECTION
+══════════════════════════════════════════ */
+function renderEvents() {
+  const list = document.getElementById('events-list');
+  list.innerHTML = '';
+
+  if (!events.length) {
+    list.innerHTML = `
+      <div class="event-empty">
+        <i class="fa-solid fa-calendar-xmark"></i>
+        <p>No upcoming events. Add one to get started!</p>
+      </div>`;
+    return;
+  }
+
+  // Sort by date
+  const sorted = [...events].sort((a, b) => new Date(a.date) - new Date(b.date));
+  sorted.forEach(ev => {
+    const card = buildEventCard(ev);
+    list.appendChild(card);
+  });
+  document.getElementById('events-stat') && (document.getElementById('events-stat').textContent = events.length);
+}
+
+function buildEventCard(ev) {
+  const div = document.createElement('div');
+  div.className = 'event-card';
+
+  const d     = new Date(ev.date + 'T00:00:00');
+  const day   = d.getDate();
+  const month = d.toLocaleString('default', { month: 'short' }).toUpperCase();
+
+  div.innerHTML = `
+    <div class="event-date-block">
+      <div class="event-day">${day}</div>
+      <div class="event-month">${month}</div>
+    </div>
+    <div class="event-info">
+      <div class="event-title">${escapeHtml(ev.title)}</div>
+      <div class="event-desc">${escapeHtml(ev.desc || '')}</div>
+      <span class="event-type-badge event-type-${ev.type}">${capitalize(ev.type)}</span>
+    </div>
+    <button class="event-remove-btn" aria-label="Remove event: ${escapeHtml(ev.title)}">
+      <i class="fa-solid fa-trash"></i>
+    </button>
+  `;
+
+  div.querySelector('.event-remove-btn').addEventListener('click', () => {
+    events = events.filter(e => e.id !== ev.id);
+    saveEvents();
+    renderEvents();
+    updateStats();
+    showToast('Event removed.', 'warning', 'fa-calendar-minus');
+  });
+
+  return div;
+}
+
+document.getElementById('add-event-btn').addEventListener('click', () => {
+  const title = document.getElementById('evt-title').value.trim();
+  const date  = document.getElementById('evt-date').value;
+  const type  = document.getElementById('evt-type').value;
+  const desc  = document.getElementById('evt-desc').value.trim();
+
+  if (!title) { showToast('Event title is required.', 'error', 'fa-circle-exclamation'); return; }
+  if (!date)  { showToast('Please select a date.',    'error', 'fa-circle-exclamation'); return; }
+
+  events.push({ id: 'e_' + Date.now(), title, date, type, desc });
+  saveEvents();
+  renderEvents();
+  updateStats();
+
+  // Clear form
+  document.getElementById('evt-title').value = '';
+  document.getElementById('evt-date').value  = '';
+  document.getElementById('evt-desc').value  = '';
+  showToast(`Event "${title}" added!`, 'success', 'fa-calendar-plus');
+});
+
+/* ══════════════════════════════════════════
+   19. CONTENT EDITABLE AUTO-SAVE
+══════════════════════════════════════════ */
+let contentSaveTimer = null;
+
+document.querySelectorAll('[data-save-key]').forEach(el => {
+  // Restore saved content
+  const key = el.dataset.saveKey;
+  if (content[key]) el.innerHTML = content[key];
+
+  // Save on input with debounce
+  el.addEventListener('input', () => {
+    clearTimeout(contentSaveTimer);
+    contentSaveTimer = setTimeout(() => {
+      content[key] = el.innerHTML;
+      saveContent();
+    }, 800);
+  });
+});
+
+/* ══════════════════════════════════════════
+   20. REPORTS — GENERATE & CSV DOWNLOAD
+══════════════════════════════════════════ */
+// Set default month to current
+const reportMonthInput = document.getElementById('report-month');
+const now = new Date();
+reportMonthInput.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+document.getElementById('generate-report-btn').addEventListener('click', generateReport);
+document.getElementById('download-csv-btn').addEventListener('click', downloadCSV);
+
+function renderReportMemberSelect() {
+  const sel = document.getElementById('report-member');
+  const current = sel.value;
+  sel.innerHTML = '<option value="all">All Members</option>';
+  members.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = `${m.name} (${capitalize(m.team)})`;
+    sel.appendChild(opt);
+  });
+  if (current) sel.value = current;
+}
+
+function getFilteredMembers() {
+  const team   = document.getElementById('report-team').value;
+  const member = document.getElementById('report-member').value;
+  return members.filter(m => {
+    if (team   !== 'all' && m.team !== team) return false;
+    if (member !== 'all' && m.id  !== member) return false;
+    return true;
+  });
+}
+
+function generateReport() {
+  const preview = document.getElementById('report-preview');
+  const filtered = getFilteredMembers();
+
+  if (!filtered.length) {
+    preview.innerHTML = '<div class="report-empty"><i class="fa-solid fa-magnifying-glass"></i><p>No members found for the selected filters.</p></div>';
+    return;
+  }
+
+  const monthVal = document.getElementById('report-month').value;
+  const [yr, mo] = monthVal.split('-');
+  const monthLabel = new Date(yr, parseInt(mo) - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+
+  let rows = '';
+  filtered.forEach(m => {
+    const t = tasks[m.id] || {};
+    const mainCount = (t.mainTasks || []).length;
+    const addlCount = (t.addlTasks || []).length;
+    const status    = statusLabels[t.projectStatus] || 'Not Started';
+    const mainStr   = (t.mainTasks || []).join('; ') || '—';
+    const addlStr   = (t.addlTasks || []).join('; ') || '—';
+    const dateRange = (t.startDate || '—') + ' → ' + (t.endDate || '—');
+
+    rows += `
+      <tr>
+        <td><strong>${escapeHtml(m.name)}</strong></td>
+        <td><span class="badge ${m.team === 'deployment' ? 'badge-deploy' : 'badge-ops'}">${capitalize(m.team)}</span></td>
+        <td>${escapeHtml(m.role || '—')}</td>
+        <td>${mainCount}</td>
+        <td>${addlCount}</td>
+        <td style="max-width:200px;word-break:break-word;font-size:0.75rem">${escapeHtml(mainStr)}</td>
+        <td style="max-width:160px;word-break:break-word;font-size:0.75rem">${escapeHtml(addlStr)}</td>
+        <td>${dateRange}</td>
+        <td><span class="status-pill status-${t.projectStatus || 'not-started'}">${status}</span></td>
+      </tr>
+    `;
+  });
+
+  preview.innerHTML = `
+    <div class="report-meta">
+      <h3><i class="fa-solid fa-chart-line"></i> MSP Team Report — ${monthLabel}</h3>
+      <span style="font-size:0.78rem;color:var(--text-muted)">${filtered.length} member(s)</span>
+    </div>
+    <div class="report-table-wrap">
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Team</th>
+            <th>Role</th>
+            <th>Main Tasks</th>
+            <th>Addl Tasks</th>
+            <th>Main Task Details</th>
+            <th>Additional Task Details</th>
+            <th>Date Range</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+  showToast('Report generated!', 'success', 'fa-chart-line');
+}
+
+function downloadCSV() {
+  const filtered = getFilteredMembers();
+  const monthVal = document.getElementById('report-month').value;
+  const [yr, mo] = monthVal.split('-');
+  const monthLabel = new Date(yr, parseInt(mo) - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+
+  const headers = [
+    'Name','Team','Role','Position','Main Tasks Count','Additional Tasks Count',
+    'Main Tasks','Additional Tasks','Start Date','End Date','Working In','Project Status'
+  ];
+
+  const dataRows = [];
+  filtered.forEach(m => {
+    const t = tasks[m.id] || {};
+    dataRows.push([
+      m.name,
+      capitalize(m.team),
+      m.role || '',
+      capitalize(m.position || 'member'),
+      (t.mainTasks || []).length,
+      (t.addlTasks || []).length,
+      (t.mainTasks || []).join(' | '),
+      (t.addlTasks || []).join(' | '),
+      t.startDate || '',
+      t.endDate   || '',
+      capitalize(t.workStatus || ''),
+      statusLabels[t.projectStatus] || 'Not Started',
+    ]);
+  });
+
+  // Build CSV with logo text block in header
+  // (Actual image in CSV not supported natively — we embed as branded header text rows)
+  const logoAscii = [
+    ['╔══════════════════════════════════════════════════╗'],
+    ['║          INSIGHTZ MSP TEAM — Cybersecurity       ║'],
+    ['║          Task Management System Report           ║'],
+    ['╚══════════════════════════════════════════════════╝'],
+  ];
+
+  const metaRows = [
+    ...logoAscii,
+    [''],
+    ['Company', 'Insightz MSP'],
+    ['Report Period', monthLabel],
+    ['Generated On', new Date().toLocaleString('en-IN')],
+    ['Total Members', filtered.length],
+    ['Total Active Tasks', filtered.reduce((a, m) => a + ((tasks[m.id]?.mainTasks||[]).length + (tasks[m.id]?.addlTasks||[]).length), 0)],
+    [''],
+    headers,
+    ...dataRows,
+  ];
+
+  const csvContent = metaRows.map(r =>
+    (Array.isArray(r) ? r : [r]).map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')
+  ).join('\r\n');
+
+  // Try to load logo.png for a visual header if it exists, then download
+  const tryLoadLogo = new Promise((resolve) => {
+    const img = new Image();
+    img.onload  = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = 'logo.png';
+  });
+
+  tryLoadLogo.then(() => {
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href  = url;
+    link.download = `MSP_Team_Data_${monthVal}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    showToast('CSV downloaded with company header!', 'success', 'fa-file-csv');
+  });
+}
+
+/* ══════════════════════════════════════════
+   20b. XLSX DOWNLOAD WITH LOGO
+══════════════════════════════════════════ */
+document.getElementById('download-xlsx-btn').addEventListener('click', downloadXLSX);
+
+async function downloadXLSX() {
+  if (typeof XLSX === 'undefined') {
+    showToast('Excel library not loaded. Using CSV instead.', 'warning', 'fa-triangle-exclamation');
+    downloadCSV();
+    return;
+  }
+
+  const filtered = getFilteredMembers();
+  const monthVal = document.getElementById('report-month').value;
+  const [yr, mo] = monthVal.split('-');
+  const monthLabel = new Date(yr, parseInt(mo) - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+
+  // Build worksheet data
+  const wsData = [
+    // Logo placeholder rows (merged later)
+    ['INSIGHTZ MSP TEAM', '', '', '', '', '', '', '', '', '', '', ''],
+    ['Cybersecurity Task Management System', '', '', '', '', '', '', '', '', '', '', ''],
+    [''],
+    ['Report Period:', monthLabel, '', '', '', '', '', '', '', '', '', ''],
+    ['Generated On:', new Date().toLocaleString('en-IN'), '', '', '', '', '', '', '', '', '', ''],
+    ['Total Members:', filtered.length, '', '', '', '', '', '', '', '', '', ''],
+    ['Total Active Tasks:', filtered.reduce((a, m) => a + ((tasks[m.id]?.mainTasks||[]).length + (tasks[m.id]?.addlTasks||[]).length), 0)],
+    [''],
+    // Headers
+    ['Name','Team','Role','Position','Main Tasks #','Additional Tasks #',
+     'Main Tasks','Additional Tasks','Start Date','End Date','Working In','Project Status'],
+  ];
+
+  // Data rows
+  filtered.forEach(m => {
+    const t = tasks[m.id] || {};
+    wsData.push([
+      m.name,
+      capitalize(m.team),
+      m.role || '',
+      capitalize(m.position || 'member'),
+      (t.mainTasks || []).length,
+      (t.addlTasks || []).length,
+      (t.mainTasks || []).join(' | ') || '',
+      (t.addlTasks || []).join(' | ') || '',
+      t.startDate || '',
+      t.endDate   || '',
+      capitalize(t.workStatus || ''),
+      statusLabels[t.projectStatus] || 'Not Started',
+    ]);
+  });
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  // Column widths
+  ws['!cols'] = [
+    {wch:18},{wch:14},{wch:20},{wch:12},{wch:12},{wch:14},
+    {wch:35},{wch:30},{wch:14},{wch:14},{wch:14},{wch:16}
+  ];
+
+  // Merge header title cells
+  ws['!merges'] = [
+    {s:{r:0,c:0},e:{r:0,c:11}},  // Company name row
+    {s:{r:1,c:0},e:{r:1,c:11}},  // Subtitle row
+  ];
+
+  // Try to embed logo.png if it exists in same directory
+  try {
+    const response = await fetch('logo.png');
+    if (response.ok) {
+      const arrayBuffer = await response.arrayBuffer();
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      if (!wb.Sheets) wb.Sheets = {};
+      if (ws['!images'] === undefined) ws['!images'] = [];
+      ws['!images'].push({
+        name: 'logo.png',
+        data: base64,
+        opts: { base64: true },
+        position: {
+          type: 'twoCellAnchor',
+          attrs: { editAs: 'oneCell' },
+          from: { col: 0, colOff: 0, row: 0, rowOff: 0 },
+          to:   { col: 2, colOff: 0, row: 2, rowOff: 0 },
+        }
+      });
+    }
+  } catch (_) { /* logo.png not found — skip */ }
+
+  XLSX.utils.book_append_sheet(wb, ws, 'MSP Team Report');
+  XLSX.writeFile(wb, `MSP_Team_Data_${monthVal}.xlsx`);
+  showToast('Excel file downloaded!', 'success', 'fa-file-excel');
+}
+
+/* ══════════════════════════════════════════
+   21. FOOTER CLOCK
+══════════════════════════════════════════ */
+function updateFooterClock() {
+  const el = document.getElementById('footer-time');
+  if (el) el.textContent = new Date().toLocaleString('en-IN', {
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    day: '2-digit', month: 'short', year: 'numeric'
+  });
+}
+updateFooterClock();
+setInterval(updateFooterClock, 1000);
+
+/* ══════════════════════════════════════════
+   22. PARALLAX HERO
+══════════════════════════════════════════ */
+window.addEventListener('scroll', () => {
+  const hero = document.getElementById('hero');
+  if (hero) {
+    const scrolled = window.scrollY;
+    hero.style.backgroundPositionY = `${scrolled * 0.3}px`;
+  }
+}, { passive: true });
+
+/* ══════════════════════════════════════════
+   23. UTILITY HELPERS
+══════════════════════════════════════════ */
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function truncate(str, max) {
+  return str.length > max ? str.slice(0, max) + '…' : str;
+}
+
+function capitalize(str) {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+/* ══════════════════════════════════════════
+   24. INITIAL RENDER
+══════════════════════════════════════════ */
+renderAll();
+renderEvents();
+
+/* Re-observe all reveal elements after initial render */
+setTimeout(() => {
+  document.querySelectorAll('.reveal:not(.visible)').forEach(el => revealObserver.observe(el));
+}, 300);
+
+/* ══════════════════════════════════════════
+   25. 3D CARD TILT EFFECT
+══════════════════════════════════════════ */
+document.addEventListener('mousemove', e => {
+  document.querySelectorAll('.member-card').forEach(card => {
+    const rect   = card.getBoundingClientRect();
+    const cardX  = rect.left + rect.width  / 2;
+    const cardY  = rect.top  + rect.height / 2;
+    const distX  = e.clientX - cardX;
+    const distY  = e.clientY - cardY;
+    const maxDist = 300;
+
+    if (Math.abs(distX) < maxDist && Math.abs(distY) < maxDist) {
+      const rotY =  (distX / maxDist) * 8;
+      const rotX = -(distY / maxDist) * 8;
+      card.style.transform = `perspective(1000px) rotateY(${rotY}deg) rotateX(${rotX}deg) translateY(-4px)`;
+    } else {
+      card.style.transform = '';
+    }
+  });
+});
+
+document.addEventListener('mouseleave', () => {
+  document.querySelectorAll('.member-card').forEach(card => {
+    card.style.transform = '';
+  });
+});
+
+  </script>
+</body>
+</html>
