@@ -111,20 +111,19 @@ function getCurrentShift(dateSGT) {
 
 // Helper function to get shift for a specific date (checks for override first)
 function getShiftForDate(date) {
-    // Build dateStr correctly in SGT timezone
-    const sgtDate = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Singapore" }));
-    const year = sgtDate.getFullYear();
-    const month = String(sgtDate.getMonth() + 1).padStart(2, '0');
-    const day = String(sgtDate.getDate()).padStart(2, '0');
-    const dateStr = `${year}-${month}-${day}`;
-
+        // SGT timezone
+        const sgtDate = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Singapore" }));
+        const year = sgtDate.getFullYear();
+        const month = String(sgtDate.getMonth() + 1).padStart(2, '0');
+        const day = String(sgtDate.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;  // Always correct in SGT    
     // Check if there's an active shift override for this date
     if (shiftOverride && shiftOverride.startDate && shiftOverride.endDate) {
         if (dateStr >= shiftOverride.startDate && dateStr <= shiftOverride.endDate) {
             return shiftOverride.shift;
         }
     }
-
+    
     // Otherwise use automatic shift detection
     return getCurrentShift(date);
 }
@@ -139,14 +138,14 @@ function getWorkingHoursDisplay() {
 let availabilityOverrides = JSON.parse(localStorage.getItem("availabilityOverrides")) || {};
 // ---------- TEAM DATA ----------
 let teamData = JSON.parse(localStorage.getItem("teamData")) || {
-    SAs: [ "Gayathiri", "Ajay", "Jana", "Malini", "Rajapandi Ganesan", "Keerthana", "Siva Bharathi"],
+    SAs: [ "Selva", "Naveen", "Kannan", "Midhun", "Prem", "Logesh", "Linith"],
     apprentices: [ "Sanjay", "Vishal", "Subash"],
     responsibilities: {
-        Gayathiri: "Vishal",
-        Ajay: "Vishal",
-        Jana: "Karl / Subash",
-        Malini: "Sanjay",
-        Rajapandi Ganesan: "Karl / Subash",
+        Selva: "Vishal",
+        Naveen: "Vishal",
+        Kannan: "Karl / Subash",
+        Midhun: "Sanjay",
+        Prem: "Karl / Subash",
     }
 };
 
@@ -165,15 +164,15 @@ let isAdmin = false;
 // ========== CENTRALIZED AVAILABILITY MANAGEMENT SYSTEM ==========
 let memberAvailabilitySettings = JSON.parse(localStorage.getItem('memberAvailabilitySettings')) || {
     SAs: {
-        "Gayathiri": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Ajay": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Jana": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Malini": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Rajapandi Ganesan": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Keerthana": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
+        "Selva": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Naveen": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Kannan": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Midhun": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Prem": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Logesh": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
     },
     apprentices: {
-        "Siva Bharathi": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Linith": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Sanjay": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Vishal": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Subash": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] }
@@ -3690,8 +3689,8 @@ window.savePasswordsToFirebase = savePasswordsToFirebase;
 
 // Default POC names
 const DEFAULT_POC_NAMES = {
-    team1: "Gayathiri",
-    team2: "Ajay"
+    team1: "Raja",
+    team2: "Vishali"
 };
 
 // Storage key - NOW GROUP-SPECIFIC
