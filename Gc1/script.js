@@ -111,19 +111,20 @@ function getCurrentShift(dateSGT) {
 
 // Helper function to get shift for a specific date (checks for override first)
 function getShiftForDate(date) {
-        // SGT timezone
-        const sgtDate = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Singapore" }));
-        const year = sgtDate.getFullYear();
-        const month = String(sgtDate.getMonth() + 1).padStart(2, '0');
-        const day = String(sgtDate.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;  // Always correct in SGT    
+    // Build dateStr correctly in SGT timezone
+    const sgtDate = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Singapore" }));
+    const year = sgtDate.getFullYear();
+    const month = String(sgtDate.getMonth() + 1).padStart(2, '0');
+    const day = String(sgtDate.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+
     // Check if there's an active shift override for this date
     if (shiftOverride && shiftOverride.startDate && shiftOverride.endDate) {
         if (dateStr >= shiftOverride.startDate && dateStr <= shiftOverride.endDate) {
             return shiftOverride.shift;
         }
     }
-    
+
     // Otherwise use automatic shift detection
     return getCurrentShift(date);
 }
@@ -139,13 +140,13 @@ let availabilityOverrides = JSON.parse(localStorage.getItem("availabilityOverrid
 // ---------- TEAM DATA ----------
 let teamData = JSON.parse(localStorage.getItem("teamData")) || {
     SAs: [ "Gayathiri", "Ajay", "Jana", "Malini", "Rajapandi Ganesan", "Keerthana", "Siva Bharathi"],
-    apprentices: [ "Rokita", "Deva", "Soban"],
+    apprentices: [ "Sanjay", "Vishal", "Subash"],
     responsibilities: {
-        Gayathiri: "Deva",
-        Ajay: "Deva",
-        Jana: "Karl / Soban",
-        Malini: "Rokita",
-        Rajapandi Ganesan: "Karl / Soban",
+        Gayathiri: "Vishal",
+        Ajay: "Vishal",
+        Jana: "Karl / Subash",
+        Malini: "Sanjay",
+        Rajapandi Ganesan: "Karl / Subash",
     }
 };
 
@@ -173,9 +174,9 @@ let memberAvailabilitySettings = JSON.parse(localStorage.getItem('memberAvailabi
     },
     apprentices: {
         "Siva Bharathi": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Rokita": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Deva": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Soban": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] }
+        "Sanjay": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Vishal": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Subash": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] }
     }
 };
 
@@ -309,7 +310,7 @@ function addMemberFromAvailability(role) {
     teamData[category].push(name.trim());
     
     if (role === "SA") {
-        const responsibilities = prompt(`Enter responsibilities for ${name.trim()} (e.g., "Karl / Soban"):`);
+        const responsibilities = prompt(`Enter responsibilities for ${name.trim()} (e.g., "Karl / Subash"):`);
         if (responsibilities) {
             teamData.responsibilities[name.trim()] = responsibilities.trim();
         }
