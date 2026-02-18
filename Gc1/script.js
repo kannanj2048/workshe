@@ -146,7 +146,6 @@ let teamData = JSON.parse(localStorage.getItem("teamData")) || {
         Kannan: "Karl / Subash",
         Midhun: "Sanjay",
         Prem: "Karl / Subash",
-        Idris: "All Apprentice"
     }
 };
 
@@ -165,7 +164,6 @@ let isAdmin = false;
 // ========== CENTRALIZED AVAILABILITY MANAGEMENT SYSTEM ==========
 let memberAvailabilitySettings = JSON.parse(localStorage.getItem('memberAvailabilitySettings')) || {
     SAs: {
-        "Idris": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], isPOC: true },
         "Selva": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
         "Naveen": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Kannan": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
@@ -3691,8 +3689,8 @@ window.savePasswordsToFirebase = savePasswordsToFirebase;
 
 // Default POC names
 const DEFAULT_POC_NAMES = {
-    team1: "Raja",
-    team2: "Vishali"
+    team1: " ",
+    team2: " "
 };
 
 // Storage key - NOW GROUP-SPECIFIC
