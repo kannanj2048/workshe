@@ -54,7 +54,6 @@ function checkForMidnightUpdate() {
     
     // Check if date has changed (midnight passed)
     if (lastCheckedDate !== null && lastCheckedDate !== currentDateStr) {
-        console.log(`Auto-updating to: ${currentDateStr}`);
         
         // Auto-update to new day
         const dateInput = document.getElementById("scheduleDate");
@@ -76,7 +75,6 @@ const SHIFT_TYPES = {
     AFTERNOON: { name: "Afternoon", start: 17, startMin: 0, end: 0, endMin: 30, label: "18:00 - 02:00" },
     NIGHT: { name: "Night", start: 0, startMin: 30, end: 8, endMin: 59, label: "01:00 - 09:00" }
 };
-
 
 let shiftSchedule = JSON.parse(localStorage.getItem("shiftSchedule")) || {
     currentPeriod: { shiftType: "MORNING", startDate: "2025-12-09", endDate: "2025-12-22" },
@@ -130,7 +128,6 @@ function getShiftForDate(date) {
     return getCurrentShift(date);
 }
 
-
 function getWorkingHoursDisplay() {
     const nowSGT = getNowSGT();
     const currentShift = getCurrentShift(nowSGT);
@@ -149,10 +146,8 @@ let teamData = JSON.parse(localStorage.getItem("teamData")) || {
         Kannan: "Karl / Subash",
         Midhun: "Sanjay",
         Prem: "Karl / Subash",
-        Idris: "All Apprentice"
     }
 };
-
 
 const platforms = {
     main: ["SIEM", "XDR", "Forti EDR"],
@@ -169,7 +164,6 @@ let isAdmin = false;
 // ========== CENTRALIZED AVAILABILITY MANAGEMENT SYSTEM ==========
 let memberAvailabilitySettings = JSON.parse(localStorage.getItem('memberAvailabilitySettings')) || {
     SAs: {
-        "Idris": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], isPOC: true },
         "Selva": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
         "Naveen": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Kannan": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
@@ -184,7 +178,6 @@ let memberAvailabilitySettings = JSON.parse(localStorage.getItem('memberAvailabi
         "Subash": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] }
     }
 };
-
 
 // ========== GLOBAL AVAILABILITY FUNCTIONS ==========
 function toggleMemberAvailability(name, role) {
@@ -287,7 +280,6 @@ function removeMemberFromAvailability(name, role) {
         if (typeof database !== 'undefined') {
             // Delete user from Firebase
             deleteUserFromRole(name, role, () => {
-                console.log("User deleted from Firebase");
             });
             saveTeamDataToFirebase();
         }
@@ -344,10 +336,8 @@ function addMemberFromAvailability(role) {
     if (typeof database !== 'undefined') {
         checkAndAddUser(name.trim(), role, (success, status) => {
             if (success) {
-                console.log(`✅ User ${name.trim()} added to Firebase`);
                 saveTeamDataToFirebase();
             } else {
-                console.error("❌ Failed to add user to Firebase");
             }
         });
     }
@@ -365,13 +355,12 @@ function saveMemberAvailabilitySettings() {
     if (typeof database !== 'undefined') {
         try {
             database.ref('memberAvailabilitySettings').set(memberAvailabilitySettings)
-                .then(() => console.log('✅ Availability settings saved to Firebase'))
+                .then(() => {})
                 .catch(() => {}); // Silent fail - localStorage already saved successfully
         } catch (error) {
             // Silent fail - localStorage already saved successfully
         }
     }
-    console.log('✅ Member availability settings saved to localStorage');
 }
 
 function changeMemberWorkingDays(name, role) {
@@ -419,14 +408,12 @@ function getAvailableSAsForDate(dateSGT) {
     
     // Safety check
     if (!memberAvailabilitySettings || !memberAvailabilitySettings.SAs) {
-        console.warn('⚠️ memberAvailabilitySettings.SAs is not defined');
         return availableMembers;
     }
     
     for (const [name, settings] of Object.entries(memberAvailabilitySettings.SAs)) {
         // Safety check for settings
         if (!settings || !settings.days) {
-            console.warn(`⚠️ Invalid settings for SA: ${name}`);
             continue;
         }
         
@@ -437,14 +424,12 @@ function getAvailableSAsForDate(dateSGT) {
         
         // ✅ Check monthly leave
         if (typeof isMemberOnLeave === 'function' && isMemberOnLeave(name, 'SA', dateSGT)) {
-            console.log(`⛔ ${name} is on MONTHLY LEAVE`);
             continue;
         }
         
         // Check availability override (manual toggle)
         const key = `${name}_SA`;
         if (availabilityOverrides[key]) {
-            console.log(`⛔ ${name} is UNAVAILABLE (manual override)`);
             continue;
         }
         
@@ -452,7 +437,6 @@ function getAvailableSAsForDate(dateSGT) {
         availableMembers.push(name);
     }
     
-    console.log(`✅ Available SAs for ${dayName}: ${availableMembers.join(', ') || 'NONE'}`);
     return availableMembers;
 }
 
@@ -464,14 +448,12 @@ function getAvailableApprenticesForDate(dateSGT) {
     
     // Safety check
     if (!memberAvailabilitySettings || !memberAvailabilitySettings.apprentices) {
-        console.warn('⚠️ memberAvailabilitySettings.apprentices is not defined');
         return availableMembers;
     }
     
     for (const [name, settings] of Object.entries(memberAvailabilitySettings.apprentices)) {
         // Safety check for settings
         if (!settings || !settings.days) {
-            console.warn(`⚠️ Invalid settings for Apprentice: ${name}`);
             continue;
         }
         
@@ -482,21 +464,18 @@ function getAvailableApprenticesForDate(dateSGT) {
         
         // ✅ Check monthly leave
         if (typeof isMemberOnLeave === 'function' && isMemberOnLeave(name, 'Apprentice', dateSGT)) {
-            console.log(`⛔ ${name} is on MONTHLY LEAVE`);
             continue;
         }
         
         // Check availability override (manual toggle)
         const key = `${name}_Apprentice`;
         if (availabilityOverrides[key]) {
-            console.log(`⛔ ${name} is UNAVAILABLE (manual override)`);
             continue;
         }
         
         availableMembers.push(name);
     }
     
-    console.log(`✅ Available Apprentices for ${dayName}: ${availableMembers.join(', ') || 'NONE'}`);
     return availableMembers;
 }
 
@@ -545,12 +524,10 @@ let assignmentHistory = JSON.parse(localStorage.getItem("assignmentHistory")) ||
 function generateScheduleForDate(date) {
     // Check if AI learning is enabled
     if (typeof AI_LEARNING_CONFIG !== 'undefined' && AI_LEARNING_CONFIG.ENABLE_LEARNING && typeof learnedPatterns !== 'undefined' && learnedPatterns.totalSchedules >= AI_LEARNING_CONFIG.MIN_PATTERNS_REQUIRED) {
-        console.log('🤖 Using AI-powered schedule generation');
         return generateScheduleWithAI(date);
     }
 
     // Fallback to original logic if not enough training data
-    console.log('📋 Using standard schedule generation (not enough training data yet)');
     
     const schedule = {
         date: date.toISOString().split("T")[0],
@@ -564,16 +541,11 @@ function generateScheduleForDate(date) {
     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const dayName = dayNames[dayOfWeek];
 
-    console.log(`\n${'='.repeat(60)}`);
-    console.log(`🧠 SMART AI SCHEDULING - ${dayName}, ${dateStr}`);
-    console.log('='.repeat(60));
-
     // ===== STEP 1: Get ONLY available members (check availability status) =====
     const availableSAs = getAvailableSAsForDate(date).filter(sa => {
         const key = `${sa}_SA`;
         const isAvailable = !availabilityOverrides[key];
         if (!isAvailable) {
-            console.log(`⛔ ${sa} is UNAVAILABLE (marked in availability status)`);
         }
         return isAvailable;
     });
@@ -582,17 +554,11 @@ function generateScheduleForDate(date) {
         const key = `${app}_Apprentice`;
         const isAvailable = !availabilityOverrides[key];
         if (!isAvailable) {
-            console.log(`⛔ ${app} is UNAVAILABLE (marked in availability status)`);
         }
         return isAvailable;
     });
 
-    console.log(`\n✅ AVAILABLE TODAY (${dayName}):`);
-    console.log(`👥 SAs: ${availableSAs.join(', ') || 'NONE'}`);
-    console.log(`🎓 Apprentices: ${availableApps.join(', ') || 'NONE'}`);
-
     if (availableSAs.length === 0) {
-        console.log('\n❌ NO SAs AVAILABLE - Cannot generate schedule');
         platforms.main.forEach(p => {
             schedule.platforms[p] = { inCharge: "No SA Available", responsibility: "N/A" };
         });
@@ -606,13 +572,10 @@ function generateScheduleForDate(date) {
     const saScores = calculateWorkloadScores(availableSAs, recentHistory, 'SA');
     const appScores = calculateWorkloadScores(availableApps, recentHistory, 'Apprentice');
 
-    console.log(`\n📊 WORKLOAD SCORES:`);
     availableSAs.forEach(sa => {
-        console.log(`  ${sa}: ${saScores[sa]?.fairnessScore || 0} points (${saScores[sa]?.total || 0} assignments)`);
     });
 
     // ===== STEP 4: Assign MAIN PLATFORMS (SIEM, XDR, Forti EDR) =====
-    console.log(`\n🎯 ASSIGNING MAIN PLATFORMS:`);
     const mainPlatforms = ['SIEM', 'XDR', 'Forti EDR'];
     const usedSAs = [];
 
@@ -644,12 +607,10 @@ function generateScheduleForDate(date) {
             };
 
             recordPlatformAssignment(platform, bestSA, dateStr, date);
-            console.log(`  ✅ ${platform}: ${bestSA} → ${responsibility}`);
         }
     });
 
     // ===== STEP 5: Assign COMMON PLATFORMS =====
-    console.log(`\n🔧 ASSIGNING COMMON PLATFORMS:`);
     const commonPlatforms = ['CrowdStrike EDR', 'NDR', 'Netskope'];
 
     if (dayOfWeek === 4 || dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0) {
@@ -659,13 +620,10 @@ function generateScheduleForDate(date) {
                 inCharge: "All SA's",
                 responsibility: 'All Apprentice'
             };
-            console.log(`  ✅ ${platform}: All SA's → All Apprentice`);
         });
     } else {
         // Monday-Wednesday - Assign specific SAs (not used in main platforms)
         const remainingSAs = availableSAs.filter(sa => !usedSAs.includes(sa));
-
-        console.log(`  📋 Remaining SAs for common platforms: ${remainingSAs.join(', ') || 'Will reuse'}`);
 
         commonPlatforms.forEach((platform, idx) => {
             let assignedSA;
@@ -695,12 +653,10 @@ function generateScheduleForDate(date) {
             };
 
             recordPlatformAssignment(platform, assignedSA, dateStr, date);
-            console.log(`  ✅ ${platform}: ${assignedSA} → All Apprentice`);
         });
     }
 
     // ===== STEP 6: Assign GROUPED PLATFORMS =====
-    console.log(`\n🌐 ASSIGNING GROUPED PLATFORMS:`);
     const groupedPlatforms = ['Sophos XDR', 'Trend Vision One', 'Cloudflare', 'Acronis EDR'];
 
     const allAssignedSAs = usedSAs.concat(
@@ -721,7 +677,6 @@ function generateScheduleForDate(date) {
                 inCharge: schedule.platforms['NDR']?.inCharge || "All SA's",
                 responsibility: 'All Apprentice'
             };
-            console.log(`  ✅ ${platform}: Same as NDR`);
         } else if (platform === 'Sophos XDR' && remainingForGrouped.length > 0) {
             const assignedSA = selectBestPersonForPlatform(
                 platform,
@@ -739,19 +694,16 @@ function generateScheduleForDate(date) {
 
             if (assignedSA) {
                 recordPlatformAssignment(platform, assignedSA, dateStr, date);
-                console.log(`  ✅ ${platform}: ${assignedSA} → All Apprentice`);
             }
         } else {
             schedule.platforms[platform] = {
                 inCharge: "All SA's",
                 responsibility: 'All Apprentice'
             };
-            console.log(`  ⚠️ ${platform}: "All SA's" (Few SA available)`);
         }
     });
 
     // ===== STEP 7: Assign ADDITIONAL TASKS =====
-    console.log(`\n📋 ASSIGNING ADDITIONAL TASKS:`);
     schedule.tasks = assignAdditionalTasksSmart(
         availableSAs,
         availableApps,
@@ -762,10 +714,6 @@ function generateScheduleForDate(date) {
 
     // Save assignment history
     localStorage.setItem("assignmentHistory", JSON.stringify(assignmentHistory));
-
-    console.log(`\n${'='.repeat(60)}`);
-    console.log('✅ SCHEDULE GENERATION COMPLETE');
-    console.log('='.repeat(60) + '\n');
 
     return schedule;
 }
@@ -831,11 +779,6 @@ function assignAdditionalTasksSmart(sas, apprentices, date, recentHistory, mainP
     const dayOfWeek = date.getDay();
     const dateStr = date.toISOString().split("T")[0];
 
-    console.log(`  📊 Task Assignment Strategy:`);
-    console.log(`     - Main Platform SAs: ${mainPlatformSAs.join(', ')}`);
-    console.log(`     - All Available SAs: ${sas.join(', ') || 'NONE'}`);
-    console.log(`     - All Available Apprentices: ${apprentices.join(', ') || 'NONE'}`);
-
     // ✅ Use only actual available members - no hardcoded fallback
     const safeSAs = sas.length > 0 ? sas : [];
     const safeApps = apprentices.length > 0 ? apprentices : [];
@@ -854,7 +797,6 @@ function assignAdditionalTasksSmart(sas, apprentices, date, recentHistory, mainP
 
     // If no members available at all, show "No one available"
     if (safeSAs.length === 0 && safeApps.length === 0) {
-        console.warn('⚠️ No SAs or Apprentices available - assigning "No one available"');
         taskList.forEach(task => {
             tasks[task] = "No one available";
         });
@@ -878,8 +820,6 @@ function assignAdditionalTasksSmart(sas, apprentices, date, recentHistory, mainP
     const availableForTasks = safeSAs.filter(sa => !mainPlatformSAs.includes(sa));
     const taskSAs = availableForTasks.length > 0 ? availableForTasks : sortedSAs;
 
-    console.log(`     - Task SAs Pool: ${taskSAs.join(', ') || 'Using all SAs'}`);
-
     // ✅ ASSIGN ALL TASKS DYNAMICALLY
     taskList.forEach((taskName, index) => {
         if (taskSAs.length > 0 && sortedApps.length > 0) {
@@ -897,23 +837,18 @@ function assignAdditionalTasksSmart(sas, apprentices, date, recentHistory, mainP
         } else {
             tasks[taskName] = "All SA's";
         }
-        console.log(`  📋 ${taskName}: ${tasks[taskName]}`);
     });
 
     // ✅ VERIFICATION: Ensure all tasks are present
     taskList.forEach(taskName => {
         if (!tasks[taskName]) {
-            console.error(`❌ MISSING TASK: ${taskName} - Adding fallback`);
             tasks[taskName] = "All SA's";
         }
     });
 
-    console.log(`  ✅ All ${taskList.length} tasks assigned successfully`);
     
     // ✅ FINAL VERIFICATION: Log all tasks before returning
-    console.log(`  📊 Final Task Summary (${Object.keys(tasks).length} tasks):`);
     Object.entries(tasks).forEach(([taskName, assigned]) => {
-        console.log(`     - ${taskName}: ${assigned}`);
     });
 
     // Record task assignments
@@ -934,7 +869,6 @@ function assignAdditionalTasksSmart(sas, apprentices, date, recentHistory, mainP
 
     return tasks;
 }
-
 
 // ==========================================
 // HELPER FUNCTIONS
@@ -1094,7 +1028,6 @@ function clearAssignmentHistory() {
         };
         localStorage.setItem("assignmentHistory", JSON.stringify(assignmentHistory));
         showNotification("Assignment history cleared!", "success");
-        console.log("🗑️ Assignment history cleared - algorithm reset");
     }
 }
 
@@ -1102,9 +1035,6 @@ function clearAssignmentHistory() {
 function assignAdditionalTasks(sas, apprentices, date) {
     return assignAdditionalTasksSmart(sas, apprentices, date, {platforms: {}, tasks: {}}, []);
 }
-
-console.log("%c🧠 SMART AI SCHEDULING SYSTEM LOADED", "color: #4CAF50; font-weight: bold; font-size: 14px;");
-console.log("%cFeatures: Availability-based | Workload balancing | 7-day cooldown | Smart pairing", "color: #2196F3; font-size: 12px;");
 
 // ==========================================
 // ✅ PROPER SCHEDULE GENERATION FUNCTION
@@ -1239,9 +1169,6 @@ function displayAdditionalTasks(schedule) {
     if (!tasksGrid) return;
     
     // ✅ DEBUG: Log tasks being displayed
-    console.log(`📋 Displaying Additional Tasks for ${schedule.date}:`);
-    console.log(`   Total tasks: ${Object.keys(schedule.tasks).length}`);
-    console.log(`   Tasks:`, schedule.tasks);
     
     tasksGrid.innerHTML = "";
     
@@ -1260,7 +1187,6 @@ function displayAdditionalTasks(schedule) {
     // Check for missing tasks and add them with fallback
     requiredTasks.forEach(taskName => {
         if (!schedule.tasks[taskName]) {
-            console.warn(`⚠️ Missing task: ${taskName} - adding fallback`);
             schedule.tasks[taskName] = "All SA's";
         }
     });
@@ -1283,8 +1209,6 @@ function displayAdditionalTasks(schedule) {
         `;
         tasksGrid.appendChild(card);
     });
-
-    console.log(`✅ Displayed ${tasksGrid.children.length} tasks`);
 
     // Load and apply task order
     if (typeof loadAndApplyTaskOrder === 'function') {
@@ -1358,7 +1282,6 @@ document.addEventListener("DOMContentLoaded", () => {
         initAvailabilityStatus();
     }
 
-
     // ✅ Generate today's schedule with correct SGT date
     const todaySGT = getNowSGT();
     lastCheckedDate = formatDateForInput(todaySGT);  // ✅ Add this line
@@ -1390,23 +1313,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }, 1500); // Adjust timing as needed
 
-
     setTimeout(() => {
         // Initialize AI Learning
         if (typeof analyzeAndLearnPatterns === 'function') {
             analyzeAndLearnPatterns();
-            console.log('✅ AI Learning initialized');
         }
 
         // If already logged in as admin, add controls
         if (isAdmin) {
             if (typeof addAILearningControls === 'function') {
                 addAILearningControls();
-                console.log('✅ AI controls added on load');
             }
             if (typeof addResetOrderButton === 'function') {
                 addResetOrderButton();
-                console.log('✅ Reset button added on load');
             }
         }
 
@@ -1416,7 +1335,6 @@ document.addEventListener("DOMContentLoaded", () => {
             spinner.classList.add("hidden");
         }
 
-        console.log('✅ Application fully loaded');
     }, 500); // currently adjust loading for skeleton
 });
 
@@ -1620,12 +1538,13 @@ function initAdminAccess() {
     }
     
 if (adminLoginForm) {
-    adminLoginForm.addEventListener("submit", e => {
+    adminLoginForm.addEventListener("submit", async e => {
         e.preventDefault();
         const password = document.getElementById("adminPassword").value.trim();
         
         // 1) Check Admin Password
-        if (password === userCredentials.admin.password) {
+        const isAdmin_ = await verifyPassword(password, userCredentials.admin.password);
+        if (isAdmin_) {
             currentUser = { username: 'admin', role: 'admin' };
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
             setAdminMode(true);
@@ -1633,9 +1552,12 @@ if (adminLoginForm) {
             if (adminLoginModal) adminLoginModal.classList.remove("show");
             adminLoginForm.reset();
             showNotification("Admin mode enabled", "success");
-        } 
+            return;
+        }
+
         // 2) Check Guest Password
-        else if (password === userCredentials.guest.password) {
+        const isGuest_ = await verifyPassword(password, userCredentials.guest.password);
+        if (isGuest_) {
             // Initialize activeSessions if it doesn't exist
             if (!userCredentials.guest.activeSessions) {
                 userCredentials.guest.activeSessions = [];
@@ -1674,11 +1596,11 @@ if (adminLoginForm) {
                     }
                 }
             }, 300);
-        } 
-        // 3) Handle Incorrect Password
-        else {
-            showNotification("Invalid password", "error");
+            return;
         }
+
+        // 3) Handle Incorrect Password
+        showNotification("Invalid password", "error");
     }); 
 }
     
@@ -1839,8 +1761,6 @@ function initScheduleFeatures() {
         const utcOffset = selectedDate.getTimezoneOffset();
         const sgtDate = new Date(selectedDate.getTime() + (sgtOffset + utcOffset) * 60000);
         
-        console.log(`📅 Date changed to: ${selectedDateStr}`);
-        console.log(`🕐 SGT Date object:`, sgtDate);
         
         generateDailySchedule(sgtDate);
     });
@@ -1857,7 +1777,6 @@ function initScheduleFeatures() {
                 dateInput.value = dateStr;
             }
             
-            console.log(`🔄 Today button clicked - Showing schedule for: ${dateStr}`);
             
             // Load existing schedule (don't regenerate)
             generateDailySchedule(nowSGT);
@@ -1880,7 +1799,6 @@ function initScheduleFeatures() {
                 dateInput.value = dateStr;
             }
             
-            console.log(`🔄 Generate Today clicked - Regenerating with current availability for: ${dateStr}`);
             
             // Generate new schedule with current availability
             generateDailySchedule(nowSGT);
@@ -1891,27 +1809,21 @@ function initScheduleFeatures() {
     const dlBtn = document.getElementById("downloadSchedule");
     if (dlBtn) {
         dlBtn.addEventListener("click", () => {
-            console.log('📥 Download CSV button clicked');
             try {
                 downloadScheduleAsCSV();
             } catch (error) {
-                console.error('❌ Error in download handler:', error);
                 showNotification(`Download failed: ${error.message}`, 'error');
             }
         });
-        console.log('✅ Download CSV button initialized');
     } else {
-        console.warn('⚠️ Download CSV button not found (ID: downloadSchedule)');
     }
     
     const toggleWeekBtn = document.getElementById("toggleWeekView");
     if (toggleWeekBtn) {
         toggleWeekBtn.addEventListener("click", () => {
-            console.log('📅 Toggle Week View button clicked');
             try {
                 const weekDiv = document.getElementById("weekSchedule");
                 if (!weekDiv) {
-                    console.error('❌ weekSchedule element not found');
                     showNotification('Error: Week view container not found', 'error');
                     return;
                 }
@@ -1920,20 +1832,15 @@ function initScheduleFeatures() {
                     generateWeekView();
                     weekDiv.style.display = "block";
                     toggleWeekBtn.innerHTML = '<i class="fas fa-calendar-day"></i> Show Day View';
-                    console.log('✅ Week view shown');
                 } else {
                     weekDiv.style.display = "none";
                     toggleWeekBtn.innerHTML = '<i class="fas fa-calendar-week"></i> Show Full Week';
-                    console.log('✅ Week view hidden');
                 }
             } catch (error) {
-                console.error('❌ Error in week view toggle:', error);
                 showNotification(`Week view error: ${error.message}`, 'error');
             }
         });
-        console.log('✅ Toggle Week View button initialized');
     } else {
-        console.warn('⚠️ Toggle Week View button not found (ID: toggleWeekView)');
     }
 }
 
@@ -1941,30 +1848,25 @@ function generateWeekView() {
     try {
         const weekDiv = document.getElementById('weekSchedule');
         if (!weekDiv) {
-            console.error('❌ weekSchedule element not found');
             return;
         }
         
         // Check if required dependencies exist
         if (typeof platforms === 'undefined') {
-            console.error('❌ platforms is not defined');
             showNotification('Error: Schedule data not loaded', 'error');
             return;
         }
         
         if (typeof scheduleHistory === 'undefined') {
-            console.error('❌ scheduleHistory is not defined');
             showNotification('Error: Schedule history not loaded', 'error');
             return;
         }
         
         if (typeof generateScheduleForDate !== 'function') {
-            console.error('❌ generateScheduleForDate is not defined');
             showNotification('Error: Schedule generator not loaded', 'error');
             return;
         }
         
-        console.log('📅 Generating week view...');
         
         const dateInput = document.getElementById('scheduleDate');
         const currentDate = new Date(dateInput ? dateInput.value : getNowSGT());
@@ -2007,11 +1909,9 @@ function generateWeekView() {
         html += '</tbody></table></div>';
         weekDiv.innerHTML = html;
         
-        console.log('✅ Week view generated successfully');
         showNotification('Week view loaded', 'success');
         
     } catch (error) {
-        console.error('❌ Week view generation error:', error);
         showNotification(`Error generating week view: ${error.message}`, 'error');
     }
 }
@@ -2021,24 +1921,20 @@ function downloadScheduleAsCSV() {
     try {
         // Check if required dependencies exist
         if (typeof platforms === 'undefined') {
-            console.error('❌ platforms is not defined');
             showNotification('Error: Schedule data not loaded', 'error');
             return;
         }
         
         if (typeof scheduleHistory === 'undefined') {
-            console.error('❌ scheduleHistory is not defined');
             showNotification('Error: Schedule history not loaded', 'error');
             return;
         }
         
         if (typeof generateScheduleForDate !== 'function') {
-            console.error('❌ generateScheduleForDate is not defined');
             showNotification('Error: Schedule generator not loaded', 'error');
             return;
         }
         
-        console.log('📥 Starting CSV download...');
         
         const dateInput = document.getElementById("scheduleDate");
         const currentDate = new Date(dateInput ? dateInput.value : getNowSGT());
@@ -2133,11 +2029,9 @@ function downloadScheduleAsCSV() {
         document.body.removeChild(a); // ✅ Clean up
         window.URL.revokeObjectURL(url);
         
-        console.log('✅ CSV downloaded successfully');
         showNotification("Weekly schedule downloaded successfully!", "success");
         
     } catch (error) {
-        console.error('❌ CSV download error:', error);
         showNotification(`Error downloading CSV: ${error.message}`, 'error');
     }
 }
@@ -2228,7 +2122,6 @@ function openAddMemberModal(type) {
         if (typeof database !== 'undefined' && typeof checkAndAddUser === 'function') {
             checkAndAddUser(name, type, (success) => {
                 if (success) {
-                    console.log(`✅ User ${name} added to Firebase`);
                     if (typeof saveTeamDataToFirebase === 'function') saveTeamDataToFirebase();
                 }
             });
@@ -2318,7 +2211,6 @@ function updateTotalMembersCount() {
         }
     });
     
-    console.log(`📊 Total Members Updated: ${total} (${teamData.SAs?.length || 0} SAs + ${teamData.apprentices?.length || 0} Apprentices)`);
 }
 
 // Helper function for counter animation
@@ -2338,12 +2230,10 @@ function animateCounter(element, target) {
     }, 16);
 }
 
-
 // ---------- AVAILABILITY STATUS ----------
 function initAvailabilityStatus() {
     updateAvailabilityStatus();
 }
-
 
 function updateAvailabilityStatus() {
     const nowSGT = getNowSGT();
@@ -2735,7 +2625,6 @@ function initContactForm() {
             newForm.reset();
             
         } catch (error) {
-            console.error("EmailJS error:", error);
             showNotification("Failed to send message. Please try again.", "error");
             
         } finally {
@@ -2802,7 +2691,6 @@ function showNotification(message, type = "success") {
         document.head.appendChild(style);
     }
 }
-
 
 // ============================================
 // TESTIMONIAL CAROUSEL FUNCTIONALITY
@@ -2935,8 +2823,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 300);
 });
 
-console.log('%c✅ Testimonial Carousel Loaded', 'color:#10b981;font-weight:bold;font-size:14px');
-
 // ============================================
 // AUTO-FOCUS CENTER CARD ON SECTION VIEW
 // ============================================
@@ -3004,8 +2890,6 @@ showTestimonial = function(index) {
     }
 };
 
-console.log('%c✨ Multi-color hover effect loaded', 'color:#f093fb;font-weight:bold;font-size:12px');
-
 // ==================
 // GUEST USER SYSTEM 
 // ===================
@@ -3023,18 +2907,71 @@ let isGuest = false;
 // Save credentials to localStorage (group-specific)
 function saveUserCredentials() {
     if (!PASSWORD_STORAGE_KEY || !userCredentials) {
-        console.warn('⚠️ Password system not initialized yet');
         return;
     }
     
     // Save to localStorage
     localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
-    console.log(`💾 Passwords saved to localStorage (${CURRENT_GROUP})`);
     
     // Save to Firebase for real-time sync
     if (typeof savePasswordsToFirebase === 'function') {
         savePasswordsToFirebase();
     }
+}
+
+// ==========================================
+// 🔒 SECURE PASSWORD HASHING SYSTEM
+// Uses Web Crypto API (SHA-256) — no libraries needed
+// Adaptable for all groups (gc1, gc2, gc3...)
+// ==========================================
+
+/**
+ * Hash a plain-text password using SHA-256.
+ * Returns a hex string (Promise).
+ */
+async function hashPassword(plainText) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(plainText);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Compare a plain-text password against a stored hash.
+ * Returns true if they match (Promise<boolean>).
+ */
+async function verifyPassword(plainText, storedHash) {
+    // Support legacy plain-text passwords during transition:
+    // if the stored value is not a 64-char hex string it's plain text
+    if (!/^[0-9a-f]{64}$/i.test(storedHash)) {
+        return plainText === storedHash;
+    }
+    const hashed = await hashPassword(plainText);
+    return hashed === storedHash;
+}
+
+/**
+ * Migrate a credentials object so all passwords are hashed.
+ * Call once when loading credentials for the first time.
+ * Returns a Promise that resolves when migration is done.
+ */
+async function migrateCredentialsToHashed(creds) {
+    let changed = false;
+
+    // Admin password
+    if (creds.admin && creds.admin.password && !/^[0-9a-f]{64}$/i.test(creds.admin.password)) {
+        creds.admin.password = await hashPassword(creds.admin.password);
+        changed = true;
+    }
+
+    // Guest password
+    if (creds.guest && creds.guest.password && !/^[0-9a-f]{64}$/i.test(creds.guest.password)) {
+        creds.guest.password = await hashPassword(creds.guest.password);
+        changed = true;
+    }
+
+    return changed;
 }
 
 // Generate unique session ID
@@ -3203,7 +3140,6 @@ function displayAdditionalTasksForGuest(schedule) {
     // Check for missing tasks and add them with fallback
     requiredTasks.forEach(taskName => {
         if (!schedule.tasks[taskName]) {
-            console.warn(`⚠️ Missing task: ${taskName} - adding fallback`);
             schedule.tasks[taskName] = "All SA's";
         }
     });
@@ -3516,7 +3452,7 @@ function closeResetPasswordModal() {
 }
 
 // Handle reset password
-function handleResetPassword(e) {
+async function handleResetPassword(e) {
     e.preventDefault();
     
     const accountType = document.getElementById('resetAccountType').value;
@@ -3540,23 +3476,25 @@ function handleResetPassword(e) {
     }
     
     if (accountType === 'admin') {
-        if (oldPassword !== userCredentials.admin.password) {
+        const valid = await verifyPassword(oldPassword, userCredentials.admin.password);
+        if (!valid) {
             showNotification("Current admin password is incorrect", "error");
             return;
         }
         
-        userCredentials.admin.password = newPassword;
+        userCredentials.admin.password = await hashPassword(newPassword);
         saveUserCredentials();
         showNotification("✅ Admin password reset successfully!", "success");
         closeResetPasswordModal();
         
     } else if (accountType === 'guest') {
-        if (oldPassword !== userCredentials.guest.password) {
+        const valid = await verifyPassword(oldPassword, userCredentials.guest.password);
+        if (!valid) {
             showNotification("Current User password is incorrect", "error");
             return;
         }
         
-        userCredentials.guest.password = newPassword;
+        userCredentials.guest.password = await hashPassword(newPassword);
         saveUserCredentials();
         showNotification("✅ User password reset successfully!", "success");
         closeResetPasswordModal();
@@ -3578,7 +3516,6 @@ function handleResetPassword(e) {
            icon.classList.add('fa-eye');
     }
 }
-console.log('%c✅ User System Loaded', 'color: #667eea; font-weight: bold; font-size: 14px');
 
 // ========================================
 // POC MANAGEMENT SYSTEM - ADMIN ONLY
@@ -3613,13 +3550,11 @@ function detectGroupID() {
     if (pageTitle.includes('G3') || pageURL.includes('group3') || pageURL.includes('gc3')) return 'gc3';
     
     // Default to gc1 if cannot detect
-    console.warn('⚠️ Could not auto-detect group ID, defaulting to gc1');
     return 'gc1';
 }
 
 // Detect current group
 const CURRENT_GROUP = detectGroupID();
-console.log('🎯 Detected Group:', CURRENT_GROUP);
 
 // ✅ Initialize password system now that CURRENT_GROUP is defined
 PASSWORD_STORAGE_KEY = `userCredentials_${CURRENT_GROUP}`;
@@ -3634,7 +3569,15 @@ userCredentials = JSON.parse(localStorage.getItem(PASSWORD_STORAGE_KEY)) || {
         activeSessions: []
     }
 };
-console.log(`🔑 Password system initialized for group: ${CURRENT_GROUP}`);
+
+// 🔒 Auto-migrate plain-text passwords to SHA-256 hashes on first load
+(async () => {
+    const migrated = await migrateCredentialsToHashed(userCredentials);
+    if (migrated) {
+        localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
+        if (typeof savePasswordsToFirebase === 'function') savePasswordsToFirebase();
+    }
+})();
 
 // ========================================
 // 🔒 FIREBASE PASSWORD SYNC FUNCTIONS
@@ -3645,37 +3588,35 @@ const PASSWORD_FIREBASE_KEY = `passwords_${CURRENT_GROUP}`;
 // Load passwords from Firebase
 function loadPasswordsFromFirebase(callback) {
     if (typeof window.database === 'undefined' || typeof database === 'undefined') {
-        console.log('⚠️ Firebase not available for password sync');
         if (callback) callback(null);
         return;
     }
     
-    console.log(`🔍 Loading passwords from Firebase: ${PASSWORD_FIREBASE_KEY}`);
     
     try {
         database.ref(PASSWORD_FIREBASE_KEY).once('value')
         .then((snapshot) => {
             const firebasePasswords = snapshot.val();
             if (firebasePasswords) {
-                console.log(`☁️ Passwords loaded from Firebase (${CURRENT_GROUP})`);
-                // Update local credentials
-                userCredentials = firebasePasswords;
-                // Update localStorage
-                localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
-                if (callback) callback(firebasePasswords);
+                // Migrate any plain-text passwords from Firebase
+                migrateCredentialsToHashed(firebasePasswords).then(migrated => {
+                    userCredentials = firebasePasswords;
+                    localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
+                    if (migrated) {
+                        if (typeof savePasswordsToFirebase === 'function') savePasswordsToFirebase();
+                    }
+                    if (callback) callback(firebasePasswords);
+                });
             } else {
-                console.log(`ℹ️ No passwords in Firebase yet, using defaults`);
                 // Save defaults to Firebase
                 savePasswordsToFirebase();
                 if (callback) callback(null);
             }
         })
         .catch((error) => {
-            console.error('❌ Error loading passwords from Firebase:', error);
             if (callback) callback(null);
         });
     } catch (error) {
-        console.error('❌ Failed to access Firebase for passwords:', error);
         if (callback) callback(null);
     }
 }
@@ -3683,44 +3624,40 @@ function loadPasswordsFromFirebase(callback) {
 // Save passwords to Firebase
 function savePasswordsToFirebase() {
     if (typeof window.database === 'undefined' || typeof database === 'undefined' || !userCredentials) {
-        console.log('⚠️ Firebase not available or userCredentials not initialized');
         return;
     }
     
     try {
         database.ref(PASSWORD_FIREBASE_KEY).set(userCredentials)
             .then(() => {
-                console.log(`☁️ Passwords saved to Firebase (${CURRENT_GROUP})`);
             })
             .catch((error) => {
-                console.error('❌ Error saving passwords to Firebase:', error);
             });
     } catch (error) {
-        console.error('❌ Failed to access Firebase for saving passwords:', error);
     }
 }
 
 // Setup real-time password listener
 function setupPasswordSyncListener() {
     if (typeof window.database === 'undefined' || typeof database === 'undefined') {
-        console.log('⚠️ Firebase not available - password sync disabled');
         return;
     }
     
-    console.log(`👂 Setting up real-time password sync for ${CURRENT_GROUP}`);
     
     try {
         database.ref(PASSWORD_FIREBASE_KEY).on('value', (snapshot) => {
             const firebasePasswords = snapshot.val();
             
             if (firebasePasswords) {
-                console.log(`🔄 Password updated from Firebase (${CURRENT_GROUP})`);
                 
-                // Update local credentials
-                userCredentials = firebasePasswords;
-                
-                // Update localStorage
-                localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
+                // Migrate and update local credentials
+                migrateCredentialsToHashed(firebasePasswords).then(migrated => {
+                    userCredentials = firebasePasswords;
+                    localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(userCredentials));
+                    if (migrated && typeof savePasswordsToFirebase === 'function') {
+                        savePasswordsToFirebase();
+                    }
+                });
                 
                 // Show notification to non-admin users
                 if (typeof isAdmin !== 'undefined' && !isAdmin) {
@@ -3728,23 +3665,18 @@ function setupPasswordSyncListener() {
                 }
             }
         }, (error) => {
-            console.error('❌ Password sync listener error:', error);
         });
     } catch (error) {
-        console.error('❌ Failed to setup password sync listener:', error);
     }
 }
 
 // Initialize password system with Firebase sync
 function initializePasswordSystem() {
-    console.log('🔑 Initializing password system with Firebase sync...');
     
     // Try to load from Firebase first
     loadPasswordsFromFirebase((firebasePasswords) => {
         if (firebasePasswords) {
-            console.log('✅ Using passwords from Firebase');
         } else {
-            console.log('✅ Using local passwords');
         }
         
         // Setup real-time sync listener
@@ -3757,8 +3689,8 @@ window.savePasswordsToFirebase = savePasswordsToFirebase;
 
 // Default POC names
 const DEFAULT_POC_NAMES = {
-    team1: "Selva",
-    team2: "Naveen"
+    team1: " ",
+    team2: " "
 };
 
 // Storage key - NOW GROUP-SPECIFIC
@@ -3775,7 +3707,6 @@ let pocNames = {
 // INITIALIZE POC SYSTEM
 // ========================================
 function initializePOCSystem() {
-    console.log('🔧 Initializing POC Management System...');
     
     // Load POC names from storage
     loadPOCNamesFromStorage();
@@ -3786,9 +3717,7 @@ function initializePOCSystem() {
     // Add edit buttons for admin only
     if (typeof isAdmin !== 'undefined' && isAdmin) {
         addPOCEditButtons();
-        console.log('✅ POC Edit buttons added (Admin Mode)');
     } else {
-        console.log('ℹ️ POC Edit buttons hidden (User Mode)');
     }
 }
 
@@ -3804,7 +3733,6 @@ function loadPOCNamesFromStorage() {
                     const data = snapshot.val();
                     if (data) {
                         pocNames = data;
-                        console.log(`☁️ POC names loaded from Firebase (${CURRENT_GROUP}):`, pocNames);
                         updatePOCDisplay();
                     } else {
                         // Try localStorage
@@ -3812,11 +3740,9 @@ function loadPOCNamesFromStorage() {
                     }
                 })
                 .catch(err => {
-                    console.warn('⚠️ Firebase POC load failed, using localStorage:', err);
                     loadPOCFromLocalStorage();
                 });
         } catch (error) {
-            console.warn('⚠️ Failed to access Firebase for POC, using localStorage:', error);
             loadPOCFromLocalStorage();
         }
     } else {
@@ -3830,14 +3756,11 @@ function loadPOCFromLocalStorage() {
     if (stored) {
         try {
             pocNames = JSON.parse(stored);
-            console.log(`💾 POC names loaded from localStorage (${CURRENT_GROUP}):`, pocNames);
         } catch (e) {
-            console.error('❌ Failed to parse POC data, using defaults');
             pocNames = { ...DEFAULT_POC_NAMES };
         }
     } else {
         pocNames = { ...DEFAULT_POC_NAMES };
-        console.log(`ℹ️ Using default POC names for ${CURRENT_GROUP}`);
     }
     updatePOCDisplay();
 }
@@ -3848,20 +3771,16 @@ function loadPOCFromLocalStorage() {
 function savePOCNamesToStorage() {
     // Save to localStorage
     localStorage.setItem(POC_STORAGE_KEY, JSON.stringify(pocNames));
-    console.log(`💾 POC names saved to localStorage (${CURRENT_GROUP})`);
     
     // Save to Firebase if available
     if (typeof window.database !== 'undefined' && typeof database !== 'undefined') {
         try {
             database.ref(POC_FIREBASE_KEY).set(pocNames)
                 .then(() => {
-                    console.log(`☁️ POC names saved to Firebase (${CURRENT_GROUP})`);
                 })
                 .catch(err => {
-                    console.error('❌ Firebase POC save failed:', err);
                 });
         } catch (error) {
-            console.error('❌ Failed to access Firebase for POC save:', error);
         }
     }
 }
@@ -3881,9 +3800,7 @@ function updatePOCDisplay() {
         pocElements[1].textContent = pocNames.team2;
         pocElements[1].setAttribute('data-team', 'team2');
         
-        console.log('✅ POC names displayed:', pocNames);
     } else {
-        console.warn('⚠️ POC elements not found in DOM');
     }
 }
 
@@ -4184,7 +4101,6 @@ function savePOCEdit(teamKey) {
         showNotification(`${teamLabel} POC updated to: ${newName}`, 'success');
     }
     
-    console.log(`✅ ${teamLabel} POC updated:`, newName);
 }
 
 // ========================================
@@ -4192,11 +4108,10 @@ function savePOCEdit(teamKey) {
 // ========================================
 function resetPOCNamesToDefault() {
     if (typeof isAdmin === 'undefined' || !isAdmin) {
-        console.error('❌ Only admins can reset POC names');
         return;
     }
     
-    if (!confirm('Reset POC names to default values?\n\nTeam1: Selva\nTeam2: Naveen')) {
+    if (!confirm('Reset POC names to default values?\n\nTeam1: Gayathiri\nTeam2: Ajay')) {
         return;
     }
     
@@ -4208,7 +4123,6 @@ function resetPOCNamesToDefault() {
         showNotification('POC names reset to default', 'success');
     }
     
-    console.log('🔄 POC names reset to default');
 }
 
 // ========================================
@@ -4234,9 +4148,6 @@ if (document.readyState === 'loading') {
     setTimeout(initializePOCSystem, 1000);
 }
 
-console.log('%c👤 POC Management System Loaded', 'color: #10b981; font-weight: bold; font-size: 14px');
-console.log(`%c   Group: ${CURRENT_GROUP} - Admin can edit POC names`, 'color: #3b82f6; font-size: 12px');
-
 // ==========================================
 // 🔒 INITIALIZE PASSWORD SYSTEM WITH FIREBASE SYNC
 // ==========================================
@@ -4244,21 +4155,16 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Admin can edit POC names`, 'color: #
 // Wait for Firebase to be ready before initializing password system
 function tryInitializePasswordSystem() {
     if (typeof window.database !== 'undefined') {
-        console.log('🔥 Firebase ready - initializing password system with sync');
         if (typeof initializePasswordSystem === 'function') {
             initializePasswordSystem();
         }
     } else {
-        console.log('⏳ Waiting for Firebase for password sync... (retrying in 500ms)');
         setTimeout(tryInitializePasswordSystem, 500);
     }
 }
 
 // Start password system initialization
 setTimeout(tryInitializePasswordSystem, 1000);
-
-console.log('%c🔒 Password System with Firebase Sync Loading...', 'color: #10b981; font-weight: bold; font-size: 14px');
-console.log(`%c   Group: ${CURRENT_GROUP} - Passwords will sync in real-time`, 'color: #3b82f6; font-size: 12px');
 
 // ==========================================
 // FIREBASE LOADING TIMEOUT NOTIFICATION
@@ -4417,7 +4323,6 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Passwords will sync in real-time`, '
     // Show loading timeout notification
     function showLoadingTimeoutNotification() {
         if (notificationShown) return;
-        console.warn('⚠️ Firebase loading timeout - showing ON-SCREEN notification');
         createOnScreenNotification();
         notificationShown = true;
     }
@@ -4431,7 +4336,6 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Passwords will sync in real-time`, '
         if (skeletonVisible && !mainContentVisible) {
             if (!loadingStartTime) {
                 loadingStartTime = currentTime;
-                console.log('🔄 Skeleton loading detected - starting timer');
             }
             
             const elapsedTime = currentTime - loadingStartTime;
@@ -4441,7 +4345,6 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Passwords will sync in real-time`, '
             }
         } else {
             if (loadingStartTime && mainContentVisible) {
-                console.log('✅ Main content loaded successfully');
                 stopMonitoring();
             }
         }
@@ -4450,7 +4353,6 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Passwords will sync in real-time`, '
     // Start monitoring
     function startMonitoring() {
         if (loadingCheckInterval) return;
-        console.log('👀 Starting Firebase loading monitor');
         loadingStartTime = null;
         notificationShown = false;
         monitorLoadingState();
@@ -4463,13 +4365,11 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Passwords will sync in real-time`, '
             clearInterval(loadingCheckInterval);
             loadingCheckInterval = null;
             loadingStartTime = null;
-            console.log('🛑 Stopped Firebase loading monitor');
         }
     }
     
     // Initialize
     function initialize() {
-        console.log('🚀 Firebase Loading Monitor initialized');
         setTimeout(startMonitoring, 500);
     }
     
@@ -4480,7 +4380,6 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Passwords will sync in real-time`, '
         initialize();
     }
     
-    console.log('%c⏳ Firebase Loading Monitor Active', 'color: #f59e0b; font-weight: bold');
     
 })();
 
@@ -4715,7 +4614,6 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Passwords will sync in real-time`, '
             platforms.main = customPlatforms.main || platforms.main;
             platforms.common = customPlatforms.common || platforms.common;
             platforms.grouped = customPlatforms.grouped || platforms.grouped;
-            console.log('✅ Custom platforms applied:', platforms);
         }
     }
     
@@ -4729,7 +4627,6 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Passwords will sync in real-time`, '
         // Add management buttons
         addManagementButtons();
         
-        console.log('🔧 Platform & Task Manager initialized (Admin Mode)');
     }
     
     // Add management buttons to the UI
@@ -4943,8 +4840,8 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Passwords will sync in real-time`, '
         // Sync to Firebase if available
         if (window.hasDatabase && window.hasDatabase()) {
             database.ref('customPlatforms').set(newPlatforms)
-                .then(() => console.log('☁️ Platforms saved to Firebase'))
-                .catch(err => console.warn('⚠️ Firebase save failed:', err.message));
+                .then(() => {})
+                .catch(err => {});
         }
         
         closePlatformManager();
@@ -5116,8 +5013,8 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Passwords will sync in real-time`, '
         // Sync to Firebase
         if (window.hasDatabase && window.hasDatabase()) {
             database.ref('customAdditionalTasks').set(newTasks)
-                .then(() => console.log('☁️ Tasks saved to Firebase'))
-                .catch(err => console.warn('⚠️ Firebase save failed:', err.message));
+                .then(() => {})
+                .catch(err => {});
         }
         
         closeTaskManager();
@@ -5281,7 +5178,6 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Passwords will sync in real-time`, '
                 localStorage.setItem(CUSTOM_PLATFORMS_KEY, JSON.stringify(firebaseData));
                 customPlatforms = firebaseData;
                 applyCustomPlatforms();
-                console.log('☁️ Custom platforms loaded from Firebase');
             }
         });
         
@@ -5290,7 +5186,6 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Passwords will sync in real-time`, '
             if (firebaseData) {
                 localStorage.setItem(CUSTOM_TASKS_KEY, JSON.stringify(firebaseData));
                 customTasks = firebaseData;
-                console.log('☁️ Custom tasks loaded from Firebase');
             }
         });
     }
@@ -5304,7 +5199,5 @@ console.log(`%c   Group: ${CURRENT_GROUP} - Passwords will sync in real-time`, '
         setTimeout(initPlatformTaskManager, 1000);
     }
     
-    console.log('%c🎯 Platform & Task Manager Loaded', 'color: #10b981; font-weight: bold; font-size: 14px');
-    console.log('%c   Admin can now add/remove platforms and tasks', 'color: #3b82f6; font-size: 12px');
     
 })();
