@@ -12,7 +12,7 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <!-- SheetJS for Excel export -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <!-- Styles -->
   <style>
 /* ═══════════════════════════════════════════════════════════════
@@ -1284,7 +1284,19 @@ input, select, textarea {
 .report-preview {
   padding: var(--spacing-xl);
   min-height: 400px;
+  max-height: 75vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
 }
+.report-preview::-webkit-scrollbar { width: 5px; }
+.report-preview::-webkit-scrollbar-track { background: transparent; }
+.report-preview::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 10px;
+  opacity: 0.6;
+}
+.report-preview::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
 
 .report-empty {
   display: flex;
@@ -2325,11 +2337,11 @@ input[type="month"]::-webkit-calendar-picker-indicator {
         <div class="form-row">
           <div class="form-group">
             <label for="member-name">Full Name <span class="req">*</span></label>
-            <input type="text" id="member-name" placeholder="e.g. John Doe" required />
+            <input type="text" id="member-name" placeholder="e.g. John Doe..." required />
           </div>
           <div class="form-group">
             <label for="member-role">Role</label>
-            <input type="text" id="member-role" placeholder="e.g. Security Engineer" />
+            <input type="text" id="member-role" placeholder="e.g. Security Analyst..." />
           </div>
         </div>
         <div class="form-row">
@@ -3548,6 +3560,62 @@ function getFilteredMembers() {
   });
 }
 
+/* ── Helper: get all days in a given year-month ──
+     - Past month    → full month (day 1 to last day)
+     - Current month → day 1 to today only
+     - Future month  → empty array (blocked)            */
+function getMonthDays(yr, mo) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const selYear  = parseInt(yr);
+  const selMonth = parseInt(mo); // 1-based
+  const curYear  = today.getFullYear();
+  const curMonth = today.getMonth() + 1; // 1-based
+
+  // Future month → block
+  if (selYear > curYear || (selYear === curYear && selMonth > curMonth)) return [];
+
+  const totalDays = new Date(selYear, selMonth, 0).getDate();
+  let lastDay = totalDays;
+
+  // Current month → only up to today's date
+  if (selYear === curYear && selMonth === curMonth) {
+    lastDay = today.getDate();
+  }
+
+  const days = [];
+  for (let d = 1; d <= lastDay; d++) {
+    const dd = String(d).padStart(2, '0');
+    const mm = String(mo).padStart(2, '0');
+    days.push(`${yr}-${mm}-${dd}`);
+  }
+  return days;
+}
+
+/* ── Helper: day-of-week name ── */
+function getDayName(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-IN', { weekday: 'short' });
+}
+
+/* ── Helper: is date a weekend ── */
+function isWeekend(dateStr) {
+  const day = new Date(dateStr + 'T00:00:00').getDay();
+  return day === 0 || day === 6;
+}
+
+/* ── Helper: is a member active on a given date ── */
+function isMemberActiveOnDate(memberId, dateStr) {
+  const t = tasks[memberId] || {};
+  if (!t.startDate && !t.endDate) return true; // no date set → show for all days
+  const start = t.startDate ? new Date(t.startDate + 'T00:00:00') : null;
+  const end   = t.endDate   ? new Date(t.endDate   + 'T00:00:00') : null;
+  const cur   = new Date(dateStr + 'T00:00:00');
+  if (start && cur < start) return false;
+  if (end   && cur > end)   return false;
+  return true;
+}
+
 function generateReport() {
   const preview = document.getElementById('report-preview');
   const filtered = getFilteredMembers();
@@ -3560,49 +3628,82 @@ function generateReport() {
   const monthVal = document.getElementById('report-month').value;
   const [yr, mo] = monthVal.split('-');
   const monthLabel = new Date(yr, parseInt(mo) - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+  const allDays = getMonthDays(yr, mo);
+
+  // Future month — block
+  if (allDays.length === 0) {
+    preview.innerHTML = `<div class="report-empty"><i class="fa-solid fa-lock"></i><p>Future month — report not available yet.</p></div>`;
+    showToast('Future month selected — cannot generate report.', 'warning', 'fa-lock');
+    return;
+  }
+
+  // Label: partial (current month) or full (past month)
+  const today = new Date();
+  const isCurrent = parseInt(yr) === today.getFullYear() && parseInt(mo) === today.getMonth() + 1;
+  const reportLabel = isCurrent
+    ? `${monthLabel} (Day 1 – ${today.getDate()})`
+    : monthLabel;
 
   let rows = '';
-  filtered.forEach(m => {
-    const t = tasks[m.id] || {};
-    const mainCount = (t.mainTasks || []).length;
-    const addlCount = (t.addlTasks || []).length;
-    const status    = statusLabels[t.projectStatus] || 'Not Started';
-    const mainStr   = (t.mainTasks || []).join('; ') || '—';
-    const addlStr   = (t.addlTasks || []).join('; ') || '—';
-    const dateRange = (t.startDate || '—') + ' → ' + (t.endDate || '—');
+  allDays.forEach(dateStr => {
+    const dayName  = getDayName(dateStr);
+    const weekend  = isWeekend(dateStr);
+    const dayLabel = dateStr.split('-')[2]; // DD
+    const rowStyle = weekend ? 'background:rgba(139,92,246,0.06);' : '';
 
-    rows += `
-      <tr>
-        <td><strong>${escapeHtml(m.name)}</strong></td>
-        <td><span class="badge ${m.team === 'deployment' ? 'badge-deploy' : 'badge-ops'}">${capitalize(m.team)}</span></td>
-        <td>${escapeHtml(m.role || '—')}</td>
-        <td>${mainCount}</td>
-        <td>${addlCount}</td>
-        <td style="max-width:200px;word-break:break-word;font-size:0.75rem">${escapeHtml(mainStr)}</td>
-        <td style="max-width:160px;word-break:break-word;font-size:0.75rem">${escapeHtml(addlStr)}</td>
-        <td>${dateRange}</td>
-        <td><span class="status-pill status-${t.projectStatus || 'not-started'}">${status}</span></td>
-      </tr>
-    `;
+    // One row per member per day
+    filtered.forEach((m, idx) => {
+      const t = tasks[m.id] || {};
+      const active = isMemberActiveOnDate(m.id, dateStr);
+      const status = statusLabels[t.projectStatus] || 'Not Started';
+      const mainStr = active ? ((t.mainTasks || []).join('; ') || '—') : '—';
+      const addlStr = active ? ((t.addlTasks || []).join('; ') || '—') : '—';
+      const workIn  = active ? capitalize(t.workStatus || '') : '—';
+      const statusVal = active ? t.projectStatus || 'not-started' : 'not-started';
+
+      // Show date cell only on first member of this day (rowspan)
+      const dateCell = idx === 0
+        ? `<td rowspan="${filtered.length}" style="font-weight:600;${rowStyle}vertical-align:middle;text-align:center;white-space:nowrap;">
+             <div style="font-size:1rem;color:var(--primary-color);">${dayLabel}</div>
+             <div style="font-size:0.72rem;color:var(--text-muted);">${dayName}</div>
+             ${weekend ? '<div style="font-size:0.65rem;color:var(--secondary-color);font-weight:700;">WEEKEND</div>' : ''}
+           </td>`
+        : '';
+
+      rows += `
+        <tr style="${rowStyle}${weekend ? 'opacity:0.75;' : ''}">
+          ${dateCell}
+          <td><strong>${escapeHtml(m.name)}</strong></td>
+          <td><span class="badge ${m.team === 'deployment' ? 'badge-deploy' : 'badge-ops'}">${capitalize(m.team)}</span></td>
+          <td style="font-size:0.8rem">${escapeHtml(m.role || '—')}</td>
+          <td style="max-width:200px;word-break:break-word;font-size:0.75rem">${active ? escapeHtml(mainStr) : '<span style="color:var(--text-muted)">—</span>'}</td>
+          <td style="max-width:160px;word-break:break-word;font-size:0.75rem">${active ? escapeHtml(addlStr) : '<span style="color:var(--text-muted)">—</span>'}</td>
+          <td style="font-size:0.78rem">${active ? escapeHtml(workIn) : '<span style="color:var(--text-muted)">—</span>'}</td>
+          <td><span class="status-pill status-${statusVal}">${active ? status : '—'}</span></td>
+        </tr>
+      `;
+    });
+
+    // Separator row between days for readability
+    rows += `<tr style="height:2px;background:var(--border-color);"><td colspan="${1 + filtered.length * 7}" style="padding:0;height:2px;"></td></tr>`;
   });
 
   preview.innerHTML = `
     <div class="report-meta">
-      <h3><i class="fa-solid fa-chart-line"></i> MSP Team Report — ${monthLabel}</h3>
-      <span style="font-size:0.78rem;color:var(--text-muted)">${filtered.length} member(s)</span>
+      <h3><i class="fa-solid fa-calendar-days"></i> Full Month Report — ${reportLabel}</h3>
+      <span style="font-size:0.78rem;color:var(--text-muted)">${allDays.length} day(s) &bull; ${filtered.length} member(s)</span>
     </div>
     <div class="report-table-wrap">
       <table class="report-table">
         <thead>
           <tr>
+            <th style="text-align:center;">Date</th>
             <th>Name</th>
             <th>Team</th>
             <th>Role</th>
-            <th>Main Tasks</th>
-            <th>Addl Tasks</th>
             <th>Main Task Details</th>
             <th>Additional Task Details</th>
-            <th>Date Range</th>
+            <th>Working In</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -3610,7 +3711,7 @@ function generateReport() {
       </table>
     </div>
   `;
-  showToast('Report generated!', 'success', 'fa-chart-line');
+  showToast('Full month report generated!', 'success', 'fa-calendar-days');
 }
 
 function downloadCSV() {
@@ -3618,33 +3719,41 @@ function downloadCSV() {
   const monthVal = document.getElementById('report-month').value;
   const [yr, mo] = monthVal.split('-');
   const monthLabel = new Date(yr, parseInt(mo) - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+  const allDays = getMonthDays(yr, mo);
+
+  if (allDays.length === 0) {
+    showToast('Future month selected — cannot download report.', 'warning', 'fa-lock');
+    return;
+  }
 
   const headers = [
-    'Name','Team','Role','Position','Main Tasks Count','Additional Tasks Count',
-    'Main Tasks','Additional Tasks','Start Date','End Date','Working In','Project Status'
+    'Date','Day','Weekend','Name','Team','Role','Position',
+    'Main Tasks','Additional Tasks','Working In','Project Status'
   ];
 
   const dataRows = [];
-  filtered.forEach(m => {
-    const t = tasks[m.id] || {};
-    dataRows.push([
-      m.name,
-      capitalize(m.team),
-      m.role || '',
-      capitalize(m.position || 'member'),
-      (t.mainTasks || []).length,
-      (t.addlTasks || []).length,
-      (t.mainTasks || []).join(' | '),
-      (t.addlTasks || []).join(' | '),
-      t.startDate || '',
-      t.endDate   || '',
-      capitalize(t.workStatus || ''),
-      statusLabels[t.projectStatus] || 'Not Started',
-    ]);
+  allDays.forEach(dateStr => {
+    const dayName = getDayName(dateStr);
+    const weekend = isWeekend(dateStr) ? 'Yes' : 'No';
+    filtered.forEach(m => {
+      const t = tasks[m.id] || {};
+      const active = isMemberActiveOnDate(m.id, dateStr);
+      dataRows.push([
+        dateStr,
+        dayName,
+        weekend,
+        m.name,
+        capitalize(m.team),
+        m.role || '',
+        capitalize(m.position || 'member'),
+        active ? (t.mainTasks || []).join(' | ') : '',
+        active ? (t.addlTasks || []).join(' | ') : '',
+        active ? capitalize(t.workStatus || '') : '',
+        active ? (statusLabels[t.projectStatus] || 'Not Started') : '',
+      ]);
+    });
   });
 
-  // Build CSV with logo text block in header
-  // (Actual image in CSV not supported natively — we embed as branded header text rows)
   const logoAscii = [
     ['╔══════════════════════════════════════════════════╗'],
     ['║          INSIGHTZ MSP TEAM — Cybersecurity       ║'],
@@ -3659,7 +3768,7 @@ function downloadCSV() {
     ['Report Period', monthLabel],
     ['Generated On', new Date().toLocaleString('en-IN')],
     ['Total Members', filtered.length],
-    ['Total Active Tasks', filtered.reduce((a, m) => a + ((tasks[m.id]?.mainTasks||[]).length + (tasks[m.id]?.addlTasks||[]).length), 0)],
+    ['Total Days', allDays.length],
     [''],
     headers,
     ...dataRows,
@@ -3669,7 +3778,6 @@ function downloadCSV() {
     (Array.isArray(r) ? r : [r]).map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')
   ).join('\r\n');
 
-  // Try to load logo.png for a visual header if it exists, then download
   const tryLoadLogo = new Promise((resolve) => {
     const img = new Image();
     img.onload  = () => resolve(img);
@@ -3682,12 +3790,12 @@ function downloadCSV() {
     const url  = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href  = url;
-    link.download = `MSP_Team_Data_${monthVal}.csv`;
+    link.download = `MSP_FullMonth_Report_${monthVal}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    showToast('CSV downloaded with company header!', 'success', 'fa-file-csv');
+    showToast('Full month CSV downloaded!', 'success', 'fa-file-csv');
   });
 }
 
@@ -3698,91 +3806,179 @@ document.getElementById('download-xlsx-btn').addEventListener('click', downloadX
 
 async function downloadXLSX() {
   if (typeof XLSX === 'undefined') {
-    showToast('Excel library not loaded. Using CSV instead.', 'warning', 'fa-triangle-exclamation');
-    downloadCSV();
-    return;
+    showToast('Excel library not loaded. Using CSV instead.','warning','fa-triangle-exclamation');
+    downloadCSV(); return;
   }
 
-  const filtered = getFilteredMembers();
-  const monthVal = document.getElementById('report-month').value;
-  const [yr, mo] = monthVal.split('-');
-  const monthLabel = new Date(yr, parseInt(mo) - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+  const filtered   = getFilteredMembers();
+  const monthVal   = document.getElementById('report-month').value;
+  const [yr, mo]   = monthVal.split('-');
+  const monthLabel = new Date(yr, parseInt(mo)-1).toLocaleString('default',{month:'long',year:'numeric'});
+  const allDays    = getMonthDays(yr, mo);
 
-  // Build worksheet data
-  const wsData = [
-    // Logo placeholder rows (merged later)
-    ['INSIGHTZ MSP TEAM', '', '', '', '', '', '', '', '', '', '', ''],
-    ['Cybersecurity Task Management System', '', '', '', '', '', '', '', '', '', '', ''],
-    [''],
-    ['Report Period:', monthLabel, '', '', '', '', '', '', '', '', '', ''],
-    ['Generated On:', new Date().toLocaleString('en-IN'), '', '', '', '', '', '', '', '', '', ''],
-    ['Total Members:', filtered.length, '', '', '', '', '', '', '', '', '', ''],
-    ['Total Active Tasks:', filtered.reduce((a, m) => a + ((tasks[m.id]?.mainTasks||[]).length + (tasks[m.id]?.addlTasks||[]).length), 0)],
-    [''],
-    // Headers
-    ['Name','Team','Role','Position','Main Tasks #','Additional Tasks #',
-     'Main Tasks','Additional Tasks','Start Date','End Date','Working In','Project Status'],
-  ];
+  if (!allDays.length)  { showToast('Future month — cannot download.','warning','fa-lock'); return; }
+  if (!filtered.length) { showToast('No members match filters.','warning','fa-filter'); return; }
 
-  // Data rows
-  filtered.forEach(m => {
-    const t = tasks[m.id] || {};
-    wsData.push([
-      m.name,
-      capitalize(m.team),
-      m.role || '',
-      capitalize(m.position || 'member'),
-      (t.mainTasks || []).length,
-      (t.addlTasks || []).length,
-      (t.mainTasks || []).join(' | ') || '',
-      (t.addlTasks || []).join(' | ') || '',
-      t.startDate || '',
-      t.endDate   || '',
-      capitalize(t.workStatus || ''),
-      statusLabels[t.projectStatus] || 'Not Started',
-    ]);
+  const today     = new Date();
+  const isCurrent = parseInt(yr)===today.getFullYear() && parseInt(mo)===today.getMonth()+1;
+  const rptLabel  = isCurrent ? monthLabel+' (Day 1 – '+today.getDate()+')' : monthLabel;
+
+  /* ─── Palette: MSP Team ─── */
+  const P = {
+    titleBg:'0A2540', titleFg:'FFFFFF',
+    subBg:  '0E3060', subFg:  'B8D0E8',
+    metaBg: '071830', metaKey:'64B5F6', metaVal:'E0EEF8',
+    hdrBg:  '0D47A1', hdrFg:  'FFFFFF',
+    dateBg: '071524', dateFg: '8CBCE0',
+    wkndBg: '1E0845', wkndFg: 'C4B5FD',
+    row0:   '071220', row1:   '060F1A',
+    rowFg:  'C5D8EA', nameFg: 'F0F8FF',
+    depFg:  '82C8FF', opsFg:  '86EFAD',
+    sepBg:  '0A1A2E',
+  };
+  const PS_FG = {
+    'not-started':'94A3B8','in-progress':'60A5FA',
+    'on-hold':    'FBBF24','completed':  '34D399','review':'A78BFA',
+  };
+  const PS_LABEL = {
+    'not-started':'○ Not Started','in-progress':'↻ In Progress',
+    'on-hold':    '⏸ On Hold',   'completed':  '✔ Completed','review':'◈ Under Review',
+  };
+
+  /* ─── Style & cell helpers ─── */
+  const bd = () => ({
+    top:   {style:'thin',color:{rgb:'1A3A6A'}},
+    bottom:{style:'thin',color:{rgb:'1A3A6A'}},
+    left:  {style:'thin',color:{rgb:'1A3A6A'}},
+    right: {style:'thin',color:{rgb:'1A3A6A'}},
+  });
+  const S = (fg, bg, opts={}) => ({
+    font:      {name:'Arial', sz:opts.sz||11, bold:!!opts.bold, color:{rgb:fg}},
+    fill:      {patternType:'solid', fgColor:{rgb:bg}},
+    alignment: {horizontal:opts.ha||'left', vertical:'center', wrapText:!!opts.wrap},
+    ...(opts.border ? {border:bd()} : {}),
+  });
+  /* Tag each cell with a "type" so we know exactly how to merge later */
+  const mkCell = (v, s, type) => ({v: String(v ?? ''), t:'s', s, _type: type||'data'});
+  const blank  = (bg) => mkCell('', S('000000', bg), 'blank');
+
+  const N   = 11; // columns
+  const aoa = []; // [{cells, ht, mergeAll}]
+
+  const addRow = (cells, ht, mergeAll) => aoa.push({cells, ht: ht||18, mergeAll:!!mergeAll});
+  const fillRow = (bg, ht) => addRow(Array(N).fill(0).map(()=>blank(bg)), ht||6);
+
+  /* ─── Title rows (mergeAll=true) ─── */
+  addRow([
+    mkCell('INSIGHTZ  •  MSP TEAM', S(P.titleFg,P.titleBg,{bold:true,sz:20,ha:'center'}), 'title'),
+    ...Array(N-1).fill(0).map(()=>blank(P.titleBg))
+  ], 36, true);
+
+  addRow([
+    mkCell('Cybersecurity Task Management  —  Full Month Report', S(P.subFg,P.subBg,{sz:13,ha:'center'}), 'title'),
+    ...Array(N-1).fill(0).map(()=>blank(P.subBg))
+  ], 24, true);
+
+  fillRow(P.titleBg, 5);
+
+  /* ─── Meta rows ─── */
+  [['Report Period', rptLabel],
+   ['Generated On',  new Date().toLocaleString('en-IN')],
+   ['Total Members', String(filtered.length)],
+   ['Total Days',    String(allDays.length)],
+  ].forEach(([k,v]) => {
+    addRow([
+      mkCell(k, S(P.metaKey, P.metaBg, {bold:true,sz:10}), 'meta'),
+      mkCell(v, S(P.metaVal, P.metaBg, {sz:10}), 'meta'),
+      ...Array(N-2).fill(0).map(()=>blank(P.metaBg)),
+    ], 18);
+  });
+  fillRow(P.metaBg, 8);
+
+  /* ─── Column headers ─── */
+  const HDRS = ['Date','Day','Name','Team','Role','Position',
+                'Main Tasks','Additional Tasks','Working In','Project Status',''];
+  const hSt  = S(P.hdrFg, P.hdrBg, {bold:true,sz:10,ha:'center',border:true});
+  const hdrIdx = aoa.length;
+  addRow(HDRS.map(h => mkCell(h, hSt, 'header')), 22);
+  aoa[hdrIdx].freeze = true;
+
+  /* ─── Day-by-day data rows ─── */
+  let prevDate = null;
+
+  allDays.forEach(dateStr => {
+    const dayName = getDayName(dateStr);
+    const wknd    = isWeekend(dateStr);
+
+    if (prevDate !== null && prevDate !== dateStr) {
+      fillRow(P.sepBg, 3);
+    }
+    prevDate = dateStr;
+
+    const dateBg = wknd ? P.wkndBg : P.dateBg;
+    const dateFg = wknd ? P.wkndFg : P.dateFg;
+
+    filtered.forEach((m, memberIdx) => {
+      const t      = tasks[m.id] || {};
+      const active = isMemberActiveOnDate(m.id, dateStr);
+      const rowBg  = wknd ? P.wkndBg : (memberIdx % 2 === 0 ? P.row0 : P.row1);
+
+      /* Only first member of each day shows the date */
+      const dateVal = memberIdx === 0 ? dateStr + (wknd ? '  ★' : '') : '';
+      const dayVal  = memberIdx === 0 ? dayName : '';
+
+      const mainStr  = active ? ((t.mainTasks||[]).join(' • ') || '—') : '—';
+      const addlStr  = active ? ((t.addlTasks||[]).join(' • ') || '—') : '—';
+      const workingIn= active ? (capitalize(t.workStatus||'') || '—') : '—';
+      const psKey    = active ? (t.projectStatus || 'not-started') : '';
+      const psLabel  = active ? (PS_LABEL[psKey] || psKey || '—') : '—';
+      const psFg     = PS_FG[psKey] || P.rowFg;
+      const teamDisp = capitalize(m.team || '');
+      const teamFg   = (m.team||'') === 'deployment' ? P.depFg : P.opsFg;
+
+      /* ── IMPORTANT: use 'data' type so these rows are NEVER merged ── */
+      addRow([
+        mkCell(dateVal,    S(dateFg,dateBg,{bold:memberIdx===0,sz:10,ha:'center',border:true}), 'data'),
+        mkCell(dayVal,     S(dateFg,dateBg,{sz:9,ha:'center',border:true}), 'data'),
+        mkCell(m.name||'—',S(P.nameFg,rowBg,{bold:true,sz:10,border:true}), 'data'),
+        mkCell(teamDisp,   S(teamFg,rowBg,{bold:true,sz:10,ha:'center',border:true}), 'data'),
+        mkCell(m.role||'—',S(P.rowFg,rowBg,{sz:10,border:true}), 'data'),
+        mkCell(capitalize(m.position||'Member'),S(P.rowFg,rowBg,{sz:10,border:true}), 'data'),
+        mkCell(mainStr,    S(P.rowFg,rowBg,{sz:10,wrap:true,border:true}), 'data'),
+        mkCell(addlStr,    S(P.rowFg,rowBg,{sz:10,wrap:true,border:true}), 'data'),
+        mkCell(workingIn,  S(P.rowFg,rowBg,{sz:10,ha:'center',border:true}), 'data'),
+        mkCell(active?psLabel:'—', S(active?psFg:P.rowFg,rowBg,{sz:10,ha:'center',border:true}), 'data'),
+        blank(rowBg),
+      ], 18);
+    });
   });
 
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  /* ─── Build worksheet ─── */
+  const ws = {}, merges = [];
+  let R = 0, freezeAt = null;
 
-  // Column widths
-  ws['!cols'] = [
-    {wch:18},{wch:14},{wch:20},{wch:12},{wch:12},{wch:14},
-    {wch:35},{wch:30},{wch:14},{wch:14},{wch:14},{wch:16}
-  ];
-
-  // Merge header title cells
-  ws['!merges'] = [
-    {s:{r:0,c:0},e:{r:0,c:11}},  // Company name row
-    {s:{r:1,c:0},e:{r:1,c:11}},  // Subtitle row
-  ];
-
-  // Try to embed logo.png if it exists in same directory
-  try {
-    const response = await fetch('logo.png');
-    if (response.ok) {
-      const arrayBuffer = await response.arrayBuffer();
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-      if (!wb.Sheets) wb.Sheets = {};
-      if (ws['!images'] === undefined) ws['!images'] = [];
-      ws['!images'].push({
-        name: 'logo.png',
-        data: base64,
-        opts: { base64: true },
-        position: {
-          type: 'twoCellAnchor',
-          attrs: { editAs: 'oneCell' },
-          from: { col: 0, colOff: 0, row: 0, rowOff: 0 },
-          to:   { col: 2, colOff: 0, row: 2, rowOff: 0 },
-        }
-      });
+  aoa.forEach(rowDef => {
+    rowDef.cells.forEach((c, ci) => {
+      if (c) ws[XLSX.utils.encode_cell({r:R, c:ci})] = {v:c.v, t:c.t, s:c.s};
+    });
+    /* Merge ONLY explicit title rows, never data rows */
+    if (rowDef.mergeAll) {
+      merges.push({s:{r:R,c:0}, e:{r:R,c:N-1}});
     }
-  } catch (_) { /* logo.png not found — skip */ }
+    if (rowDef.freeze) freezeAt = R + 1;
+    R++;
+  });
 
-  XLSX.utils.book_append_sheet(wb, ws, 'MSP Team Report');
-  XLSX.writeFile(wb, `MSP_Team_Data_${monthVal}.xlsx`);
-  showToast('Excel file downloaded!', 'success', 'fa-file-excel');
+  ws['!ref']    = XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:R-1,c:N-1}});
+  ws['!cols']   = [16,6,18,14,18,14,38,32,16,18,2].map(w => ({wch:w}));
+  ws['!merges'] = merges;
+  ws['!rows']   = aoa.map(rd => ({hpt: rd.ht}));
+  if (freezeAt) ws['!freeze'] = {xSplit:0, ySplit:freezeAt};
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Monthly Report');
+  XLSX.writeFile(wb, `MSP_FullMonth_Report_${monthVal}.xlsx`);
+  showToast('Excel report downloaded!', 'success', 'fa-file-excel');
 }
 
 /* ══════════════════════════════════════════
