@@ -2360,7 +2360,6 @@ if (!isAdmin && !isGuest) {
         return;
     }
 
-    // Guard: schedule or platforms may be undefined if history not loaded yet
     if (!schedule) {
         const dateInput = document.getElementById('scheduleDate');
         if (dateInput && dateInput.value && typeof scheduleHistory !== 'undefined') {
@@ -2427,7 +2426,18 @@ if (!isAdmin && !isGuest) {
         showNotification('Access required', 'error');
         return;
     }
-    
+
+    if (!schedule) {
+        const dateInput = document.getElementById('scheduleDate');
+        if (dateInput && dateInput.value && typeof scheduleHistory !== 'undefined') {
+            schedule = scheduleHistory[dateInput.value];
+        }
+    }
+    if (!schedule || !schedule.tasks) {
+        showNotification('Schedule data not available. Please reload the schedule.', 'error');
+        return;
+    }
+
     const modal = document.getElementById("editTaskModal");
     if (!modal) return;
     const editTaskName = document.getElementById("editTaskName");
