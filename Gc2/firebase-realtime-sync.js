@@ -22,7 +22,7 @@
         
         // Remove previous listener if exists
         if (currentScheduleListener) {
-            window.database.ref('schedules/' + currentScheduleListener).off('value');
+            database.ref('schedules/' + currentScheduleListener).off('value');
             console.log('🔌 Detached previous schedule listener');
         }
         
@@ -31,7 +31,7 @@
         console.log('👂 Listening for schedule changes:', dateStr);
         
         // Attach real-time listener
-        window.database.ref('schedules/' + dateStr).on('value', (snapshot) => {
+        database.ref('schedules/' + dateStr).on('value', (snapshot) => {
             const firebaseSchedule = snapshot.val();
             
             if (firebaseSchedule) {
@@ -75,7 +75,7 @@
         
         console.log('👂 Listening for team data changes');
         
-        window.database.ref('teamData').on('value', (snapshot) => {
+        database.ref('teamData').on('value', (snapshot) => {
             const firebaseTeamData = snapshot.val();
             
             if (firebaseTeamData && typeof teamData !== 'undefined') {
@@ -111,7 +111,7 @@
         
         console.log('👂 Listening for availability changes');
         
-        window.database.ref('availabilityOverrides').on('value', (snapshot) => {
+        database.ref('availabilityOverrides').on('value', (snapshot) => {
             const firebaseAvailability = snapshot.val();
             
             if (firebaseAvailability && typeof availabilityOverrides !== 'undefined') {
@@ -154,7 +154,7 @@
         
         console.log('👂 Listening for member availability settings changes');
         
-        window.database.ref('memberAvailabilitySettings').on('value', (snapshot) => {
+        database.ref('memberAvailabilitySettings').on('value', (snapshot) => {
             const firebaseSettings = snapshot.val();
             
             if (firebaseSettings && typeof memberAvailabilitySettings !== 'undefined') {
@@ -197,7 +197,7 @@
         console.log('👂 Listening for leave management changes');
         
         // ✅ Using 'leaveSettings' to match saveLeaveSettingsToFirebase()
-        window.database.ref('leaveSettings').on('value', (snapshot) => {
+        database.ref('leaveSettings').on('value', (snapshot) => {
             const firebaseLeaveSettings = snapshot.val();
             
             if (firebaseLeaveSettings && typeof monthlyLeaveSettings !== 'undefined') {
@@ -319,13 +319,13 @@
             
             console.log('🔌 Detaching all real-time listeners');
             
-            window.database.ref('teamData').off('value');
-            window.database.ref('availabilityOverrides').off('value');
-            window.database.ref('memberAvailabilitySettings').off('value');
-            window.database.ref('leaveSettings').off('value');
+            database.ref('teamData').off('value');
+            database.ref('availabilityOverrides').off('value');
+            database.ref('memberAvailabilitySettings').off('value');
+            database.ref('leaveSettings').off('value');
             
             if (currentScheduleListener) {
-                window.database.ref('schedules/' + currentScheduleListener).off('value');
+                database.ref('schedules/' + currentScheduleListener).off('value');
             }
             
             listenersAttached = false;

@@ -138,14 +138,14 @@ function getWorkingHoursDisplay() {
 let availabilityOverrides = JSON.parse(localStorage.getItem("availabilityOverrides")) || {};
 // ---------- TEAM DATA ----------
 let teamData = JSON.parse(localStorage.getItem("teamData")) || {
-    SAs: [ "Raja", "Vishali", "Sahasraa", "Priyanga", "Elakkia", "Yuva", "Stephan", "Deepak", "Naveen Raj"],
-    apprentices: [ "Sriharan"],
+    SAs: [ "Selva", "Naveen", "Kannan", "Midhun", "Prem", "Logesh", "Linith"],
+    apprentices: [ "Sanjay", "Vishal", "Subash"],
     responsibilities: {
-        Raja: "Vishal",
-        Vishali: "Vishal",
-        Sahasraa: "Sriharan / Subash",
-        Priyanga: "Sriharan",
-        Elakkia: "Karl / Subash",
+        Selva: "Vishal",
+        Naveen: "Vishal",
+        Kannan: "Karl / Subash",
+        Midhun: "Sanjay",
+        Prem: "Karl / Subash",
     }
 };
 
@@ -164,16 +164,16 @@ let isAdmin = false;
 // ========== CENTRALIZED AVAILABILITY MANAGEMENT SYSTEM ==========
 let memberAvailabilitySettings = JSON.parse(localStorage.getItem('memberAvailabilitySettings')) || {
     SAs: {
-        "Raja": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Vishali": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Sahasraa": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Priyanga": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Elakkia": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Yuva": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
+        "Selva": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Naveen": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Kannan": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Midhun": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Prem": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Logesh": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
     },
     apprentices: {
-        "Stephan": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Sriharan": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Linith": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Sanjay": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Vishal": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Subash": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] }
     }
@@ -1054,53 +1054,45 @@ function generateDailySchedule(dateSGT) {
     
     // Check if we have Firebase
     if (typeof database !== 'undefined') {
-        // ✅ FIX: Firebase is the SINGLE SOURCE OF TRUTH.
-        // ALL devices read from Firebase.
-        // ONLY admin generates or writes a new schedule to Firebase.
+        // Try localStorage first for instant display
         let localSchedule = scheduleHistory[dateStr];
-        const userIsAdmin = (typeof isAdmin !== 'undefined' && isAdmin);
-
+        
         loadScheduleFromFirebase(dateSGT, (firebaseSchedule) => {
-
+            let scheduleToDisplay = null;
+            
             if (firebaseSchedule) {
-                // ✅ ALL devices: Firebase has it — display immediately
-                firebaseSchedule.shift = getShiftForDate(dateSGT);
+                // Use Firebase schedule (most up-to-date)
+                scheduleToDisplay = firebaseSchedule;
+                // Apply shift override if active for this date
+                scheduleToDisplay.shift = getShiftForDate(dateSGT);
                 scheduleHistory[dateStr] = firebaseSchedule;
                 localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-                displaySchedule(firebaseSchedule);
-
-            } else if (userIsAdmin && localSchedule) {
-                // ✅ ADMIN ONLY: push localStorage schedule to Firebase
-                localSchedule.shift = getShiftForDate(dateSGT);
-                saveScheduleToFirebase(localSchedule);
-                displaySchedule(localSchedule);
-
-            } else if (userIsAdmin) {
-                // ✅ ADMIN ONLY: generate new schedule and push to Firebase
-                const newSchedule = generateScheduleForDate(dateSGT);
-                scheduleHistory[dateStr] = newSchedule;
-                localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-                saveScheduleToFirebase(newSchedule);
-                displaySchedule(newSchedule);
-
+            } else if (localSchedule) {
+                // Use localStorage schedule
+                scheduleToDisplay = localSchedule;
+                // Apply shift override if active for this date
+                scheduleToDisplay.shift = getShiftForDate(dateSGT);
+                saveScheduleToFirebase(localSchedule); // Sync to Firebase
             } else {
-                // ⏳ NON-ADMIN: no Firebase schedule yet — real-time listener auto-updates
-                const tbody = document.getElementById('scheduleTableBody');
-                if (tbody) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--text-secondary);font-size:15px;">⏳ Waiting for admin to generate schedule...<br><small style="opacity:0.6">This will update automatically</small></td></tr>';
-                }
+                // Generate new schedule
+                scheduleToDisplay = generateScheduleForDate(dateSGT);
+                scheduleHistory[dateStr] = scheduleToDisplay;
+                localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
+                saveScheduleToFirebase(scheduleToDisplay);
             }
+            
+            displaySchedule(scheduleToDisplay);
         });
     } else {
-        // No Firebase - localStorage only; only admin writes new schedules
-        const userIsAdmin = (typeof isAdmin !== 'undefined' && isAdmin);
+        // No Firebase - use localStorage 
         if (scheduleHistory[dateStr]) {
             let schedule = scheduleHistory[dateStr];
+            // Apply shift override if active for this date
             schedule.shift = getShiftForDate(dateSGT);
             scheduleHistory[dateStr] = schedule;
             localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
             displaySchedule(schedule);
-        } else if (userIsAdmin) {
+        } else {
             const schedule = generateScheduleForDate(dateSGT);
             scheduleHistory[dateStr] = schedule;
             localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
@@ -2366,8 +2358,19 @@ function openEditScheduleModal(schedule, platform) {
 if (!isAdmin && !isGuest) {
         showNotification('Access required', 'error');
         return;
-    }    
-    
+    }
+
+    if (!schedule) {
+        const dateInput = document.getElementById('scheduleDate');
+        if (dateInput && dateInput.value && typeof scheduleHistory !== 'undefined') {
+            schedule = scheduleHistory[dateInput.value];
+        }
+    }
+    if (!schedule || !schedule.platforms) {
+        showNotification('Schedule data not available. Please reload the schedule.', 'error');
+        return;
+    }
+
     const modal = document.getElementById("editScheduleModal");
     if (!modal) return;
     const editPlatform = document.getElementById("editPlatform");
@@ -2423,7 +2426,18 @@ if (!isAdmin && !isGuest) {
         showNotification('Access required', 'error');
         return;
     }
-    
+
+    if (!schedule) {
+        const dateInput = document.getElementById('scheduleDate');
+        if (dateInput && dateInput.value && typeof scheduleHistory !== 'undefined') {
+            schedule = scheduleHistory[dateInput.value];
+        }
+    }
+    if (!schedule || !schedule.tasks) {
+        showNotification('Schedule data not available. Please reload the schedule.', 'error');
+        return;
+    }
+
     const modal = document.getElementById("editTaskModal");
     if (!modal) return;
     const editTaskName = document.getElementById("editTaskName");
@@ -3697,8 +3711,8 @@ window.savePasswordsToFirebase = savePasswordsToFirebase;
 
 // Default POC names
 const DEFAULT_POC_NAMES = {
-    team1: "Raja",
-    team2: "Vishali"
+    team1: "Gayathiri",
+    team2: "Ajay"
 };
 
 // Storage key - NOW GROUP-SPECIFIC
