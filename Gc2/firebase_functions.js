@@ -10,7 +10,7 @@ function checkAndAddUser(userName, role, callback) {
         return;
     }
 
-    const userRef = database.ref('users/' + role + '/' + userName);
+    const userRef = window.database.ref('users/' + role + '/' + userName);
     
     // Check if user exists
     userRef.once('value')
@@ -45,7 +45,7 @@ function addUserToRole(userName, role, callback) {
         active: true
     };
 
-    database.ref('users/' + role + '/' + userName).set(userData)
+    window.database.ref('users/' + role + '/' + userName).set(userData)
         .then(() => {
             console.log('✅ User added successfully:', userName, 'as', role);
             
@@ -126,7 +126,7 @@ function getAllUsers(callback) {
         return;
     }
 
-    database.ref('users').once('value')
+    window.database.ref('users').once('value')
         .then((snapshot) => {
             const users = snapshot.val();
             if (callback) callback(users);
@@ -145,7 +145,7 @@ function deleteUserFromRole(userName, role, callback) {
         return;
     }
 
-    database.ref('users/' + role + '/' + userName).remove()
+    window.database.ref('users/' + role + '/' + userName).remove()
         .then(() => {
             console.log('User removed:', userName);
             showNotification(`User ${userName} removed`, 'success');

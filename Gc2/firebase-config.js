@@ -10,9 +10,11 @@ const firebaseConfig = {
   measurementId: "G-EH0HMB5VFZ"
 };
 
-// 2) Global database
-let database = null;
-let firebaseReady = false;
+// 2) Global database — stored on window so ALL modules always get the live reference
+window.database = null;
+window.firebaseReady = false;
+
+
 
 // 3) Initialize Firebase SAFELY
 function initFirebase() {
@@ -23,8 +25,8 @@ function initFirebase() {
     }
 
     firebase.initializeApp(firebaseConfig);
-    database = firebase.database();
-    firebaseReady = true;
+    window.database = firebase.database();
+    window.firebaseReady = true;
     console.log("✅ Firebase READY");
     return true;
   } catch (error) {
@@ -34,7 +36,7 @@ function initFirebase() {
 }
 
 // 4) SAFE database check
-window.hasDatabase = () => firebaseReady && database !== null;
+window.hasDatabase = () => window.firebaseReady && window.database !== null;
 
 // ========================================
 // BULLETPROOF FIREBASE FUNCTIONS
@@ -47,7 +49,7 @@ function saveScheduleToFirebase(schedule) {
   }
   
   const dateKey = schedule.date;
-  database.ref('schedules/' + dateKey).set(schedule)
+  window.database.ref('schedules/' + dateKey).set(schedule)
     .then(() => console.log('✅ Schedule saved:', dateKey))
     .catch(err => console.error('❌ Save failed:', err));
 }
@@ -65,7 +67,7 @@ function loadScheduleFromFirebase(date, callback) {
     : date.toISOString().split('T')[0];
   console.log("🔍 Loading schedule from Firebase:", dateStr);
   
-  database.ref('schedules/' + dateStr).once('value')
+  window.database.ref('schedules/' + dateStr).once('value')
     .then(snapshot => {
       const schedule = snapshot.val();
       console.log("📥 Firebase schedule:", schedule ? "FOUND" : "NOT FOUND");
@@ -79,7 +81,7 @@ function loadScheduleFromFirebase(date, callback) {
 
 function saveTeamDataToFirebase() {
   if (!window.hasDatabase() || typeof teamData === 'undefined') return;
-  database.ref('teamData').set(teamData)
+  window.database.ref('teamData').set(teamData)
     .catch(err => console.error('❌ Team save error:', err));
 }
 
@@ -88,7 +90,7 @@ function loadTeamDataFromFirebase(callback) {
     if (callback) callback(null);
     return;
   }
-  database.ref('teamData').once('value')
+  window.database.ref('teamData').once('value')
     .then(snapshot => {
       const data = snapshot.val();
       if (data && typeof teamData !== 'undefined') {
@@ -104,7 +106,7 @@ function loadTeamDataFromFirebase(callback) {
 
 function saveAvailabilityToFirebase() {
   if (!window.hasDatabase() || typeof availabilityOverrides === 'undefined') return;
-  database.ref('availabilityOverrides').set(availabilityOverrides)
+  window.database.ref('availabilityOverrides').set(availabilityOverrides)
     .catch(err => console.error('❌ Availability save error:', err));
 }
 
@@ -113,7 +115,7 @@ function loadAvailabilityFromFirebase(callback) {
     if (callback) callback(null);
     return;
   }
-  database.ref('availabilityOverrides').once('value')
+  window.database.ref('availabilityOverrides').once('value')
     .then(snapshot => {
       const data = snapshot.val();
       if (data) availabilityOverrides = data;
@@ -225,8 +227,7 @@ if (document.readyState === 'loading') {
 }
 
 // Export everything safely
-window.database = database;
-window.firebaseReady = firebaseReady;
+// window.database and window.firebaseReady are already live references set in initFirebase()
 window.saveScheduleToFirebase = saveScheduleToFirebase;
 window.loadScheduleFromFirebase = loadScheduleFromFirebase;
 window.saveTeamDataToFirebase = saveTeamDataToFirebase;
@@ -250,7 +251,7 @@ window.syncLocalToFirebase = function() {
     // 1. Sync Team Data
     const localTeam = localStorage.getItem('teamData');
     if (localTeam) {
-        database.ref('teamData').set(JSON.parse(localTeam))
+        window.database.ref('teamData').set(JSON.parse(localTeam))
             .then(() => console.log("✅ Team Data synced to Firebase"))
             .catch(err => console.error("❌ Team sync failed:", err));
     }
@@ -258,7 +259,7 @@ window.syncLocalToFirebase = function() {
     // 2. Sync Schedule History
     const localSchedules = localStorage.getItem('scheduleHistory');
     if (localSchedules) {
-        database.ref('schedules').update(JSON.parse(localSchedules))
+        window.database.ref('schedules').update(JSON.parse(localSchedules))
             .then(() => console.log("✅ Schedule History synced to Firebase"))
             .catch(err => console.error("❌ Schedule sync failed:", err));
     }
@@ -266,7 +267,7 @@ window.syncLocalToFirebase = function() {
     // 3. Sync Availability Overrides
     const localAvail = localStorage.getItem('availabilityOverrides');
     if (localAvail) {
-        database.ref('availabilityOverrides').set(JSON.parse(localAvail))
+        window.database.ref('availabilityOverrides').set(JSON.parse(localAvail))
             .then(() => console.log("✅ Availability synced to Firebase"))
             .catch(err => console.error("❌ Availability sync failed:", err));
     }
