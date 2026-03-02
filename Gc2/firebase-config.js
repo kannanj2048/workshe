@@ -25,6 +25,9 @@ function initFirebase() {
     firebase.initializeApp(firebaseConfig);
     database = firebase.database();
     firebaseReady = true;
+    // ✅ Export to window NOW so all other scripts get the live reference
+    window.database = database;
+    window.firebaseReady = true;
     console.log("✅ Firebase READY");
     return true;
   } catch (error) {
@@ -39,6 +42,20 @@ window.hasDatabase = () => firebaseReady && database !== null;
 // ========================================
 // BULLETPROOF FIREBASE FUNCTIONS
 // ========================================
+
+// ✅ Safe localStorage writer - used by generateDailySchedule
+// Falls back gracefully if safeSetScheduleHistory defined in script.js
+function _safeSetScheduleHistory() {
+  if (typeof safeSetScheduleHistory === 'function') {
+    _safeSetScheduleHistory(); // use the full version from script.js if available
+  } else {
+    try {
+      localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
+    } catch(e) {
+      console.warn("⚠️ localStorage write failed:", e.message);
+    }
+  }
+}
 
 function saveScheduleToFirebase(schedule) {
   if (!window.hasDatabase()) {
@@ -126,106 +143,95 @@ function loadAvailabilityFromFirebase(callback) {
 }
 
 // ========================================
-// ✅ PERFECTLY SAFE generateDailySchedule
+// generateDailySchedule — SINGLE SOURCE OF TRUTH
+// Firebase is ALWAYS master. Local data is read-only cache.
+// Only admin (or the midnight lock winner) may write to Firebase.
 // ========================================
 window.generateDailySchedule = function(dateSGT) {
-  // ✅ CRITICAL FIX: Use formatDateForInput to preserve SGT date (not UTC)
-  const dateStr = typeof formatDateForInput === 'function' 
-    ? formatDateForInput(dateSGT) 
-    : dateSGT.toISOString().split("T")[0];
-  
-  // ✅ CRITICAL: Update date input field FIRST to prevent display lag
-  const dateInput = document.getElementById("scheduleDate");
-  if (dateInput) {
-    dateInput.value = dateStr;
-  }
-  
-  // ✅ STEP 1: Refresh availability status BEFORE generating schedule
-  console.log("🔄 Refreshing availability status before schedule generation...");
-  if (typeof syncWorkingSchedulesWithLeave === 'function') {
-    syncWorkingSchedulesWithLeave();
-  }
-  if (typeof updateAvailabilityStatus === 'function') {
-    updateAvailabilityStatus();
-  }
-  
-  // Always update display first (safe functions)
-  if (typeof updateCurrentDayDisplay === 'function') {
-    updateCurrentDayDisplay(dateSGT);
-  }
 
-  // Wait for generateScheduleForDate to be ready
+  const dateStr = typeof formatDateForInput === 'function'
+    ? formatDateForInput(dateSGT)
+    : dateSGT.toISOString().split("T")[0];
+
+  // Update date picker immediately
+  const dateInput = document.getElementById("scheduleDate");
+  if (dateInput) dateInput.value = dateStr;
+
+  // Refresh availability before anything else
+  if (typeof syncWorkingSchedulesWithLeave === 'function') syncWorkingSchedulesWithLeave();
+  if (typeof updateAvailabilityStatus === 'function') updateAvailabilityStatus();
+  if (typeof updateCurrentDayDisplay === 'function') updateCurrentDayDisplay(dateSGT);
+
   function tryGenerate() {
-    if (typeof generateScheduleForDate === 'function') {
-      console.log("✅ generateScheduleForDate READY - generating schedule for:", dateStr);
-      
-      // ✅ CRITICAL FIX: Check localStorage FIRST (faster than Firebase)
-      let localSchedule = null;
-      if (typeof scheduleHistory !== 'undefined' && scheduleHistory[dateStr]) {
-        localSchedule = scheduleHistory[dateStr];
-        console.log(`📋 Found schedule in localStorage for ${dateStr}`);
-      }
-      
-      // Firebase path
-      if (window.hasDatabase()) {
-        loadScheduleFromFirebase(dateSGT, (firebaseSchedule) => {
-          let scheduleToDisplay = null;
-          
-          if (firebaseSchedule) {
-            // ✅ Firebase is the single source of truth — ALWAYS use it.
-            // Never let a local copy overwrite what is already in Firebase.
-            console.log(`☁️ Using Firebase schedule for ${dateStr}`);
-            scheduleToDisplay = firebaseSchedule;
-            scheduleHistory[dateStr] = firebaseSchedule;
-            localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-          } else if (localSchedule && typeof isAdmin !== 'undefined' && isAdmin) {
-            // ✅ Firebase has nothing AND this device is the admin:
-            // Upload the local copy so other devices can get it.
-            console.log(`💾 Admin uploading localStorage schedule to Firebase for ${dateStr}`);
-            scheduleToDisplay = localSchedule;
-            saveScheduleToFirebase(localSchedule);
-          } else if (localSchedule) {
-            // ✅ Firebase has nothing and this is a non-admin device.
-            // Show the local copy for now but DO NOT upload — wait for admin.
-            console.log(`💾 Using localStorage schedule for ${dateStr} (non-admin, not uploading)`);
-            scheduleToDisplay = localSchedule;
-          } else if (typeof isAdmin !== 'undefined' && isAdmin) {
-            // ✅ Nothing anywhere — only admin generates and saves a new schedule.
-            console.log(`🆕 Admin generating NEW schedule for ${dateStr}`);
-            scheduleToDisplay = generateScheduleForDate(dateSGT);
-            scheduleHistory[dateStr] = scheduleToDisplay;
-            localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-            saveScheduleToFirebase(scheduleToDisplay);
-          } else {
-            // ✅ Non-admin with no data at all — show empty / wait.
-            // Don't generate a conflicting schedule.
-            console.log(`⏳ No schedule found for ${dateStr} — waiting for admin to generate.`);
-            scheduleToDisplay = null;
-          }
-          
-          // Display the schedule
-          if (scheduleToDisplay && typeof displaySchedule === 'function') displaySchedule(scheduleToDisplay);
-          if (typeof updateCurrentShiftInfo === 'function') updateCurrentShiftInfo(dateSGT);
-        });
-      } else {
-        // LocalStorage only - use existing logic
-        let schedule = localSchedule;
-        if (!schedule) {
-          console.log(`🆕 Generating NEW schedule for ${dateStr} (localStorage only)`);
-          schedule = generateScheduleForDate(dateSGT);
-          scheduleHistory[dateStr] = schedule;
-          localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-        }
-        if (typeof displaySchedule === 'function') displaySchedule(schedule);
-        if (typeof updateCurrentShiftInfo === 'function') updateCurrentShiftInfo(dateSGT);
-      }
-    } else {
-      // Retry in 50ms
-      console.log("⏳ Waiting for generateScheduleForDate... (50ms)");
+    if (typeof generateScheduleForDate !== 'function') {
       setTimeout(tryGenerate, 50);
+      return;
+    }
+
+    if (window.hasDatabase()) {
+      // ─────────────────────────────────────────────
+      // FIREBASE PATH: always read Firebase first
+      // ─────────────────────────────────────────────
+      loadScheduleFromFirebase(dateSGT, (firebaseSchedule) => {
+
+        if (firebaseSchedule) {
+          // ✅ Firebase has a schedule → use it on ALL devices, no exceptions
+          console.log("☁️ Using Firebase schedule for", dateStr);
+          firebaseSchedule.shift = typeof getShiftForDate === 'function'
+            ? getShiftForDate(dateSGT) : firebaseSchedule.shift;
+          scheduleHistory[dateStr] = firebaseSchedule;
+          _safeSetScheduleHistory();
+          if (typeof displaySchedule === 'function') displaySchedule(firebaseSchedule);
+          if (typeof updateCurrentShiftInfo === 'function') updateCurrentShiftInfo(dateSGT);
+
+        } else {
+          // Firebase has nothing for this date
+          const localSchedule = (typeof scheduleHistory !== 'undefined') ? scheduleHistory[dateStr] : null;
+
+          if (typeof isAdmin !== 'undefined' && isAdmin) {
+            // ✅ Admin: generate new schedule and save it to Firebase
+            // All other devices will get it via real-time listener
+            const newSchedule = localSchedule || generateScheduleForDate(dateSGT);
+            newSchedule.shift = typeof getShiftForDate === 'function'
+              ? getShiftForDate(dateSGT) : newSchedule.shift;
+            scheduleHistory[dateStr] = newSchedule;
+            _safeSetScheduleHistory();
+            saveScheduleToFirebase(newSchedule);
+            console.log("🆕 Admin generated & saved schedule for", dateStr);
+            if (typeof displaySchedule === 'function') displaySchedule(newSchedule);
+            if (typeof updateCurrentShiftInfo === 'function') updateCurrentShiftInfo(dateSGT);
+
+          } else if (localSchedule) {
+            // ✅ Non-admin with local cache: show it but DO NOT upload
+            // The real-time listener will push the correct one when admin generates
+            console.log("💾 Non-admin showing cached schedule for", dateStr, "(not uploading)");
+            if (typeof displaySchedule === 'function') displaySchedule(localSchedule);
+            if (typeof updateCurrentShiftInfo === 'function') updateCurrentShiftInfo(dateSGT);
+
+          } else {
+            // ✅ Non-admin, no data at all: show empty state
+            console.log("⏳ No schedule yet for", dateStr, "- waiting for admin");
+            if (typeof displaySchedule === 'function') displaySchedule({ date: dateStr, platforms: {}, tasks: {} });
+            if (typeof updateCurrentShiftInfo === 'function') updateCurrentShiftInfo(dateSGT);
+          }
+        }
+      });
+
+    } else {
+      // ─────────────────────────────────────────────
+      // NO FIREBASE: use local only
+      // ─────────────────────────────────────────────
+      let schedule = (typeof scheduleHistory !== 'undefined') ? scheduleHistory[dateStr] : null;
+      if (!schedule) {
+        schedule = generateScheduleForDate(dateSGT);
+        scheduleHistory[dateStr] = schedule;
+        _safeSetScheduleHistory();
+      }
+      if (typeof displaySchedule === 'function') displaySchedule(schedule);
+      if (typeof updateCurrentShiftInfo === 'function') updateCurrentShiftInfo(dateSGT);
     }
   }
-  
+
   tryGenerate();
 };
 
@@ -237,8 +243,8 @@ if (document.readyState === 'loading') {
 }
 
 // Export everything safely
-window.database = database;
-window.firebaseReady = firebaseReady;
+// ✅ NOTE: window.database and window.firebaseReady are set inside initFirebase()
+// so they are always up-to-date. Do NOT export the local variables here as they are null at parse time.
 window.saveScheduleToFirebase = saveScheduleToFirebase;
 window.loadScheduleFromFirebase = loadScheduleFromFirebase;
 window.saveTeamDataToFirebase = saveTeamDataToFirebase;

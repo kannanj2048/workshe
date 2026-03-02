@@ -1039,67 +1039,9 @@ function assignAdditionalTasks(sas, apprentices, date) {
 // ==========================================
 // ✅ PROPER SCHEDULE GENERATION FUNCTION
 // ==========================================
-function generateDailySchedule(dateSGT) {
-    const dateStr = dateSGT.toISOString().split("T")[0];
-    
-    // ✅ CRITICAL: Update date input field FIRST
-    const dateInput = document.getElementById("scheduleDate");
-    if (dateInput) {
-        dateInput.value = dateStr;
-    }
-    
-    // Update display immediately
-    updateCurrentDayDisplay(dateSGT);
-    updateCurrentShiftInfo(dateSGT);
-    
-    // Check if we have Firebase
-    if (typeof database !== 'undefined') {
-        // Try localStorage first for instant display
-        let localSchedule = scheduleHistory[dateStr];
-        
-        loadScheduleFromFirebase(dateSGT, (firebaseSchedule) => {
-            let scheduleToDisplay = null;
-            
-            if (firebaseSchedule) {
-                // Use Firebase schedule (most up-to-date)
-                scheduleToDisplay = firebaseSchedule;
-                // Apply shift override if active for this date
-                scheduleToDisplay.shift = getShiftForDate(dateSGT);
-                scheduleHistory[dateStr] = firebaseSchedule;
-                localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-            } else if (localSchedule) {
-                // Use localStorage schedule
-                scheduleToDisplay = localSchedule;
-                // Apply shift override if active for this date
-                scheduleToDisplay.shift = getShiftForDate(dateSGT);
-                saveScheduleToFirebase(localSchedule); // Sync to Firebase
-            } else {
-                // Generate new schedule
-                scheduleToDisplay = generateScheduleForDate(dateSGT);
-                scheduleHistory[dateStr] = scheduleToDisplay;
-                localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-                saveScheduleToFirebase(scheduleToDisplay);
-            }
-            
-            displaySchedule(scheduleToDisplay);
-        });
-    } else {
-        // No Firebase - use localStorage 
-        if (scheduleHistory[dateStr]) {
-            let schedule = scheduleHistory[dateStr];
-            // Apply shift override if active for this date
-            schedule.shift = getShiftForDate(dateSGT);
-            scheduleHistory[dateStr] = schedule;
-            localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-            displaySchedule(schedule);
-        } else {
-            const schedule = generateScheduleForDate(dateSGT);
-            scheduleHistory[dateStr] = schedule;
-            localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-            displaySchedule(schedule);
-        }
-    }
-}
+// ⚠️ generateDailySchedule is defined in firebase-config.js
+// That is the ONLY version that runs - it always reads Firebase first
+// so all devices show the same schedule. Do NOT define it here.
 
 // ---------- DISPLAY ----------
 function displaySchedule(schedule) {
