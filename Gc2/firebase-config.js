@@ -10,9 +10,9 @@ const firebaseConfig = {
   measurementId: "G-EH0HMB5VFZ"
 };
 
-// 2) Global database
-let database = null;
-let firebaseReady = false;
+// 2) Global database — on window so ALL modules always get the live reference
+window.database = null;
+window.firebaseReady = false;
 
 // 3) Initialize Firebase SAFELY
 function initFirebase() {
@@ -23,8 +23,8 @@ function initFirebase() {
     }
 
     firebase.initializeApp(firebaseConfig);
-    database = firebase.database();
-    firebaseReady = true;
+    window.database = firebase.database();
+    window.firebaseReady = true;
     console.log("✅ Firebase READY");
     return true;
   } catch (error) {
@@ -34,7 +34,7 @@ function initFirebase() {
 }
 
 // 4) SAFE database check
-window.hasDatabase = () => firebaseReady && database !== null;
+window.hasDatabase = () => window.firebaseReady && window.database !== null;
 
 // ========================================
 // BULLETPROOF FIREBASE FUNCTIONS
@@ -47,7 +47,7 @@ function saveScheduleToFirebase(schedule) {
   }
   
   const dateKey = schedule.date;
-  database.ref('schedules/' + dateKey).set(schedule)
+  window.database.ref('schedules/' + dateKey).set(schedule)
     .then(() => console.log('✅ Schedule saved:', dateKey))
     .catch(err => console.error('❌ Save failed:', err));
 }
@@ -65,7 +65,7 @@ function loadScheduleFromFirebase(date, callback) {
     : date.toISOString().split('T')[0];
   console.log("🔍 Loading schedule from Firebase:", dateStr);
   
-  database.ref('schedules/' + dateStr).once('value')
+  window.database.ref('schedules/' + dateStr).once('value')
     .then(snapshot => {
       const schedule = snapshot.val();
       console.log("📥 Firebase schedule:", schedule ? "FOUND" : "NOT FOUND");
@@ -79,7 +79,7 @@ function loadScheduleFromFirebase(date, callback) {
 
 function saveTeamDataToFirebase() {
   if (!window.hasDatabase() || typeof teamData === 'undefined') return;
-  database.ref('teamData').set(teamData)
+  window.database.ref('teamData').set(teamData)
     .catch(err => console.error('❌ Team save error:', err));
 }
 
@@ -88,7 +88,7 @@ function loadTeamDataFromFirebase(callback) {
     if (callback) callback(null);
     return;
   }
-  database.ref('teamData').once('value')
+  window.database.ref('teamData').once('value')
     .then(snapshot => {
       const data = snapshot.val();
       if (data && typeof teamData !== 'undefined') {
@@ -104,7 +104,7 @@ function loadTeamDataFromFirebase(callback) {
 
 function saveAvailabilityToFirebase() {
   if (!window.hasDatabase() || typeof availabilityOverrides === 'undefined') return;
-  database.ref('availabilityOverrides').set(availabilityOverrides)
+  window.database.ref('availabilityOverrides').set(availabilityOverrides)
     .catch(err => console.error('❌ Availability save error:', err));
 }
 
@@ -113,7 +113,7 @@ function loadAvailabilityFromFirebase(callback) {
     if (callback) callback(null);
     return;
   }
-  database.ref('availabilityOverrides').once('value')
+  window.database.ref('availabilityOverrides').once('value')
     .then(snapshot => {
       const data = snapshot.val();
       if (data) availabilityOverrides = data;
@@ -167,50 +167,49 @@ window.generateDailySchedule = function(dateSGT) {
       }
       
       // ✅ FIX: Firebase is the SINGLE SOURCE OF TRUTH.
-      // Only admin can generate or upload a schedule.
-      // Guests/non-admins ONLY read from Firebase — never generate, never upload.
+      // ALL devices read from Firebase.
+      // ONLY admin device generates or saves a new schedule to Firebase.
       if (window.hasDatabase()) {
         loadScheduleFromFirebase(dateSGT, (firebaseSchedule) => {
-          let scheduleToDisplay = null;
           const userIsAdmin = (typeof isAdmin !== 'undefined' && isAdmin);
 
           if (firebaseSchedule) {
-            // ✅ ALL devices: use the Firebase schedule (single source of truth)
+            // ✅ ALL devices: Firebase has a schedule — display it immediately
             console.log(`☁️ Using Firebase schedule for ${dateStr}`);
-            scheduleToDisplay = firebaseSchedule;
             scheduleHistory[dateStr] = firebaseSchedule;
             localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
+            if (typeof displaySchedule === 'function') displaySchedule(firebaseSchedule);
 
           } else if (userIsAdmin && localSchedule) {
-            // ✅ ADMIN ONLY: upload existing localStorage schedule to Firebase
+            // ✅ ADMIN ONLY: push existing localStorage schedule up to Firebase
             console.log(`💾 Admin syncing localStorage schedule to Firebase for ${dateStr}`);
-            scheduleToDisplay = localSchedule;
             saveScheduleToFirebase(localSchedule);
+            if (typeof displaySchedule === 'function') displaySchedule(localSchedule);
 
           } else if (userIsAdmin) {
-            // ✅ ADMIN ONLY: generate brand new schedule when none exists anywhere
+            // ✅ ADMIN ONLY: generate a brand-new schedule and push to Firebase
             console.log(`🆕 Admin generating NEW schedule for ${dateStr}`);
-            scheduleToDisplay = generateScheduleForDate(dateSGT);
-            scheduleHistory[dateStr] = scheduleToDisplay;
+            const newSchedule = generateScheduleForDate(dateSGT);
+            scheduleHistory[dateStr] = newSchedule;
             localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-            saveScheduleToFirebase(scheduleToDisplay);
+            saveScheduleToFirebase(newSchedule);
+            if (typeof displaySchedule === 'function') displaySchedule(newSchedule);
 
           } else {
-            // ⏳ GUEST/NON-ADMIN: no schedule in Firebase yet — do NOT generate or upload
-            console.log(`⏳ No Firebase schedule for ${dateStr} — waiting for admin`);
+            // ⏳ NON-ADMIN: no Firebase schedule yet — show waiting message.
+            // The real-time listener in firebase-realtime-sync.js will auto-display
+            // as soon as admin generates and saves the schedule to Firebase.
+            console.log(`⏳ No Firebase schedule for ${dateStr} — real-time listener will update when admin generates`);
             const tbody = document.getElementById('scheduleTableBody');
             if (tbody) {
-              tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-secondary);">⏳ Waiting for admin to generate schedule...</td></tr>';
+              tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--text-secondary);font-size:15px;">⏳ Waiting for admin to generate schedule...<br><small style="opacity:0.6">This will update automatically</small></td></tr>';
             }
-            if (typeof updateCurrentShiftInfo === 'function') updateCurrentShiftInfo(dateSGT);
-            return;
           }
 
-          if (typeof displaySchedule === 'function') displaySchedule(scheduleToDisplay);
           if (typeof updateCurrentShiftInfo === 'function') updateCurrentShiftInfo(dateSGT);
         });
       } else {
-        // No Firebase — localStorage only; only admin writes
+        // No Firebase — localStorage only; only admin writes new schedules
         const userIsAdmin = (typeof isAdmin !== 'undefined' && isAdmin);
         let schedule = localSchedule;
         if (!schedule && userIsAdmin) {
@@ -239,9 +238,7 @@ if (document.readyState === 'loading') {
   initFirebase();
 }
 
-// Export everything safely
-window.database = database;
-window.firebaseReady = firebaseReady;
+// window.database and window.firebaseReady are live — set in initFirebase()
 window.saveScheduleToFirebase = saveScheduleToFirebase;
 window.loadScheduleFromFirebase = loadScheduleFromFirebase;
 window.saveTeamDataToFirebase = saveTeamDataToFirebase;
@@ -265,7 +262,7 @@ window.syncLocalToFirebase = function() {
     // 1. Sync Team Data
     const localTeam = localStorage.getItem('teamData');
     if (localTeam) {
-        database.ref('teamData').set(JSON.parse(localTeam))
+        window.database.ref('teamData').set(JSON.parse(localTeam))
             .then(() => console.log("✅ Team Data synced to Firebase"))
             .catch(err => console.error("❌ Team sync failed:", err));
     }
@@ -273,7 +270,7 @@ window.syncLocalToFirebase = function() {
     // 2. Sync Schedule History
     const localSchedules = localStorage.getItem('scheduleHistory');
     if (localSchedules) {
-        database.ref('schedules').update(JSON.parse(localSchedules))
+        window.database.ref('schedules').update(JSON.parse(localSchedules))
             .then(() => console.log("✅ Schedule History synced to Firebase"))
             .catch(err => console.error("❌ Schedule sync failed:", err));
     }
@@ -281,7 +278,7 @@ window.syncLocalToFirebase = function() {
     // 3. Sync Availability Overrides
     const localAvail = localStorage.getItem('availabilityOverrides');
     if (localAvail) {
-        database.ref('availabilityOverrides').set(JSON.parse(localAvail))
+        window.database.ref('availabilityOverrides').set(JSON.parse(localAvail))
             .then(() => console.log("✅ Availability synced to Firebase"))
             .catch(err => console.error("❌ Availability sync failed:", err));
     }

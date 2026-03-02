@@ -1054,46 +1054,45 @@ function generateDailySchedule(dateSGT) {
     
     // Check if we have Firebase
     if (typeof database !== 'undefined') {
-        // Try localStorage first for instant display
+        // ✅ FIX: Firebase is the SINGLE SOURCE OF TRUTH.
+        // ALL devices read from Firebase.
+        // ONLY admin generates or writes a new schedule to Firebase.
         let localSchedule = scheduleHistory[dateStr];
         const userIsAdmin = (typeof isAdmin !== 'undefined' && isAdmin);
 
         loadScheduleFromFirebase(dateSGT, (firebaseSchedule) => {
-            let scheduleToDisplay = null;
 
             if (firebaseSchedule) {
-                // ✅ ALL devices: Firebase is the single source of truth
-                scheduleToDisplay = firebaseSchedule;
-                scheduleToDisplay.shift = getShiftForDate(dateSGT);
+                // ✅ ALL devices: Firebase has it — display immediately
+                firebaseSchedule.shift = getShiftForDate(dateSGT);
                 scheduleHistory[dateStr] = firebaseSchedule;
                 localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
+                displaySchedule(firebaseSchedule);
 
             } else if (userIsAdmin && localSchedule) {
-                // ✅ ADMIN ONLY: upload localStorage schedule to Firebase
-                scheduleToDisplay = localSchedule;
-                scheduleToDisplay.shift = getShiftForDate(dateSGT);
+                // ✅ ADMIN ONLY: push localStorage schedule to Firebase
+                localSchedule.shift = getShiftForDate(dateSGT);
                 saveScheduleToFirebase(localSchedule);
+                displaySchedule(localSchedule);
 
             } else if (userIsAdmin) {
-                // ✅ ADMIN ONLY: generate new schedule when none exists
-                scheduleToDisplay = generateScheduleForDate(dateSGT);
-                scheduleHistory[dateStr] = scheduleToDisplay;
+                // ✅ ADMIN ONLY: generate new schedule and push to Firebase
+                const newSchedule = generateScheduleForDate(dateSGT);
+                scheduleHistory[dateStr] = newSchedule;
                 localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-                saveScheduleToFirebase(scheduleToDisplay);
+                saveScheduleToFirebase(newSchedule);
+                displaySchedule(newSchedule);
 
             } else {
-                // ⏳ GUEST: no Firebase schedule yet — do NOT generate or upload
+                // ⏳ NON-ADMIN: no Firebase schedule yet — real-time listener auto-updates
                 const tbody = document.getElementById('scheduleTableBody');
                 if (tbody) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-secondary);">⏳ Waiting for admin to generate schedule...</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--text-secondary);font-size:15px;">⏳ Waiting for admin to generate schedule...<br><small style="opacity:0.6">This will update automatically</small></td></tr>';
                 }
-                return;
             }
-
-            displaySchedule(scheduleToDisplay);
         });
     } else {
-        // No Firebase - use localStorage (admin only writes)
+        // No Firebase - localStorage only; only admin writes new schedules
         const userIsAdmin = (typeof isAdmin !== 'undefined' && isAdmin);
         if (scheduleHistory[dateStr]) {
             let schedule = scheduleHistory[dateStr];
