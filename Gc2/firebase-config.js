@@ -172,27 +172,39 @@ window.generateDailySchedule = function(dateSGT) {
           let scheduleToDisplay = null;
           
           if (firebaseSchedule) {
-            // Use Firebase schedule (more up-to-date)
+            // ✅ Firebase is the single source of truth — ALWAYS use it.
+            // Never let a local copy overwrite what is already in Firebase.
             console.log(`☁️ Using Firebase schedule for ${dateStr}`);
             scheduleToDisplay = firebaseSchedule;
             scheduleHistory[dateStr] = firebaseSchedule;
             localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-          } else if (localSchedule) {
-            // Use localStorage schedule
-            console.log(`💾 Using localStorage schedule for ${dateStr}`);
+          } else if (localSchedule && typeof isAdmin !== 'undefined' && isAdmin) {
+            // ✅ Firebase has nothing AND this device is the admin:
+            // Upload the local copy so other devices can get it.
+            console.log(`💾 Admin uploading localStorage schedule to Firebase for ${dateStr}`);
             scheduleToDisplay = localSchedule;
-            saveScheduleToFirebase(localSchedule); // Sync to Firebase
-          } else {
-            // Generate new schedule
-            console.log(`🆕 Generating NEW schedule for ${dateStr}`);
+            saveScheduleToFirebase(localSchedule);
+          } else if (localSchedule) {
+            // ✅ Firebase has nothing and this is a non-admin device.
+            // Show the local copy for now but DO NOT upload — wait for admin.
+            console.log(`💾 Using localStorage schedule for ${dateStr} (non-admin, not uploading)`);
+            scheduleToDisplay = localSchedule;
+          } else if (typeof isAdmin !== 'undefined' && isAdmin) {
+            // ✅ Nothing anywhere — only admin generates and saves a new schedule.
+            console.log(`🆕 Admin generating NEW schedule for ${dateStr}`);
             scheduleToDisplay = generateScheduleForDate(dateSGT);
             scheduleHistory[dateStr] = scheduleToDisplay;
             localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
             saveScheduleToFirebase(scheduleToDisplay);
+          } else {
+            // ✅ Non-admin with no data at all — show empty / wait.
+            // Don't generate a conflicting schedule.
+            console.log(`⏳ No schedule found for ${dateStr} — waiting for admin to generate.`);
+            scheduleToDisplay = null;
           }
           
           // Display the schedule
-          if (typeof displaySchedule === 'function') displaySchedule(scheduleToDisplay);
+          if (scheduleToDisplay && typeof displaySchedule === 'function') displaySchedule(scheduleToDisplay);
           if (typeof updateCurrentShiftInfo === 'function') updateCurrentShiftInfo(dateSGT);
         });
       } else {
