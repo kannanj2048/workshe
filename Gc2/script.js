@@ -1056,43 +1056,52 @@ function generateDailySchedule(dateSGT) {
     if (typeof database !== 'undefined') {
         // Try localStorage first for instant display
         let localSchedule = scheduleHistory[dateStr];
-        
+        const userIsAdmin = (typeof isAdmin !== 'undefined' && isAdmin);
+
         loadScheduleFromFirebase(dateSGT, (firebaseSchedule) => {
             let scheduleToDisplay = null;
-            
+
             if (firebaseSchedule) {
-                // Use Firebase schedule (most up-to-date)
+                // ✅ ALL devices: Firebase is the single source of truth
                 scheduleToDisplay = firebaseSchedule;
-                // Apply shift override if active for this date
                 scheduleToDisplay.shift = getShiftForDate(dateSGT);
                 scheduleHistory[dateStr] = firebaseSchedule;
                 localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-            } else if (localSchedule) {
-                // Use localStorage schedule
+
+            } else if (userIsAdmin && localSchedule) {
+                // ✅ ADMIN ONLY: upload localStorage schedule to Firebase
                 scheduleToDisplay = localSchedule;
-                // Apply shift override if active for this date
                 scheduleToDisplay.shift = getShiftForDate(dateSGT);
-                saveScheduleToFirebase(localSchedule); // Sync to Firebase
-            } else {
-                // Generate new schedule
+                saveScheduleToFirebase(localSchedule);
+
+            } else if (userIsAdmin) {
+                // ✅ ADMIN ONLY: generate new schedule when none exists
                 scheduleToDisplay = generateScheduleForDate(dateSGT);
                 scheduleHistory[dateStr] = scheduleToDisplay;
                 localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
                 saveScheduleToFirebase(scheduleToDisplay);
+
+            } else {
+                // ⏳ GUEST: no Firebase schedule yet — do NOT generate or upload
+                const tbody = document.getElementById('scheduleTableBody');
+                if (tbody) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-secondary);">⏳ Waiting for admin to generate schedule...</td></tr>';
+                }
+                return;
             }
-            
+
             displaySchedule(scheduleToDisplay);
         });
     } else {
-        // No Firebase - use localStorage 
+        // No Firebase - use localStorage (admin only writes)
+        const userIsAdmin = (typeof isAdmin !== 'undefined' && isAdmin);
         if (scheduleHistory[dateStr]) {
             let schedule = scheduleHistory[dateStr];
-            // Apply shift override if active for this date
             schedule.shift = getShiftForDate(dateSGT);
             scheduleHistory[dateStr] = schedule;
             localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
             displaySchedule(schedule);
-        } else {
+        } else if (userIsAdmin) {
             const schedule = generateScheduleForDate(dateSGT);
             scheduleHistory[dateStr] = schedule;
             localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
