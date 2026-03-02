@@ -9,6 +9,11 @@
     // Track if listeners are already attached to prevent duplicates
     let listenersAttached = false;
     let currentScheduleListener = null;
+
+    // ✅ FIX 1: Track whether the initial Firebase "on value" fire has been processed.
+    // Firebase always fires once immediately on attach. We use this flag to skip
+    // that first fire so we don't overwrite the schedule the admin just saved.
+    let scheduleListenerInitialFired = false;
     
     // ========================================
     // REAL-TIME SCHEDULE SYNC
@@ -19,19 +24,38 @@
             console.log('⚠️ Firebase not available - real-time sync disabled');
             return;
         }
+
+        // ✅ FIX 2: Don't skip re-attaching if the date changes.
+        // Old code checked listenersAttached globally and returned early,
+        // which blocked the listener from moving to the new date.
+        if (currentScheduleListener === dateStr) {
+            // Already listening to this exact date — nothing to do
+            return;
+        }
         
         // Remove previous listener if exists
         if (currentScheduleListener) {
             database.ref('schedules/' + currentScheduleListener).off('value');
-            console.log('🔌 Detached previous schedule listener');
+            console.log('🔌 Detached previous schedule listener for:', currentScheduleListener);
         }
         
         currentScheduleListener = dateStr;
+        scheduleListenerInitialFired = false; // ✅ Reset flag for the new date
         
         console.log('👂 Listening for schedule changes:', dateStr);
         
         // Attach real-time listener
         database.ref('schedules/' + dateStr).on('value', (snapshot) => {
+
+            // ✅ FIX 3: Skip the very first immediate fire.
+            // Firebase always fires on attach even if nothing changed.
+            // This initial fire would overwrite whatever generateDailySchedule just displayed.
+            if (!scheduleListenerInitialFired) {
+                scheduleListenerInitialFired = true;
+                console.log('🔔 Schedule listener attached for:', dateStr, '(initial fire skipped)');
+                return;
+            }
+
             const firebaseSchedule = snapshot.val();
             
             if (firebaseSchedule) {
@@ -48,21 +72,44 @@
                 const currentViewingDate = dateInput ? dateInput.value : null;
                 
                 if (currentViewingDate === dateStr) {
-                    console.log('✅ Updating display with new schedule');
+                    console.log('✅ Updating display with new schedule data');
                     
-                    // Update the display
+                    // ✅ FIX 4: Call displaySchedule for the main schedule table
                     if (typeof displaySchedule === 'function') {
                         displaySchedule(firebaseSchedule);
+                    }
+
+                    // ✅ FIX 5: Also re-render the additional tasks section.
+                    // The tasks are stored inside the schedule object (firebaseSchedule.tasks
+                    // or firebaseSchedule.additionalTasks). displaySchedule should handle this,
+                    // but if your app has a separate render function for tasks, call it here too.
+                    if (typeof displayAdditionalTasks === 'function' && firebaseSchedule.additionalTasks) {
+                        displayAdditionalTasks(firebaseSchedule.additionalTasks);
+                    }
+
+                    // Re-apply drag order for admin after display update
+                    if (typeof isAdmin !== 'undefined' && isAdmin) {
+                        if (typeof loadAndApplyPlatformOrder === 'function') {
+                            setTimeout(loadAndApplyPlatformOrder, 50);
+                        }
+                        if (typeof loadAndApplyTaskOrder === 'function') {
+                            setTimeout(loadAndApplyTaskOrder, 50);
+                        }
+                        if (typeof initDragAndDrop === 'function') {
+                            setTimeout(initDragAndDrop, 100);
+                        }
                     }
                     
                     // Show notification to non-admin users
                     if (typeof isAdmin !== 'undefined' && !isAdmin) {
-                        showNotification('📋 Schedule updated by admin', 'info');
+                        if (typeof showNotification === 'function') {
+                            showNotification('📋 Schedule updated by admin', 'info');
+                        }
                     }
                 }
             }
         }, (error) => {
-            console.error('❌ Firebase listener error:', error);
+            console.error('❌ Firebase schedule listener error:', error);
         });
     }
     
@@ -258,10 +305,22 @@
         setupMemberAvailabilityListener();
         setupLeaveManagementListener();
         
-        // Setup schedule listener for current date
+        // ✅ FIX 6: Setup schedule listener for the currently displayed date.
+        // Also hook the date input change so the listener moves when the user
+        // navigates to a different date.
         const dateInput = document.getElementById('scheduleDate');
-        if (dateInput && dateInput.value) {
-            setupScheduleListener(dateInput.value);
+        if (dateInput) {
+            if (dateInput.value) {
+                setupScheduleListener(dateInput.value);
+            }
+
+            // ✅ When the admin/user changes the date, re-attach the listener
+            // to the new date so syncing continues to work.
+            dateInput.addEventListener('change', function() {
+                if (this.value) {
+                    setupScheduleListener(this.value);
+                }
+            });
         }
         
         listenersAttached = true;
@@ -271,28 +330,46 @@
     }
     
     // ========================================
-    // OVERRIDE DATE CHANGE TO UPDATE LISTENER
+    // ✅ FIX 7: Hook into generateDailySchedule AFTER it is defined.
+    // The old code captured window.generateDailySchedule at parse time,
+    // which was undefined because firebase-config.js defines it later.
+    // We use a MutationObserver-style poll to wait until it is ready.
     // ========================================
-    
-    // Store original generateDailySchedule
-    const originalGenerateDailySchedule = window.generateDailySchedule;
-    
-    if (typeof originalGenerateDailySchedule === 'function') {
+
+    function hookGenerateDailySchedule() {
+        const original = window.generateDailySchedule;
+        if (typeof original !== 'function') return false;
+
         window.generateDailySchedule = function(dateSGT) {
-            // Call original function
-            const result = originalGenerateDailySchedule.call(this, dateSGT);
-            
-            // Update schedule listener to new date
-            const dateStr = typeof formatDateForInput === 'function' 
-                ? formatDateForInput(dateSGT) 
+            // Call the original function first
+            const result = original.call(this, dateSGT);
+
+            // After generating, update the schedule listener to the new date
+            const dateStr = typeof formatDateForInput === 'function'
+                ? formatDateForInput(dateSGT)
                 : dateSGT.toISOString().split('T')[0];
-            
-            setupScheduleListener(dateStr);
-            
+
+            // ✅ Use a small delay so the schedule is fully saved to Firebase
+            // before we reset the "initial fire" flag on the new listener.
+            setTimeout(() => {
+                setupScheduleListener(dateStr);
+            }, 300);
+
             return result;
         };
+
+        console.log('✅ generateDailySchedule hooked for real-time sync');
+        return true;
     }
-    
+
+    // Poll until generateDailySchedule is available, then hook it
+    function waitAndHook() {
+        if (!hookGenerateDailySchedule()) {
+            setTimeout(waitAndHook, 100);
+        }
+    }
+    waitAndHook();
+
     // ========================================
     // SAVE FUNCTIONS WITH IMMEDIATE SYNC
     // ========================================
@@ -329,6 +406,7 @@
             }
             
             listenersAttached = false;
+            currentScheduleListener = null;
             console.log('✅ All listeners detached');
         }
     };
