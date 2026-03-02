@@ -138,14 +138,14 @@ function getWorkingHoursDisplay() {
 let availabilityOverrides = JSON.parse(localStorage.getItem("availabilityOverrides")) || {};
 // ---------- TEAM DATA ----------
 let teamData = JSON.parse(localStorage.getItem("teamData")) || {
-    SAs: [ "Selva", "Naveen", "Kannan", "Midhun", "Prem", "Logesh", "Linith"],
-    apprentices: [ "Sanjay", "Vishal", "Subash"],
+    SAs: [ "Raja", "Vishali", "Sahasraa", "Priyanga", "Elakkia", "Yuva", "Stephan", "Deepak", "Naveen Raj"],
+    apprentices: [ "Sriharan"],
     responsibilities: {
-        Selva: "Vishal",
-        Naveen: "Vishal",
-        Kannan: "Karl / Subash",
-        Midhun: "Sanjay",
-        Prem: "Karl / Subash",
+        Raja: "Vishal",
+        Vishali: "Vishal",
+        Sahasraa: "Sriharan / Subash",
+        Priyanga: "Sriharan",
+        Elakkia: "Karl / Subash",
     }
 };
 
@@ -164,16 +164,16 @@ let isAdmin = false;
 // ========== CENTRALIZED AVAILABILITY MANAGEMENT SYSTEM ==========
 let memberAvailabilitySettings = JSON.parse(localStorage.getItem('memberAvailabilitySettings')) || {
     SAs: {
-        "Selva": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Naveen": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Kannan": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Midhun": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Prem": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Logesh": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
+        "Raja": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Vishali": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Sahasraa": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Priyanga": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Elakkia": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
+        "Yuva": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
     },
     apprentices: {
-        "Linith": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Sanjay": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Stephan": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        "Sriharan": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Vishal": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Subash": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] }
     }
@@ -2358,19 +2358,8 @@ function openEditScheduleModal(schedule, platform) {
 if (!isAdmin && !isGuest) {
         showNotification('Access required', 'error');
         return;
-    }
-
-    if (!schedule) {
-        const dateInput = document.getElementById('scheduleDate');
-        if (dateInput && dateInput.value && typeof scheduleHistory !== 'undefined') {
-            schedule = scheduleHistory[dateInput.value];
-        }
-    }
-    if (!schedule || !schedule.platforms) {
-        showNotification('Schedule data not available. Please reload the schedule.', 'error');
-        return;
-    }
-
+    }    
+    
     const modal = document.getElementById("editScheduleModal");
     if (!modal) return;
     const editPlatform = document.getElementById("editPlatform");
@@ -2426,18 +2415,7 @@ if (!isAdmin && !isGuest) {
         showNotification('Access required', 'error');
         return;
     }
-
-    if (!schedule) {
-        const dateInput = document.getElementById('scheduleDate');
-        if (dateInput && dateInput.value && typeof scheduleHistory !== 'undefined') {
-            schedule = scheduleHistory[dateInput.value];
-        }
-    }
-    if (!schedule || !schedule.tasks) {
-        showNotification('Schedule data not available. Please reload the schedule.', 'error');
-        return;
-    }
-
+    
     const modal = document.getElementById("editTaskModal");
     if (!modal) return;
     const editTaskName = document.getElementById("editTaskName");
@@ -3711,8 +3689,8 @@ window.savePasswordsToFirebase = savePasswordsToFirebase;
 
 // Default POC names
 const DEFAULT_POC_NAMES = {
-    team1: "Gayathiri",
-    team2: "Ajay"
+    team1: "Raja",
+    team2: "Vishali"
 };
 
 // Storage key - NOW GROUP-SPECIFIC
