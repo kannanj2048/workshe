@@ -1,10 +1,8 @@
 // ==========================================
 // FIREBASE REAL-TIME SYNCHRONIZATION
 // ==========================================
-
 (function() {
     'use strict';
-
     let listenersAttached = false;
     let currentScheduleListener = null;
     let hasEverConnected = false;
@@ -13,6 +11,8 @@
         try { localStorage.setItem(key, value); } catch(e) {}
     }
 
+    // Apply Firebase schedule to page. Calls _markRealtimeSynced() so
+    // generateDailySchedule knows NOT to overwrite with stale .once() data.
     function applyScheduleToPage(schedule, dateStr) {
         if (!schedule) return;
         if (typeof scheduleHistory !== 'undefined') {
@@ -35,7 +35,7 @@
         if (!dateInput || !dateInput.value) return;
         const dateStr = dateInput.value;
         database.ref('schedules/' + dateStr).once('value')
-            .then((snapshot) => { const s = snapshot.val(); if (s) applyScheduleToPage(s, dateStr); })
+            .then((snap) => { const s = snap.val(); if (s) applyScheduleToPage(s, dateStr); })
             .catch((err) => console.error('SYNC fetch error:', err));
     }
 
@@ -45,55 +45,55 @@
         if (currentScheduleListener) database.ref('schedules/' + currentScheduleListener).off('value');
         currentScheduleListener = dateStr;
         console.log('SYNC: listening on', dateStr);
-        database.ref('schedules/' + dateStr).on('value', (snapshot) => {
-            const schedule = snapshot.val();
-            if (schedule) applyScheduleToPage(schedule, dateStr);
-        }, (error) => { console.error('SYNC schedule listener error:', error); });
+        database.ref('schedules/' + dateStr).on('value', (snap) => {
+            const s = snap.val();
+            if (s) applyScheduleToPage(s, dateStr);
+        }, (err) => console.error('SYNC listener error:', err));
     }
 
     function setupTeamDataListener() {
         if (!window.hasDatabase || !window.hasDatabase()) return;
-        database.ref('teamData').on('value', (snapshot) => {
-            const data = snapshot.val();
+        database.ref('teamData').on('value', (snap) => {
+            const data = snap.val();
             if (!data || typeof teamData === 'undefined') return;
             Object.assign(teamData, data);
             safeSetItem('teamData', JSON.stringify(teamData));
             if (typeof updateTeamMembersDisplay === 'function') updateTeamMembersDisplay();
             if (typeof isAdmin !== 'undefined' && !isAdmin)
                 if (typeof showNotification === 'function') showNotification('Team members updated', 'info');
-        }, (err) => { console.error('SYNC team error:', err); });
+        }, (err) => console.error('SYNC team error:', err));
     }
 
     function setupAvailabilityListener() {
         if (!window.hasDatabase || !window.hasDatabase()) return;
-        database.ref('availabilityOverrides').on('value', (snapshot) => {
-            const data = snapshot.val();
+        database.ref('availabilityOverrides').on('value', (snap) => {
+            const data = snap.val();
             if (!data || typeof availabilityOverrides === 'undefined') return;
             availabilityOverrides = data;
             safeSetItem('availabilityOverrides', JSON.stringify(availabilityOverrides));
             fetchAndDisplayCurrentSchedule();
             if (typeof isAdmin !== 'undefined' && !isAdmin)
                 if (typeof showNotification === 'function') showNotification('Availability updated', 'info');
-        }, (err) => { console.error('SYNC availability error:', err); });
+        }, (err) => console.error('SYNC avail error:', err));
     }
 
     function setupMemberAvailabilityListener() {
         if (!window.hasDatabase || !window.hasDatabase()) return;
-        database.ref('memberAvailabilitySettings').on('value', (snapshot) => {
-            const data = snapshot.val();
+        database.ref('memberAvailabilitySettings').on('value', (snap) => {
+            const data = snap.val();
             if (!data || typeof memberAvailabilitySettings === 'undefined') return;
             Object.assign(memberAvailabilitySettings, data);
             safeSetItem('memberAvailabilitySettings', JSON.stringify(memberAvailabilitySettings));
             fetchAndDisplayCurrentSchedule();
             if (typeof isAdmin !== 'undefined' && !isAdmin)
                 if (typeof showNotification === 'function') showNotification('Working schedules updated', 'info');
-        }, (err) => { console.error('SYNC member availability error:', err); });
+        }, (err) => console.error('SYNC member avail error:', err));
     }
 
     function setupLeaveManagementListener() {
         if (!window.hasDatabase || !window.hasDatabase()) return;
-        database.ref('leaveSettings').on('value', (snapshot) => {
-            const data = snapshot.val();
+        database.ref('leaveSettings').on('value', (snap) => {
+            const data = snap.val();
             if (!data || typeof monthlyLeaveSettings === 'undefined') return;
             Object.assign(monthlyLeaveSettings, data);
             safeSetItem('monthlyLeaveSettings', JSON.stringify(monthlyLeaveSettings));
@@ -101,7 +101,7 @@
             fetchAndDisplayCurrentSchedule();
             if (typeof isAdmin !== 'undefined' && !isAdmin)
                 if (typeof showNotification === 'function') showNotification('Leave calendar updated', 'info');
-        }, (err) => { console.error('SYNC leave error:', err); });
+        }, (err) => console.error('SYNC leave error:', err));
     }
 
     function initializeRealtimeSync() {
@@ -112,30 +112,31 @@
         setupAvailabilityListener();
         setupMemberAvailabilityListener();
         setupLeaveManagementListener();
-        function waitForDateAndAttach() {
-            const dateInput = document.getElementById('scheduleDate');
-            if (dateInput && dateInput.value) {
-                setupScheduleListener(dateInput.value);
-                if (!dateInput._syncChangeAttached) {
-                    dateInput.addEventListener('change', function() {
+        function waitForDate() {
+            const di = document.getElementById('scheduleDate');
+            if (di && di.value) {
+                setupScheduleListener(di.value);
+                if (!di._syncChangeAttached) {
+                    di.addEventListener('change', function() {
                         if (this.value) { currentScheduleListener = null; setupScheduleListener(this.value); }
                     });
-                    dateInput._syncChangeAttached = true;
+                    di._syncChangeAttached = true;
                 }
-            } else { setTimeout(waitForDateAndAttach, 300); }
+            } else { setTimeout(waitForDate, 300); }
         }
-        waitForDateAndAttach();
+        waitForDate();
         listenersAttached = true;
         console.log('SYNC: ready');
     }
 
     function setupConnectionMonitor() {
         if (!window.hasDatabase || !window.hasDatabase()) return;
-        database.ref('.info/connected').on('value', (snapshot) => {
-            const isConnected = snapshot.val() === true;
-            if (isConnected) {
+        database.ref('.info/connected').on('value', (snap) => {
+            const connected = snap.val() === true;
+            if (connected) {
                 if (!hasEverConnected) { hasEverConnected = true; }
                 else {
+                    console.log('SYNC: reconnected');
                     listenersAttached = false;
                     initializeRealtimeSync();
                     const di = document.getElementById('scheduleDate');
@@ -160,11 +161,11 @@
         }
     };
 
-    function tryInitialize() {
+    function tryInit() {
         if (window.hasDatabase && window.hasDatabase()) { initializeRealtimeSync(); setupConnectionMonitor(); }
-        else setTimeout(tryInitialize, 500);
+        else setTimeout(tryInit, 500);
     }
-    setTimeout(tryInitialize, 1000);
+    setTimeout(tryInit, 1000);
 
     console.log('%cFirebase Real-Time Sync Loaded', 'color:#10b981;font-weight:bold;font-size:14px');
     console.log('%c  Schedules+tasks sync instantly on all devices', 'color:#3b82f6;font-size:12px');

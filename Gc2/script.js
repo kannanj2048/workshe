@@ -51,22 +51,24 @@ let lastCheckedDate = null;
 function checkForMidnightUpdate() {
     const nowSGT = getNowSGT();
     const currentDateStr = formatDateForInput(nowSGT);
-    
-    // Check if date has changed (midnight passed)
+
     if (lastCheckedDate !== null && lastCheckedDate !== currentDateStr) {
-        
-        // Auto-update to new day
+        // Update date input to new day
         const dateInput = document.getElementById("scheduleDate");
-        if (dateInput) {
-            dateInput.value = currentDateStr;
-        }
-        
-        // Generate new schedule for the new day
+        if (dateInput) dateInput.value = currentDateStr;
+
+        // Update day title and shift display immediately
+        updateCurrentDayDisplay(nowSGT);
+        updateCurrentShiftInfo(nowSGT);
+
+        // generateDailySchedule handles the read-only vs write logic internally.
+        // Non-admin devices will fetch from Firebase (or show placeholder).
+        // Admin/guest devices will generate+save if nothing exists yet.
         generateDailySchedule(nowSGT);
-        
-        showNotification(`📅 Schedule auto-updated to ${currentDateStr}`, 'success');
+
+        showNotification('📅 Schedule auto-updated to ' + currentDateStr, 'success');
     }
-    
+
     lastCheckedDate = currentDateStr;
 }
 // ---------- SHIFT SYSTEM (SGT) ----------
@@ -1038,10 +1040,110 @@ function assignAdditionalTasks(sas, apprentices, date) {
 
 // ==========================================
 // ✅ PROPER SCHEDULE GENERATION FUNCTION
+// FIXED: Non-admin/non-guest devices are READ-ONLY.
+// They NEVER generate or write schedules to Firebase.
+// Only admin/guest can generate and save — this prevents
+// different devices writing conflicting schedules at midnight.
 // ==========================================
-// ⚠️ generateDailySchedule is defined in firebase-config.js
-// That is the ONLY version that runs - it always reads Firebase first
-// so all devices show the same schedule. Do NOT define it here.
+function generateDailySchedule(dateSGT) {
+    // Use SGT-safe date string (not UTC .toISOString which can give wrong date)
+    const dateStr = typeof formatDateForInput === 'function'
+        ? formatDateForInput(dateSGT)
+        : dateSGT.toISOString().split("T")[0];
+
+    // Update date input field
+    const dateInput = document.getElementById("scheduleDate");
+    if (dateInput) dateInput.value = dateStr;
+
+    // Update display
+    updateCurrentDayDisplay(dateSGT);
+    updateCurrentShiftInfo(dateSGT);
+
+    // Who is allowed to write new schedules to Firebase?
+    const canWrite = (typeof isAdmin !== 'undefined' && isAdmin) ||
+                     (typeof isGuest !== 'undefined' && isGuest);
+
+    if (typeof database !== 'undefined' && typeof loadScheduleFromFirebase === 'function') {
+
+        // ── READ-ONLY PATH (plain viewer — no admin, no guest login) ──────
+        if (!canWrite) {
+            // Skip if real-time listener already pushed fresh data to screen
+            if (typeof window._realtimeSyncedRecently === 'function' && window._realtimeSyncedRecently()) {
+                return;
+            }
+            loadScheduleFromFirebase(dateSGT, (firebaseSchedule) => {
+                if (firebaseSchedule) {
+                    scheduleHistory[dateStr] = firebaseSchedule;
+                    try { localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory)); } catch(e) {}
+                    displaySchedule(firebaseSchedule);
+                } else {
+                    // Nothing in Firebase yet — show placeholder, NEVER auto-generate
+                    const tbody = document.getElementById("scheduleTableBody");
+                    if (tbody) {
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;opacity:0.6;">' +
+                            '<i class="fas fa-clock"></i> Waiting for admin to generate today\'s schedule...' +
+                            '</td></tr>';
+                    }
+                }
+            });
+            return; // EXIT — non-admin never reaches write code below
+        }
+
+        // ── WRITE PATH (admin or guest only) ─────────────────────────────
+        // Skip display if real-time listener already showed fresh data
+        if (typeof window._realtimeSyncedRecently === 'function' && window._realtimeSyncedRecently()) {
+            return;
+        }
+
+        let localSchedule = scheduleHistory[dateStr] || null;
+
+        loadScheduleFromFirebase(dateSGT, (firebaseSchedule) => {
+            // Check again after async — real-time may have fired while waiting
+            if (typeof window._realtimeSyncedRecently === 'function' && window._realtimeSyncedRecently()) {
+                return;
+            }
+
+            let scheduleToDisplay = null;
+
+            if (firebaseSchedule) {
+                // Firebase has a schedule — use it
+                scheduleToDisplay = firebaseSchedule;
+                scheduleToDisplay.shift = getShiftForDate(dateSGT);
+                scheduleHistory[dateStr] = firebaseSchedule;
+                try { localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory)); } catch(e) {}
+            } else if (localSchedule) {
+                // No Firebase schedule yet — upload localStorage version
+                scheduleToDisplay = localSchedule;
+                scheduleToDisplay.shift = getShiftForDate(dateSGT);
+                if (typeof saveScheduleToFirebase === 'function') saveScheduleToFirebase(localSchedule);
+            } else {
+                // Nothing anywhere — generate fresh (admin/guest only)
+                scheduleToDisplay = generateScheduleForDate(dateSGT);
+                scheduleHistory[dateStr] = scheduleToDisplay;
+                try { localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory)); } catch(e) {}
+                if (typeof saveScheduleToFirebase === 'function') saveScheduleToFirebase(scheduleToDisplay);
+            }
+
+            displaySchedule(scheduleToDisplay);
+        });
+
+    } else {
+        // No Firebase — localStorage only
+        if (scheduleHistory[dateStr]) {
+            let schedule = scheduleHistory[dateStr];
+            schedule.shift = getShiftForDate(dateSGT);
+            scheduleHistory[dateStr] = schedule;
+            try { localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory)); } catch(e) {}
+            displaySchedule(schedule);
+        } else if (canWrite) {
+            // Only admin/guest generate when there's nothing available
+            const schedule = generateScheduleForDate(dateSGT);
+            scheduleHistory[dateStr] = schedule;
+            try { localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory)); } catch(e) {}
+            displaySchedule(schedule);
+        }
+    }
+}
 
 // ---------- DISPLAY ----------
 function displaySchedule(schedule) {
