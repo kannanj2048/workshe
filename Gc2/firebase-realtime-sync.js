@@ -1,6 +1,5 @@
 // ==========================================
 // FIREBASE REAL-TIME SYNCHRONIZATION
-// Auto-updates all devices when admin makes changes
 // ==========================================
 
 (function() {
@@ -10,38 +9,22 @@
     let currentScheduleListener = null;
     let hasEverConnected = false;
 
-    // Safe localStorage - handles gc1_/gc2_/gc3_ prefixes + tracking prevention
     function safeSetItem(key, value) {
         try { localStorage.setItem(key, value); } catch(e) {}
     }
 
-    // ========================================
-    // APPLY SCHEDULE TO PAGE
-    // Displays platforms + tasks from Firebase data directly.
-    // Calls window._markRealtimeSynced() so firebase-config.js
-    // generateDailySchedule knows NOT to overwrite with stale .once() data.
-    // ========================================
     function applyScheduleToPage(schedule, dateStr) {
         if (!schedule) return;
-
         if (typeof scheduleHistory !== 'undefined') {
             scheduleHistory[dateStr] = schedule;
             safeSetItem('scheduleHistory', JSON.stringify(scheduleHistory));
         }
-
         const dateInput = document.getElementById('scheduleDate');
         if (!dateInput || dateInput.value !== dateStr) return;
-
-        // Tell generateDailySchedule to skip its own display step
-        if (typeof window._markRealtimeSynced === 'function') {
-            window._markRealtimeSynced();
-        }
-
-        console.log('SYNC: displaying schedule + tasks from Firebase for', dateStr);
-
+        if (typeof window._markRealtimeSynced === 'function') window._markRealtimeSynced();
+        console.log('SYNC: displaying schedule+tasks from Firebase for', dateStr);
         if (typeof displaySchedule === 'function') displaySchedule(schedule);
         if (typeof updateCurrentShiftInfo === 'function') updateCurrentShiftInfo(new Date(dateStr + 'T00:00:00'));
-
         if (typeof isAdmin !== 'undefined' && !isAdmin)
             if (typeof showNotification === 'function') showNotification('Schedule updated by admin', 'info');
     }
@@ -53,21 +36,19 @@
         const dateStr = dateInput.value;
         database.ref('schedules/' + dateStr).once('value')
             .then((snapshot) => { const s = snapshot.val(); if (s) applyScheduleToPage(s, dateStr); })
-            .catch((err) => console.error('SYNC: fetch error:', err));
+            .catch((err) => console.error('SYNC fetch error:', err));
     }
 
     function setupScheduleListener(dateStr) {
         if (!window.hasDatabase || !window.hasDatabase()) return;
         if (currentScheduleListener === dateStr) return;
-        if (currentScheduleListener) {
-            database.ref('schedules/' + currentScheduleListener).off('value');
-        }
+        if (currentScheduleListener) database.ref('schedules/' + currentScheduleListener).off('value');
         currentScheduleListener = dateStr;
-        console.log('SYNC: listening for schedule + task changes on', dateStr);
+        console.log('SYNC: listening on', dateStr);
         database.ref('schedules/' + dateStr).on('value', (snapshot) => {
             const schedule = snapshot.val();
             if (schedule) applyScheduleToPage(schedule, dateStr);
-        }, (error) => { console.error('SYNC: schedule listener error:', error); });
+        }, (error) => { console.error('SYNC schedule listener error:', error); });
     }
 
     function setupTeamDataListener() {
@@ -80,7 +61,7 @@
             if (typeof updateTeamMembersDisplay === 'function') updateTeamMembersDisplay();
             if (typeof isAdmin !== 'undefined' && !isAdmin)
                 if (typeof showNotification === 'function') showNotification('Team members updated', 'info');
-        }, (err) => { console.error('SYNC: team error:', err); });
+        }, (err) => { console.error('SYNC team error:', err); });
     }
 
     function setupAvailabilityListener() {
@@ -93,7 +74,7 @@
             fetchAndDisplayCurrentSchedule();
             if (typeof isAdmin !== 'undefined' && !isAdmin)
                 if (typeof showNotification === 'function') showNotification('Availability updated', 'info');
-        }, (err) => { console.error('SYNC: availability error:', err); });
+        }, (err) => { console.error('SYNC availability error:', err); });
     }
 
     function setupMemberAvailabilityListener() {
@@ -106,7 +87,7 @@
             fetchAndDisplayCurrentSchedule();
             if (typeof isAdmin !== 'undefined' && !isAdmin)
                 if (typeof showNotification === 'function') showNotification('Working schedules updated', 'info');
-        }, (err) => { console.error('SYNC: member availability error:', err); });
+        }, (err) => { console.error('SYNC member availability error:', err); });
     }
 
     function setupLeaveManagementListener() {
@@ -120,7 +101,7 @@
             fetchAndDisplayCurrentSchedule();
             if (typeof isAdmin !== 'undefined' && !isAdmin)
                 if (typeof showNotification === 'function') showNotification('Leave calendar updated', 'info');
-        }, (err) => { console.error('SYNC: leave error:', err); });
+        }, (err) => { console.error('SYNC leave error:', err); });
     }
 
     function initializeRealtimeSync() {
@@ -145,7 +126,7 @@
         }
         waitForDateAndAttach();
         listenersAttached = true;
-        console.log('SYNC: ready - all devices update in real time');
+        console.log('SYNC: ready');
     }
 
     function setupConnectionMonitor() {
@@ -157,8 +138,8 @@
                 else {
                     listenersAttached = false;
                     initializeRealtimeSync();
-                    const dateInput = document.getElementById('scheduleDate');
-                    if (dateInput && dateInput.value) { currentScheduleListener = null; setupScheduleListener(dateInput.value); }
+                    const di = document.getElementById('scheduleDate');
+                    if (di && di.value) { currentScheduleListener = null; setupScheduleListener(di.value); }
                 }
             } else { if (hasEverConnected) listenersAttached = false; }
         });
@@ -186,5 +167,5 @@
     setTimeout(tryInitialize, 1000);
 
     console.log('%cFirebase Real-Time Sync Loaded', 'color:#10b981;font-weight:bold;font-size:14px');
-    console.log('%c  Schedules + tasks sync instantly on all devices', 'color:#3b82f6;font-size:12px');
+    console.log('%c  Schedules+tasks sync instantly on all devices', 'color:#3b82f6;font-size:12px');
 })();
