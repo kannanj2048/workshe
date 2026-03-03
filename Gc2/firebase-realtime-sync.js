@@ -5,112 +5,18 @@
 
 (function() {
     'use strict';
-
-    let currentScheduleListener = null;
+    
+    // Track if listeners are already attached to prevent duplicates
     let listenersAttached = false;
-    let hasEverConnected = false; // ✅ FIX: ignore Firebase's initial false before first connect
+    let currentScheduleListener = null;
+    let hasEverConnected = false;
 
-    function setupScheduleListener(dateStr) {
-        if (!window.hasDatabase || !window.hasDatabase()) return;
-
-        // ✅ FIX: Skip if already listening to this exact date — prevents duplicate listeners
-        if (currentScheduleListener === dateStr) {
-            console.log('ℹ️ Already listening for:', dateStr, '— skipping');
-            return;
-        }
-
-        if (currentScheduleListener) {
-            database.ref('schedules/' + currentScheduleListener).off('value');
-            console.log('🔌 Detached previous schedule listener');
-        }
-
-        currentScheduleListener = dateStr;
-        console.log('👂 Listening for schedule changes:', dateStr);
-
-        database.ref('schedules/' + dateStr).on('value', (snapshot) => {
-            const firebaseSchedule = snapshot.val();
-            if (!firebaseSchedule) return;
-
-            console.log('🔄 Schedule updated from Firebase:', dateStr);
-
-            if (typeof scheduleHistory !== 'undefined') {
-                scheduleHistory[dateStr] = firebaseSchedule;
-                localStorage.setItem('scheduleHistory', JSON.stringify(scheduleHistory));
-            }
-
-            const dateInput = document.getElementById('scheduleDate');
-            if (dateInput && dateInput.value === dateStr) {
-                console.log('✅ Displaying updated schedule from Firebase');
-
-                // ✅ KEY FIX: displaySchedule() directly — never generateDailySchedule()
-                // generateDailySchedule re-reads localStorage and shows stale data
-                if (typeof displaySchedule === 'function') displaySchedule(firebaseSchedule);
-                if (typeof updateCurrentShiftInfo === 'function') {
-                    updateCurrentShiftInfo(new Date(dateStr + 'T00:00:00'));
-                }
-                if (typeof isAdmin !== 'undefined' && !isAdmin) {
-                    if (typeof showNotification === 'function') {
-                        showNotification('📋 Schedule updated by admin', 'info');
-                    }
-                }
-            }
-        }, (error) => { console.error('❌ Schedule listener error:', error); });
+    // Safe localStorage wrapper - handles tracking prevention blocks
+    function safeSetItem(key, value) {
+        try { localStorage.setItem(key, value); } catch(e) {}
     }
 
-    function setupTeamDataListener() {
-        if (!window.hasDatabase || !window.hasDatabase()) return;
-        database.ref('teamData').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (!data || typeof teamData === 'undefined') return;
-            Object.assign(teamData, data);
-            localStorage.setItem('teamData', JSON.stringify(teamData));
-            if (typeof updateTeamMembersDisplay === 'function') updateTeamMembersDisplay();
-            if (typeof isAdmin !== 'undefined' && !isAdmin)
-                if (typeof showNotification === 'function') showNotification('👥 Team members updated', 'info');
-        }, (error) => { console.error('❌ Team data listener error:', error); });
-    }
-
-    function setupAvailabilityListener() {
-        if (!window.hasDatabase || !window.hasDatabase()) return;
-        database.ref('availabilityOverrides').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (!data || typeof availabilityOverrides === 'undefined') return;
-            availabilityOverrides = data;
-            localStorage.setItem('availabilityOverrides', JSON.stringify(availabilityOverrides));
-            refreshCurrentDateSchedule(); // ✅ FIX: fetch from Firebase, not generateDailySchedule
-            if (typeof isAdmin !== 'undefined' && !isAdmin)
-                if (typeof showNotification === 'function') showNotification('📅 Availability updated', 'info');
-        }, (error) => { console.error('❌ Availability listener error:', error); });
-    }
-
-    function setupMemberAvailabilityListener() {
-        if (!window.hasDatabase || !window.hasDatabase()) return;
-        database.ref('memberAvailabilitySettings').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (!data || typeof memberAvailabilitySettings === 'undefined') return;
-            Object.assign(memberAvailabilitySettings, data);
-            localStorage.setItem('memberAvailabilitySettings', JSON.stringify(memberAvailabilitySettings));
-            refreshCurrentDateSchedule(); // ✅ FIX
-            if (typeof isAdmin !== 'undefined' && !isAdmin)
-                if (typeof showNotification === 'function') showNotification('⚙️ Working schedules updated', 'info');
-        }, (error) => { console.error('❌ Member availability listener error:', error); });
-    }
-
-    function setupLeaveManagementListener() {
-        if (!window.hasDatabase || !window.hasDatabase()) return;
-        database.ref('leaveSettings').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (!data || typeof monthlyLeaveSettings === 'undefined') return;
-            Object.assign(monthlyLeaveSettings, data);
-            localStorage.setItem('monthlyLeaveSettings', JSON.stringify(monthlyLeaveSettings));
-            if (typeof syncWorkingSchedulesWithLeave === 'function') syncWorkingSchedulesWithLeave();
-            refreshCurrentDateSchedule(); // ✅ FIX
-            if (typeof isAdmin !== 'undefined' && !isAdmin)
-                if (typeof showNotification === 'function') showNotification('🏖️ Leave calendar updated', 'info');
-        }, (error) => { console.error('❌ Leave listener error:', error); });
-    }
-
-    // ✅ NEW: Fetch schedule directly from Firebase and display it — skips stale localStorage
+    // Fetch schedule from Firebase directly - bypasses stale localStorage cache
     function refreshCurrentDateSchedule() {
         if (!window.hasDatabase || !window.hasDatabase()) return;
         const dateInput = document.getElementById('scheduleDate');
@@ -119,33 +25,269 @@
         database.ref('schedules/' + dateStr).once('value')
             .then((snapshot) => {
                 const schedule = snapshot.val();
-                if (schedule && typeof displaySchedule === 'function') {
+                if (schedule) {
                     if (typeof scheduleHistory !== 'undefined') {
                         scheduleHistory[dateStr] = schedule;
-                        localStorage.setItem('scheduleHistory', JSON.stringify(scheduleHistory));
+                        safeSetItem('scheduleHistory', JSON.stringify(scheduleHistory));
                     }
-                    displaySchedule(schedule);
+                    if (typeof displaySchedule === 'function') displaySchedule(schedule);
+                    if (typeof updateCurrentShiftInfo === 'function') {
+                        updateCurrentShiftInfo(new Date(dateStr + 'T00:00:00'));
+                    }
                 }
             })
-            .catch((err) => console.error('❌ Refresh schedule error:', err));
+            .catch((err) => console.error('Refresh error:', err));
     }
+    
+    // ========================================
+    // REAL-TIME SCHEDULE SYNC
+    // ========================================
+    
+    function setupScheduleListener(dateStr) {
+        if (!window.hasDatabase || !window.hasDatabase()) {
+            console.log('⚠️ Firebase not available - real-time sync disabled');
+            return;
+        }
+        
+        // Skip if already listening to this exact date
+        if (currentScheduleListener === dateStr) return;
 
-    function initializeRealtimeSync() {
-        if (listenersAttached) return;
+        // Remove previous listener if exists
+        if (currentScheduleListener) {
+            database.ref('schedules/' + currentScheduleListener).off('value');
+            console.log('🔌 Detached previous schedule listener');
+        }
+        
+        currentScheduleListener = dateStr;
+        
+        console.log('👂 Listening for schedule changes:', dateStr);
+        
+        // Attach real-time listener
+        database.ref('schedules/' + dateStr).on('value', (snapshot) => {
+            const firebaseSchedule = snapshot.val();
+            
+            if (firebaseSchedule) {
+                console.log('🔄 Schedule updated from Firebase:', dateStr);
+                
+                // Update local storage
+                if (typeof scheduleHistory !== 'undefined') {
+                    scheduleHistory[dateStr] = firebaseSchedule;
+                    safeSetItem('scheduleHistory', JSON.stringify(scheduleHistory));
+                }
+                
+                // Only update display if we're viewing this date
+                const dateInput = document.getElementById('scheduleDate');
+                const currentViewingDate = dateInput ? dateInput.value : null;
+                
+                if (currentViewingDate === dateStr) {
+                    console.log('✅ Updating display with new schedule');
+                    
+                    // Update the display
+                    if (typeof displaySchedule === 'function') {
+                        displaySchedule(firebaseSchedule);
+                    }
+                    
+                    // Show notification to non-admin users
+                    if (typeof isAdmin !== 'undefined' && !isAdmin) {
+                        showNotification('📋 Schedule updated by admin', 'info');
+                    }
+                }
+            }
+        }, (error) => {
+            console.error('❌ Firebase listener error:', error);
+        });
+    }
+    
+    // ========================================
+    // REAL-TIME TEAM DATA SYNC
+    // ========================================
+    
+    function setupTeamDataListener() {
         if (!window.hasDatabase || !window.hasDatabase()) return;
-
+        
+        console.log('👂 Listening for team data changes');
+        
+        database.ref('teamData').on('value', (snapshot) => {
+            const firebaseTeamData = snapshot.val();
+            
+            if (firebaseTeamData && typeof teamData !== 'undefined') {
+                console.log('🔄 Team data updated from Firebase');
+                
+                // Update local teamData
+                Object.assign(teamData, firebaseTeamData);
+                
+                // Update localStorage
+                safeSetItem('teamData', JSON.stringify(teamData));
+                
+                // Refresh UI if needed
+                if (typeof updateTeamMembersDisplay === 'function') {
+                    updateTeamMembersDisplay();
+                }
+                
+                // Show notification
+                if (typeof isAdmin !== 'undefined' && !isAdmin) {
+                    showNotification('👥 Team members updated', 'info');
+                }
+            }
+        }, (error) => {
+            console.error('❌ Team data listener error:', error);
+        });
+    }
+    
+    // ========================================
+    // REAL-TIME AVAILABILITY SYNC
+    // ========================================
+    
+    function setupAvailabilityListener() {
+        if (!window.hasDatabase || !window.hasDatabase()) return;
+        
+        console.log('👂 Listening for availability changes');
+        
+        database.ref('availabilityOverrides').on('value', (snapshot) => {
+            const firebaseAvailability = snapshot.val();
+            
+            if (firebaseAvailability && typeof availabilityOverrides !== 'undefined') {
+                console.log('🔄 Availability updated from Firebase');
+                
+                // Update local availability
+                availabilityOverrides = firebaseAvailability;
+                
+                // Update localStorage
+                safeSetItem('availabilityOverrides', JSON.stringify(availabilityOverrides));
+                
+                // Refresh schedule if needed
+                const dateInput = document.getElementById('scheduleDate');
+                if (dateInput && dateInput.value) {
+                    const currentDate = new Date(dateInput.value);
+                    
+                    // KEY FIX: fetch from Firebase directly, not generateDailySchedule
+                    refreshCurrentDateSchedule();
+                }
+                
+                // Show notification
+                if (typeof isAdmin !== 'undefined' && !isAdmin) {
+                    showNotification('📅 Availability updated', 'info');
+                }
+            }
+        }, (error) => {
+            console.error('❌ Availability listener error:', error);
+        });
+    }
+    
+    // ========================================
+    // REAL-TIME MEMBER AVAILABILITY SETTINGS SYNC
+    // ========================================
+    
+    function setupMemberAvailabilityListener() {
+        if (!window.hasDatabase || !window.hasDatabase()) return;
+        
+        console.log('👂 Listening for member availability settings changes');
+        
+        database.ref('memberAvailabilitySettings').on('value', (snapshot) => {
+            const firebaseSettings = snapshot.val();
+            
+            if (firebaseSettings && typeof memberAvailabilitySettings !== 'undefined') {
+                console.log('🔄 Member availability settings updated from Firebase');
+                
+                // Update local settings
+                Object.assign(memberAvailabilitySettings, firebaseSettings);
+                
+                // Update localStorage
+                safeSetItem('memberAvailabilitySettings', JSON.stringify(memberAvailabilitySettings));
+                
+                // Regenerate schedule with new settings
+                const dateInput = document.getElementById('scheduleDate');
+                if (dateInput && dateInput.value) {
+                    const currentDate = new Date(dateInput.value);
+                    
+                    // KEY FIX: fetch from Firebase directly, not generateDailySchedule
+                    refreshCurrentDateSchedule();
+                }
+                
+                // Show notification
+                if (typeof isAdmin !== 'undefined' && !isAdmin) {
+                    showNotification('⚙️ Working schedules updated', 'info');
+                }
+            }
+        }, (error) => {
+            console.error('❌ Member availability listener error:', error);
+        });
+    }
+    
+    // ========================================
+    // REAL-TIME LEAVE MANAGEMENT SYNC
+    // ========================================
+    
+    function setupLeaveManagementListener() {
+        if (!window.hasDatabase || !window.hasDatabase()) return;
+        
+        console.log('👂 Listening for leave management changes');
+        
+        // ✅ Using 'leaveSettings' to match saveLeaveSettingsToFirebase()
+        database.ref('leaveSettings').on('value', (snapshot) => {
+            const firebaseLeaveSettings = snapshot.val();
+            
+            if (firebaseLeaveSettings && typeof monthlyLeaveSettings !== 'undefined') {
+                console.log('🔄 Leave settings updated from Firebase');
+                
+                // Update local leave settings
+                Object.assign(monthlyLeaveSettings, firebaseLeaveSettings);
+                
+                // Update localStorage
+                safeSetItem('monthlyLeaveSettings', JSON.stringify(monthlyLeaveSettings));
+                
+                // Sync with working schedules
+                if (typeof syncWorkingSchedulesWithLeave === 'function') {
+                    syncWorkingSchedulesWithLeave();
+                }
+                
+                // Regenerate schedule
+                const dateInput = document.getElementById('scheduleDate');
+                if (dateInput && dateInput.value) {
+                    const currentDate = new Date(dateInput.value);
+                    
+                    // KEY FIX: fetch from Firebase directly, not generateDailySchedule
+                    refreshCurrentDateSchedule();
+                }
+                
+                // Show notification
+                if (typeof isAdmin !== 'undefined' && !isAdmin) {
+                    showNotification('🏖️ Leave calendar updated', 'info');
+                }
+            }
+        }, (error) => {
+            console.error('❌ Leave management listener error:', error);
+        });
+    }
+    
+    // ========================================
+    // INITIALIZE ALL LISTENERS
+    // ========================================
+    
+    function initializeRealtimeSync() {
+        if (listenersAttached) {
+            console.log('⚠️ Real-time listeners already attached');
+            return;
+        }
+        
+        if (!window.hasDatabase || !window.hasDatabase()) {
+            console.log('⚠️ Firebase not available - skipping real-time sync');
+            return;
+        }
+        
         console.log('🚀 Initializing Firebase real-time sync...');
-
+        
+        // Setup all listeners
         setupTeamDataListener();
         setupAvailabilityListener();
         setupMemberAvailabilityListener();
         setupLeaveManagementListener();
-
+        
+        // Wait for date input to have a value, then attach schedule listener
         function waitForDateAndAttach() {
             const dateInput = document.getElementById('scheduleDate');
             if (dateInput && dateInput.value) {
                 setupScheduleListener(dateInput.value);
-                // ✅ Only attach the change listener once using a flag
                 if (!dateInput._syncChangeAttached) {
                     dateInput.addEventListener('change', function() {
                         if (this.value) {
@@ -160,26 +302,87 @@
             }
         }
         waitForDateAndAttach();
-
+        
         listenersAttached = true;
+        
         console.log('✅ Real-time sync initialized');
         console.log('📡 All devices will now update automatically');
     }
-
+    
+    // ========================================
+    // OVERRIDE DATE CHANGE TO UPDATE LISTENER
+    // ========================================
+    
+    // Store original generateDailySchedule
+    const originalGenerateDailySchedule = window.generateDailySchedule;
+    
+    if (typeof originalGenerateDailySchedule === 'function') {
+        window.generateDailySchedule = function(dateSGT) {
+            // Call original function
+            const result = originalGenerateDailySchedule.call(this, dateSGT);
+            
+            // Update schedule listener to new date
+            const dateStr = typeof formatDateForInput === 'function' 
+                ? formatDateForInput(dateSGT) 
+                : dateSGT.toISOString().split('T')[0];
+            
+            setupScheduleListener(dateStr);
+            
+            return result;
+        };
+    }
+    
+    // ========================================
+    // SAVE FUNCTIONS WITH IMMEDIATE SYNC
+    // ========================================
+    
+    // Override saveScheduleToFirebase to ensure immediate sync
+    const originalSaveSchedule = window.saveScheduleToFirebase;
+    
+    if (typeof originalSaveSchedule === 'function') {
+        window.saveScheduleToFirebase = function(schedule) {
+            console.log('💾 Saving schedule to Firebase (will trigger real-time sync)');
+            return originalSaveSchedule.call(this, schedule);
+        };
+    }
+    
+    // ========================================
+    // EXPORT FUNCTIONS
+    // ========================================
+    
+    window.realtimeSync = {
+        initialize: initializeRealtimeSync,
+        setupScheduleListener: setupScheduleListener,
+        detachListeners: function() {
+            if (!window.hasDatabase || !window.hasDatabase()) return;
+            
+            console.log('🔌 Detaching all real-time listeners');
+            
+            database.ref('teamData').off('value');
+            database.ref('availabilityOverrides').off('value');
+            database.ref('memberAvailabilitySettings').off('value');
+            database.ref('leaveSettings').off('value');
+            
+            if (currentScheduleListener) {
+                database.ref('schedules/' + currentScheduleListener).off('value');
+            }
+            
+            listenersAttached = false;
+            console.log('✅ All listeners detached');
+        }
+    };
+    
+    // ========================================
+    // CONNECTION MONITOR - Re-init on reconnect, ignore initial false
+    // ========================================
     function setupConnectionMonitor() {
         if (!window.hasDatabase || !window.hasDatabase()) return;
-
         database.ref('.info/connected').on('value', (snapshot) => {
             const isConnected = snapshot.val() === true;
-
             if (isConnected) {
-                console.log('🔥 Firebase connected');
                 if (!hasEverConnected) {
-                    // ✅ First real connection — this is normal startup, do nothing extra
                     hasEverConnected = true;
                 } else {
-                    // ✅ This is a RECONNECT after a real drop — re-attach listeners
-                    console.log('🔄 Reconnected — re-attaching listeners...');
                     listenersAttached = false;
                     initializeRealtimeSync();
                     const dateInput = document.getElementById('scheduleDate');
@@ -189,45 +392,31 @@
                     }
                 }
             } else {
-                // ✅ FIX: Ignore the initial false Firebase emits before first connect
-                if (hasEverConnected) {
-                    console.log('⚠️ Firebase disconnected — will re-sync on reconnect');
-                    listenersAttached = false;
-                }
+                if (hasEverConnected) listenersAttached = false;
             }
         });
     }
 
-    window.realtimeSync = {
-        initialize: initializeRealtimeSync,
-        setupScheduleListener: setupScheduleListener,
-        detachListeners: function() {
-            if (!window.hasDatabase || !window.hasDatabase()) return;
-            database.ref('teamData').off('value');
-            database.ref('availabilityOverrides').off('value');
-            database.ref('memberAvailabilitySettings').off('value');
-            database.ref('leaveSettings').off('value');
-            database.ref('.info/connected').off('value');
-            if (currentScheduleListener) {
-                database.ref('schedules/' + currentScheduleListener).off('value');
-            }
-            listenersAttached = false;
-            currentScheduleListener = null;
-        }
-    };
-
+    // ========================================
+    // AUTO-INITIALIZE WHEN PAGE LOADS
+    // ========================================
+    
+    // Wait for Firebase to be ready
     function tryInitialize() {
         if (window.hasDatabase && window.hasDatabase()) {
+            console.log('🔥 Firebase ready - initializing real-time sync');
             initializeRealtimeSync();
             setupConnectionMonitor();
         } else {
+            console.log('⏳ Waiting for Firebase... (retrying in 500ms)');
             setTimeout(tryInitialize, 500);
         }
     }
-
+    
+    // Start initialization after a short delay
     setTimeout(tryInitialize, 1000);
-
+    
     console.log('%c📡 Firebase Real-Time Sync Module Loaded', 'color: #10b981; font-weight: bold; font-size: 14px');
     console.log('%c   Changes will sync across all devices instantly', 'color: #3b82f6; font-size: 12px');
-
+    
 })();
