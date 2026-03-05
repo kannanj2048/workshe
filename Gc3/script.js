@@ -143,9 +143,9 @@ let teamData = JSON.parse(localStorage.getItem("teamData")) || {
     responsibilities: {
         Selva: "Vishal",
         Naveen: "Vishal",
-        Kannan: "Subash",
+        Kannan: "Karl / Subash",
         Midhun: "Sanjay",
-        Prem: "Subash",
+        Prem: "Karl / Subash",
     }
 };
 
@@ -309,7 +309,7 @@ function addMemberFromAvailability(role) {
     teamData[category].push(name.trim());
     
     if (role === "SA") {
-        const responsibilities = prompt(`Enter responsibilities for ${name.trim()} (e.g., "Vishal / Sanjay"):`);
+        const responsibilities = prompt(`Enter responsibilities for ${name.trim()} (e.g., "Karl / Subash"):`);
         if (responsibilities) {
             teamData.responsibilities[name.trim()] = responsibilities.trim();
         }
@@ -727,16 +727,9 @@ function smartApprenticeAssignment(sa, availableApps, dayName, platformIndex, to
         return 'All Apprentice';
     }
 
-    // Check predefined responsibilities — but only return names that are actually available today
+    // Check predefined responsibilities
     if (teamData.responsibilities[sa] && teamData.responsibilities[sa] !== 'All Apprentice') {
-        const predefined = teamData.responsibilities[sa];
-        // Filter to only available apprentices from the predefined list
-        const predefinedNames = predefined.split('/').map(n => n.trim()).filter(n => n.length > 0);
-        const availableFiltered = predefinedNames.filter(n => availableApps.includes(n));
-        if (availableFiltered.length > 0) {
-            return availableFiltered.join(' / ');
-        }
-        // All predefined are unavailable — fall through to smart pairing below
+        return teamData.responsibilities[sa];
     }
 
     // Smart pairing logic
@@ -2218,6 +2211,25 @@ function updateTotalMembersCount() {
         }
     });
     
+}
+
+function updatePlatformCount() {
+    const total = (platforms.main ? platforms.main.length : 0)
+                + (platforms.common ? platforms.common.length : 0)
+                + (platforms.grouped ? platforms.grouped.length : 0);
+
+    const statNumbers = document.querySelectorAll('.stat-number');
+    statNumbers.forEach(el => {
+        const parentStatItem = el.closest('.stat-item');
+        if (parentStatItem) {
+            const label = parentStatItem.querySelector('p');
+            if (label && label.textContent.trim() === 'Platforms') {
+                el.setAttribute('data-target', total);
+                el.textContent = total;
+                animateCounter(el, total);
+            }
+        }
+    });
 }
 
 // Helper function for counter animation
@@ -4622,6 +4634,7 @@ setTimeout(tryInitializePasswordSystem, 1000);
             platforms.common = customPlatforms.common || platforms.common;
             platforms.grouped = customPlatforms.grouped || platforms.grouped;
         }
+        if (typeof updatePlatformCount === 'function') updatePlatformCount();
     }
     
     // Initialize on page load
@@ -4852,6 +4865,7 @@ setTimeout(tryInitializePasswordSystem, 1000);
         }
         
         closePlatformManager();
+        if (typeof updatePlatformCount === 'function') updatePlatformCount();
         showNotification('✅ Platforms saved successfully! Regenerating schedule...', 'success');
         
         // Regenerate current schedule
@@ -4881,6 +4895,7 @@ setTimeout(tryInitializePasswordSystem, 1000);
         }
         
         closePlatformManager();
+        if (typeof updatePlatformCount === 'function') updatePlatformCount();
         showNotification('✅ Platforms reset to default! Regenerating schedule...', 'success');
         
         // Regenerate schedule
