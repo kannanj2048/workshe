@@ -33,28 +33,29 @@
         // Attach real-time listener
         database.ref('schedules/' + dateStr).on('value', (snapshot) => {
             const firebaseSchedule = snapshot.val();
-            
+
             if (firebaseSchedule) {
                 console.log('🔄 Schedule updated from Firebase:', dateStr);
-                
+
                 // Update local storage
                 if (typeof scheduleHistory !== 'undefined') {
                     scheduleHistory[dateStr] = firebaseSchedule;
                     localStorage.setItem('scheduleHistory', JSON.stringify(scheduleHistory));
                 }
-                
+
                 // Only update display if we're viewing this date
                 const dateInput = document.getElementById('scheduleDate');
                 const currentViewingDate = dateInput ? dateInput.value : null;
-                
+
                 if (currentViewingDate === dateStr) {
                     console.log('✅ Updating display with new schedule');
-                    
-                    // Update the display
-                    if (typeof displaySchedule === 'function') {
-                        displaySchedule(firebaseSchedule);
+
+                    // Use window.displaySchedule so we always call the current version
+                    const displayFn = window.displaySchedule || (typeof displaySchedule === 'function' ? displaySchedule : null);
+                    if (displayFn) {
+                        displayFn(firebaseSchedule);
                     }
-                    
+
                     // Show notification to non-admin users
                     if (typeof isAdmin !== 'undefined' && !isAdmin) {
                         showNotification('📋 Schedule updated by admin', 'info');
@@ -265,47 +266,28 @@
         }
         
         listenersAttached = true;
-        
+
+        // Wrap generateDailySchedule to keep schedule listener in sync with viewed date
+        if (typeof window.generateDailySchedule === 'function') {
+            const _origGenerate = window.generateDailySchedule;
+            window.generateDailySchedule = function(dateSGT) {
+                const result = _origGenerate.call(this, dateSGT);
+                const dateStr = typeof formatDateForInput === 'function'
+                    ? formatDateForInput(dateSGT)
+                    : dateSGT.toISOString().split('T')[0];
+                setupScheduleListener(dateStr);
+                return result;
+            };
+        }
+
         console.log('✅ Real-time sync initialized');
         console.log('📡 All devices will now update automatically');
     }
     
     // ========================================
     // OVERRIDE DATE CHANGE TO UPDATE LISTENER
+    // (Done inside initializeRealtimeSync so window functions are ready)
     // ========================================
-    
-    // Store original generateDailySchedule
-    const originalGenerateDailySchedule = window.generateDailySchedule;
-    
-    if (typeof originalGenerateDailySchedule === 'function') {
-        window.generateDailySchedule = function(dateSGT) {
-            // Call original function
-            const result = originalGenerateDailySchedule.call(this, dateSGT);
-            
-            // Update schedule listener to new date
-            const dateStr = typeof formatDateForInput === 'function' 
-                ? formatDateForInput(dateSGT) 
-                : dateSGT.toISOString().split('T')[0];
-            
-            setupScheduleListener(dateStr);
-            
-            return result;
-        };
-    }
-    
-    // ========================================
-    // SAVE FUNCTIONS WITH IMMEDIATE SYNC
-    // ========================================
-    
-    // Override saveScheduleToFirebase to ensure immediate sync
-    const originalSaveSchedule = window.saveScheduleToFirebase;
-    
-    if (typeof originalSaveSchedule === 'function') {
-        window.saveScheduleToFirebase = function(schedule) {
-            console.log('💾 Saving schedule to Firebase (will trigger real-time sync)');
-            return originalSaveSchedule.call(this, schedule);
-        };
-    }
     
     // ========================================
     // EXPORT FUNCTIONS
