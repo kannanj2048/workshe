@@ -772,7 +772,7 @@ function smartApprenticeAssignment(sa, availableApps, dayName, platformIndex, to
 // ==========================================
 
 // ==========================================
-// SMART TASK ASSIGNMENT - FV
+// SMART TASK ASSIGNMENT - FIXED VERSION
 // ==========================================
 function assignAdditionalTasksSmart(sas, apprentices, date, recentHistory, mainPlatformSAs) {
     const tasks = {};
@@ -1102,7 +1102,9 @@ function generateDailySchedule(dateSGT) {
 }
 
 // ---------- DISPLAY ----------
+let currentDisplayedSchedule = null;
 function displaySchedule(schedule) {
+    currentDisplayedSchedule = schedule;
     const tbody = document.getElementById("scheduleTableBody");
     if (!tbody) return;
     tbody.innerHTML = "";
@@ -1114,7 +1116,7 @@ function displaySchedule(schedule) {
         const responsibility = schedule.platforms[plat].responsibility;
 // Show edit button for BOTH admin AND guest
         const editBtn = (isAdmin || isGuest) ? 
-            `<button class="edit-schedule-btn ${isGuest ? 'guest-only' : 'admin-only'}" onclick="openEditScheduleModal(scheduleHistory['${schedule.date}'], '${plat}')">
+            `<button class="edit-schedule-btn ${isGuest ? 'guest-only' : 'admin-only'}" onclick="openEditScheduleModal(currentDisplayedSchedule, '${plat}')">
                 <i class="fas fa-edit"></i> Edit
             </button>` : "";        
             
@@ -1197,7 +1199,7 @@ function displayAdditionalTasks(schedule) {
         
         // Show edit button for BOTH admin AND guest
         const editBtn = (isAdmin || isGuest) ? 
-            `<button class="edit-task-btn ${isGuest ? 'guest-only' : 'admin-only'}" onclick="openEditTaskModal(scheduleHistory['${schedule.date}'], '${taskName}')">
+            `<button class="edit-task-btn ${isGuest ? 'guest-only' : 'admin-only'}" onclick="openEditTaskModal(currentDisplayedSchedule, '${taskName}')">
                 <i class="fas fa-edit"></i>
             </button>` : "";        
         
@@ -2358,13 +2360,8 @@ function openEditScheduleModal(schedule, platform) {
 if (!isAdmin && !isGuest) {
         showNotification('Access required', 'error');
         return;
-    }
-
-    if (!schedule || !schedule.platforms) {
-        showNotification('Schedule data not found. Please refresh and try again.', 'error');
-        return;
-    }
-
+    }    
+    
     const modal = document.getElementById("editScheduleModal");
     if (!modal) return;
     const editPlatform = document.getElementById("editPlatform");
