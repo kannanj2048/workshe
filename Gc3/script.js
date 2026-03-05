@@ -1102,9 +1102,7 @@ function generateDailySchedule(dateSGT) {
 }
 
 // ---------- DISPLAY ----------
-let currentDisplayedSchedule = null;
 function displaySchedule(schedule) {
-    currentDisplayedSchedule = schedule;
     const tbody = document.getElementById("scheduleTableBody");
     if (!tbody) return;
     tbody.innerHTML = "";
@@ -1116,7 +1114,7 @@ function displaySchedule(schedule) {
         const responsibility = schedule.platforms[plat].responsibility;
 // Show edit button for BOTH admin AND guest
         const editBtn = (isAdmin || isGuest) ? 
-            `<button class="edit-schedule-btn ${isGuest ? 'guest-only' : 'admin-only'}" onclick="openEditScheduleModal(currentDisplayedSchedule, '${plat}')">
+            `<button class="edit-schedule-btn ${isGuest ? 'guest-only' : 'admin-only'}" onclick="openEditScheduleModal(scheduleHistory['${schedule.date}'], '${plat}')">
                 <i class="fas fa-edit"></i> Edit
             </button>` : "";        
             
@@ -1199,7 +1197,7 @@ function displayAdditionalTasks(schedule) {
         
         // Show edit button for BOTH admin AND guest
         const editBtn = (isAdmin || isGuest) ? 
-            `<button class="edit-task-btn ${isGuest ? 'guest-only' : 'admin-only'}" onclick="openEditTaskModal(currentDisplayedSchedule, '${taskName}')">
+            `<button class="edit-task-btn ${isGuest ? 'guest-only' : 'admin-only'}" onclick="openEditTaskModal(scheduleHistory['${schedule.date}'], '${taskName}')">
                 <i class="fas fa-edit"></i>
             </button>` : "";        
         
@@ -1792,18 +1790,28 @@ function initScheduleFeatures() {
         genBtn.addEventListener("click", () => {
             const nowSGT = getNowSGT();
             const dateStr = formatDateForInput(nowSGT);
-            
-            // Delete existing schedule to force regeneration
+
+            // Delete from localStorage to force fresh generation
             delete scheduleHistory[dateStr];
             localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-            
+
             if (dateInput) {
                 dateInput.value = dateStr;
             }
-            
-            
-            // Generate new schedule with current availability
-            generateDailySchedule(nowSGT);
+
+            // Force fresh generation using current availability (bypass Firebase read)
+            const freshSchedule = generateScheduleForDate(nowSGT);
+            scheduleHistory[dateStr] = freshSchedule;
+            localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
+
+            // Also overwrite in Firebase so it stays in sync
+            if (typeof database !== 'undefined' && typeof saveScheduleToFirebase === 'function') {
+                saveScheduleToFirebase(freshSchedule);
+            }
+
+            updateCurrentDayDisplay(nowSGT);
+            updateCurrentShiftInfo(nowSGT);
+            displaySchedule(freshSchedule);
             showNotification("Today's schedule generated successfully!");
         });
     }
