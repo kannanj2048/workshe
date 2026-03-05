@@ -143,9 +143,9 @@ let teamData = JSON.parse(localStorage.getItem("teamData")) || {
     responsibilities: {
         Selva: "Vishal",
         Naveen: "Vishal",
-        Kannan: "Karl / Subash",
+        Kannan: "Subash",
         Midhun: "Sanjay",
-        Prem: "Karl / Subash",
+        Prem: "Subash",
     }
 };
 
@@ -309,7 +309,7 @@ function addMemberFromAvailability(role) {
     teamData[category].push(name.trim());
     
     if (role === "SA") {
-        const responsibilities = prompt(`Enter responsibilities for ${name.trim()} (e.g., "Karl / Subash"):`);
+        const responsibilities = prompt(`Enter responsibilities for ${name.trim()} (e.g., "Vishal / Sanjay"):`);
         if (responsibilities) {
             teamData.responsibilities[name.trim()] = responsibilities.trim();
         }
@@ -727,9 +727,16 @@ function smartApprenticeAssignment(sa, availableApps, dayName, platformIndex, to
         return 'All Apprentice';
     }
 
-    // Check predefined responsibilities
+    // Check predefined responsibilities — but only return names that are actually available today
     if (teamData.responsibilities[sa] && teamData.responsibilities[sa] !== 'All Apprentice') {
-        return teamData.responsibilities[sa];
+        const predefined = teamData.responsibilities[sa];
+        // Filter to only available apprentices from the predefined list
+        const predefinedNames = predefined.split('/').map(n => n.trim()).filter(n => n.length > 0);
+        const availableFiltered = predefinedNames.filter(n => availableApps.includes(n));
+        if (availableFiltered.length > 0) {
+            return availableFiltered.join(' / ');
+        }
+        // All predefined are unavailable — fall through to smart pairing below
     }
 
     // Smart pairing logic
@@ -2388,10 +2395,7 @@ if (!isAdmin && !isGuest) {
             const newSA = editInCharge ? editInCharge.value : "";
             const newResp = editResponsibility ? editResponsibility.value.trim() : "";
             schedule.platforms[platform] = { inCharge: newSA, responsibility: newResp };
-            const dateInput = document.getElementById('scheduleDate');
-            const dateKey = schedule.date || (dateInput ? dateInput.value : null);
-            if (!dateKey) { showNotification('Error: could not determine schedule date', 'error'); return; }
-            schedule.date = dateKey;
+            const dateKey = schedule.date;
             scheduleHistory[dateKey] = schedule;
             localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
             if (typeof database !== 'undefined' && typeof saveScheduleToFirebase === 'function') {
@@ -2432,10 +2436,7 @@ if (!isAdmin && !isGuest) {
             e.preventDefault();
             const newAssigned = editTaskAssigned ? editTaskAssigned.value.trim() : "";
             schedule.tasks[taskName] = newAssigned;
-            const dateInput2 = document.getElementById('scheduleDate');
-            const dateKey = schedule.date || (dateInput2 ? dateInput2.value : null);
-            if (!dateKey) { showNotification('Error: could not determine schedule date', 'error'); return; }
-            schedule.date = dateKey;
+            const dateKey = schedule.date;
             scheduleHistory[dateKey] = schedule;
             localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
             if (typeof database !== 'undefined' && typeof saveScheduleToFirebase === 'function') {
@@ -5206,13 +5207,4 @@ setTimeout(tryInitializePasswordSystem, 1000);
     }
     
     
-
-
-// ========================================
-// EXPOSE FUNCTIONS FOR REAL-TIME SYNC
-// ========================================
-window.generateDailySchedule = generateDailySchedule;
-window.generateScheduleForDate = generateScheduleForDate;
-window.displaySchedule = displaySchedule;
-window.scheduleHistory = scheduleHistory;
 })();
