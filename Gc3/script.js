@@ -772,7 +772,7 @@ function smartApprenticeAssignment(sa, availableApps, dayName, platformIndex, to
 // ==========================================
 
 // ==========================================
-// SMART TASK ASSIGNMENT - FIXED VERSION
+// SMART TASK ASSIGNMENT - FV
 // ==========================================
 function assignAdditionalTasksSmart(sas, apprentices, date, recentHistory, mainPlatformSAs) {
     const tasks = {};
@@ -2358,8 +2358,13 @@ function openEditScheduleModal(schedule, platform) {
 if (!isAdmin && !isGuest) {
         showNotification('Access required', 'error');
         return;
-    }    
-    
+    }
+
+    if (!schedule || !schedule.platforms) {
+        showNotification('Schedule data not found. Please refresh and try again.', 'error');
+        return;
+    }
+
     const modal = document.getElementById("editScheduleModal");
     if (!modal) return;
     const editPlatform = document.getElementById("editPlatform");
