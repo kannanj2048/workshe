@@ -1790,28 +1790,18 @@ function initScheduleFeatures() {
         genBtn.addEventListener("click", () => {
             const nowSGT = getNowSGT();
             const dateStr = formatDateForInput(nowSGT);
-
-            // Delete from localStorage to force fresh generation
+            
+            // Delete existing schedule to force regeneration
             delete scheduleHistory[dateStr];
             localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-
+            
             if (dateInput) {
                 dateInput.value = dateStr;
             }
-
-            // Force fresh generation using current availability (bypass Firebase read)
-            const freshSchedule = generateScheduleForDate(nowSGT);
-            scheduleHistory[dateStr] = freshSchedule;
-            localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
-
-            // Also overwrite in Firebase so it stays in sync
-            if (typeof database !== 'undefined' && typeof saveScheduleToFirebase === 'function') {
-                saveScheduleToFirebase(freshSchedule);
-            }
-
-            updateCurrentDayDisplay(nowSGT);
-            updateCurrentShiftInfo(nowSGT);
-            displaySchedule(freshSchedule);
+            
+            
+            // Generate new schedule with current availability
+            generateDailySchedule(nowSGT);
             showNotification("Today's schedule generated successfully!");
         });
     }
@@ -2398,7 +2388,10 @@ if (!isAdmin && !isGuest) {
             const newSA = editInCharge ? editInCharge.value : "";
             const newResp = editResponsibility ? editResponsibility.value.trim() : "";
             schedule.platforms[platform] = { inCharge: newSA, responsibility: newResp };
-            const dateKey = schedule.date;
+            const dateInput = document.getElementById('scheduleDate');
+            const dateKey = schedule.date || (dateInput ? dateInput.value : null);
+            if (!dateKey) { showNotification('Error: could not determine schedule date', 'error'); return; }
+            schedule.date = dateKey;
             scheduleHistory[dateKey] = schedule;
             localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
             if (typeof database !== 'undefined' && typeof saveScheduleToFirebase === 'function') {
@@ -2439,7 +2432,10 @@ if (!isAdmin && !isGuest) {
             e.preventDefault();
             const newAssigned = editTaskAssigned ? editTaskAssigned.value.trim() : "";
             schedule.tasks[taskName] = newAssigned;
-            const dateKey = schedule.date;
+            const dateInput2 = document.getElementById('scheduleDate');
+            const dateKey = schedule.date || (dateInput2 ? dateInput2.value : null);
+            if (!dateKey) { showNotification('Error: could not determine schedule date', 'error'); return; }
+            schedule.date = dateKey;
             scheduleHistory[dateKey] = schedule;
             localStorage.setItem("scheduleHistory", JSON.stringify(scheduleHistory));
             if (typeof database !== 'undefined' && typeof saveScheduleToFirebase === 'function') {
@@ -5210,4 +5206,13 @@ setTimeout(tryInitializePasswordSystem, 1000);
     }
     
     
+
+
+// ========================================
+// EXPOSE FUNCTIONS FOR REAL-TIME SYNC
+// ========================================
+window.generateDailySchedule = generateDailySchedule;
+window.generateScheduleForDate = generateScheduleForDate;
+window.displaySchedule = displaySchedule;
+window.scheduleHistory = scheduleHistory;
 })();
