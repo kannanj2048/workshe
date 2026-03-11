@@ -2171,6 +2171,142 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 }
 #auth-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 
+/* ════════════════════════════════════════════
+   DELIVERY BIKE ANIMATION — Login Form Drop
+════════════════════════════════════════════ */
+
+/* Road strip at vertical center */
+.delivery-road {
+  position: absolute;
+  left: 0; right: 0;
+  top: 50%; transform: translateY(-50%);
+  height: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity .3s;
+}
+.delivery-road.visible { opacity: 1; }
+.delivery-road-line {
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%, rgba(59,130,246,.08) 15%,
+    rgba(59,130,246,.18) 50%,
+    rgba(59,130,246,.08) 85%, transparent 100%);
+}
+
+/* Dust/speed particles trailing behind bike */
+.delivery-dust {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 3;
+  display: none;
+}
+.delivery-dust.active { display: block; }
+.delivery-dust span {
+  position: absolute;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(59,130,246,.5);
+  animation: dustFly 0.9s ease-out infinite;
+  opacity: 0;
+}
+.delivery-dust span:nth-child(1) { animation-delay: 0s;    top: -14px; }
+.delivery-dust span:nth-child(2) { animation-delay: 0.1s;  top: 2px;   width:5px; height:5px; }
+.delivery-dust span:nth-child(3) { animation-delay: 0.2s;  top: -6px;  background: rgba(139,92,246,.4); }
+.delivery-dust span:nth-child(4) { animation-delay: 0.05s; top: 10px;  width:4px; height:4px; }
+.delivery-dust span:nth-child(5) { animation-delay: 0.15s; top: -20px; width:3px; height:3px; background: rgba(16,185,129,.4); }
+@keyframes dustFly {
+  0%   { transform: translateX(0) scale(1); opacity: .8; }
+  100% { transform: translateX(-60px) scale(0); opacity: 0; }
+}
+
+/* The bike scene wrapper — rides across screen */
+.delivery-scene {
+  position: absolute;
+  top: 50%;
+  left: -760px;                 /* fully off-screen left for 720px lottie */
+  transform: translateY(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Phase 1: Slow cinematic ride in from full off-screen */
+  animation: bikeRideIn 4.5s cubic-bezier(.08,.6,.2,1) forwards;
+  animation-delay: 0.5s;
+}
+
+/* Glow halo under bike when stopped */
+.delivery-package-glow {
+  position: absolute;
+  bottom: 40px; left: 50%;
+  transform: translateX(-50%);
+  width: 340px; height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(59,130,246,.28) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity .7s;
+  pointer-events: none;
+}
+.delivery-scene.stopped .delivery-package-glow { opacity: 1; }
+
+/* Phase 1: Ride in from full off-screen left edge to center */
+@keyframes bikeRideIn {
+  from { left: -760px; }
+  to   { left: calc(50% - 360px); }
+}
+
+/* Phase 2: Satisfying multi-bounce stop */
+@keyframes bikeStop {
+  0%   { transform: translateY(-50%) rotate(0deg); }
+  20%  { transform: translateY(-44%) rotate(-3deg); }
+  45%  { transform: translateY(-55%) rotate(2deg); }
+  65%  { transform: translateY(-47%) rotate(-1deg); }
+  82%  { transform: translateY(-52%) rotate(.5deg); }
+  100% { transform: translateY(-50%) rotate(0deg); }
+}
+
+/* Phase 3: Slow visible exit to the right */
+@keyframes bikeRideOut {
+  0%   { left: calc(50% - 300px); opacity: 1; }
+  72%  { opacity: 1; }
+  100% { left: 115vw; opacity: 0; }
+}
+
+/* AUTH CARD — hidden by default, zoom-in reveal */
+.auth-card {
+  position: relative; z-index: 10;
+  width: 440px; max-width: calc(100vw - 2rem);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-xl);
+  /* Hidden until delivered */
+  opacity: 0;
+  transform: scale(0.78);
+  pointer-events: none;
+  transition: none;
+}
+.auth-card.delivered {
+  animation: formZoomIn 0.65s cubic-bezier(.25,.46,.45,.94) forwards;
+  pointer-events: all;
+}
+/* Zoom-in: grows from small to normal size */
+@keyframes formZoomIn {
+  0%   { opacity: 0;   transform: scale(0.78); filter: blur(4px); }
+  50%  { opacity: 1;   transform: scale(1.04); filter: blur(0);   }
+  75%  { transform: scale(0.98); }
+  100% { opacity: 1;   transform: scale(1);    filter: blur(0);   }
+}
+
 /* ── Animated background canvas ── */
 #auth-bg-canvas {
   position: absolute; inset: 0; pointer-events: none; z-index: 0;
@@ -2232,19 +2368,7 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   50% { transform: translateY(-18px) rotate(5deg); }
 }
 
-/* ── Card ── */
-.auth-card {
-  position: relative; z-index: 10;
-  width: 440px; max-width: calc(100vw - 2rem);
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 1.5rem;
-  padding: 2.5rem;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: var(--shadow-xl);
-  animation: mspCardIn .7s cubic-bezier(.175,.885,.32,1.275) both;
-}
+/* ── Card duplicate removed — defined in delivery section above ── */
 [data-theme="dark"] .auth-card {
   box-shadow: 0 0 0 1px rgba(59,130,246,.12), 0 0 50px rgba(59,130,246,.1), 0 40px 80px rgba(0,0,0,.5);
 }
@@ -2262,28 +2386,93 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 }
 
 /* ── Logo ── */
-.auth-logo { text-align: center; margin-bottom: 2rem; }
+.auth-logo {
+  text-align: center; margin-bottom: 1.6rem;
+  display: flex; flex-direction: column; align-items: center; gap: .5rem;
+}
+.auth-logo-row {
+  display: flex; align-items: center; gap: .55rem;
+}
+
+/* Orbit icon wrap */
 .auth-logo-icon {
+  position: relative;
   display: inline-flex; align-items: center; justify-content: center;
-  width: 62px; height: 62px; border-radius: 1.25rem;
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-  box-shadow: 0 8px 30px rgba(59,130,246,.35);
-  margin-bottom: .875rem;
-  animation: mspIconPulse 3s ease-in-out infinite;
+  width: 72px; height: 72px;
+  margin-bottom: .3rem;
 }
-.auth-logo-icon i { font-size: 1.7rem; color: #fff; }
-@keyframes mspIconPulse {
-  0%,100% { box-shadow: 0 8px 30px rgba(59,130,246,.35); transform: scale(1); }
-  50%      { box-shadow: 0 8px 40px rgba(59,130,246,.55); transform: scale(1.04); }
+/* Center shield icon */
+.auth-logo-icon i {
+  font-size: 1.6rem;
+  color: var(--primary-color);
+  position: relative; z-index: 2;
 }
+
+/* Ring 1 — static circle, no glow */
+.auth-logo-icon .ring1 {
+  position: absolute;
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  border: 1px solid rgba(59,130,246,0.35);
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  pointer-events: none;
+}
+/* Ring 2 — static dashed, no glow */
+.auth-logo-icon .ring2 {
+  position: absolute;
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  border: 1px dashed rgba(139,92,246,0.25);
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  pointer-events: none;
+}
+
+/* Dot 1 orbits ring1 (radius 27px) */
+.auth-logo-icon .orbit-dot {
+  position: absolute;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  top: 50%; left: 50%;
+  margin-top: -2.5px; margin-left: -2.5px;
+  transform-origin: center center;
+  animation: orbitDot1 4s linear infinite;
+  z-index: 3;
+}
+/* Dot 2 orbits ring2 (radius 36px) */
+.auth-logo-icon .orbit-dot2 {
+  position: absolute;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--secondary-color);
+  top: 50%; left: 50%;
+  margin-top: -2px; margin-left: -2px;
+  transform-origin: center center;
+  animation: orbitDot2 7s linear infinite reverse;
+  z-index: 3;
+}
+
+/* Correct circular orbit: rotate the angle, push out by radius, counter-rotate so dot stays upright */
+@keyframes orbitDot1 {
+  from { transform: rotate(0deg)   translateY(-27px); }
+  to   { transform: rotate(360deg) translateY(-27px); }
+}
+@keyframes orbitDot2 {
+  from { transform: rotate(0deg)   translateY(-36px); }
+  to   { transform: rotate(360deg) translateY(-36px); }
+}
+
 .auth-logo-title {
-  font-family: var(--font-heading); font-weight: 800; font-size: 1.35rem;
-  color: var(--text-primary); display: block; letter-spacing: .03em;
+  font-family: var(--font-heading); font-weight: 800; font-size: 1.55rem;
+  display: inline; letter-spacing: .04em;
+  color: var(--text-primary);
 }
-.auth-logo-title span { color: var(--primary-color); }
+.auth-logo-title .msp-word { color: var(--primary-color); }
 .auth-logo-sub {
   font-size: .72rem; color: var(--text-muted); letter-spacing: .15em;
-  text-transform: uppercase; display: block; margin-top: .3rem;
+  text-transform: uppercase; display: block; margin-top: .05rem;
 }
 
 /* ── Panel system ── */
@@ -2721,7 +2910,31 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   display: flex; align-items: center; justify-content: center;
   font-size: .65rem; font-weight: 700; color: #fff;
   flex-shrink: 0; letter-spacing: .02em;
+  overflow: hidden; cursor: pointer;
+  transition: box-shadow .2s;
+  position: relative;
 }
+.nav-user-avatar:hover { box-shadow: 0 0 0 2px var(--primary-color); }
+.nav-user-avatar img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center top;
+  border-radius: 50%;
+  display: block;
+}
+/* Hidden file input trigger */
+#avatar-upload-input { display: none; }
+/* Tooltip on avatar hover */
+.nav-user-avatar::after {
+  content: '📷';
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.55);
+  border-radius: 50%;
+  font-size: .7rem;
+  opacity: 0;
+  transition: opacity .15s;
+}
+.nav-user-avatar:hover::after { opacity: 1; }
 .nav-user-text {
   display: flex; flex-direction: column;
   line-height: 1.15; min-width: 0;
@@ -2786,12 +2999,38 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   <!-- Background canvas -->
   <canvas id="auth-bg-canvas"></canvas>
 
-  <div class="auth-card">
+  <!-- DELIVERY ROAD -->
+  <div class="delivery-road">
+    <div class="delivery-road-line"></div>
+    <div class="delivery-road-line"></div>
+    <div class="delivery-road-line"></div>
+  </div>
+
+  <!-- DELIVERY DUST PARTICLES -->
+  <div class="delivery-dust" id="delivery-dust">
+    <span></span><span></span><span></span><span></span><span></span>
+  </div> 
+
+  <!-- DELIVERY BIKE + PACKAGE -->
+  <div class="delivery-scene" id="delivery-scene">
+    <div class="delivery-package-glow"></div>
+    <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.3/dist/dotlottie-wc.js" type="module"></script>
+    <dotlottie-wc id="delivery-lottie" src="https://lottie.host/790c4903-8d01-47d5-bae7-1c4d8331ae92/DDONCXNFn7.lottie" style="width:720px;height:920px" autoplay></dotlottie-wc>
+  </div>
+
+  <!-- LOGIN CARD — hidden until delivered -->
+  <div class="auth-card" id="auth-card">
     <div class="auth-card-top-bar"></div>
 
     <div class="auth-logo">
-      <div class="auth-logo-icon"><i class="fa-solid fa-shield-halved"></i></div>
-      <span class="auth-logo-title">INSIGHTZ <span>MSP</span></span>
+      <div class="auth-logo-icon">
+        <span class="ring1"></span>
+        <span class="ring2"></span>
+        <i class="fa-solid fa-shield-halved"></i>
+        <span class="orbit-dot"></span>
+        <span class="orbit-dot2"></span>
+      </div>
+      <span class="auth-logo-title">INSIGHTZ <span class="msp-word">MSP</span></span>
       <span class="auth-logo-sub">Secure Access Portal</span>
     </div>
 
@@ -3049,7 +3288,8 @@ input[type="month"]::-webkit-calendar-picker-indicator {
           <div id="nav-user-info">
             <div class="nav-divider"></div>
             <div class="nav-user-pill">
-              <div class="nav-user-avatar" id="nav-avatar">SA</div>
+              <div class="nav-user-avatar" id="nav-avatar" onclick="document.getElementById('avatar-upload-input').click()" title="Click to change profile photo">SA</div>
+              <input type="file" id="avatar-upload-input" accept="image/*" onchange="handleAvatarUpload(event)"/>
               <div class="nav-user-text">
                 <span class="nav-user-name" id="strip-name">User</span>
                 <span class="nav-user-role" id="strip-role">user</span>
@@ -3483,7 +3723,7 @@ function dbWrite(key, val) {
 const SEED_MEMBERS = [
   { id: 'jagan',    name: 'Jagan',     role: 'Deployment Lead',  team: 'deployment', position: 'lead',   color: '#3b82f6' },
   { id: 'sivakumar',name: 'Siva Kumar',role: 'Operations Lead',  team: 'operations', position: 'lead',   color: '#8b5cf6' },
-  { id: 'vimal',    name: 'Vimal',     role: 'Security Engineer', team: 'deployment', position: 'member', color: '#10b981' },
+  { id: 'vimal',    name: 'Vimal',     role: 'Security Analyst', team: 'deployment', position: 'member', color: '#10b981' },
   { id: 'suriya',   name: 'Suriya',    role: 'Security Analyst',  team: 'operations', position: 'member', color: '#f59e0b' },
   { id: 'idris',    name: 'Idris',     role: 'Security Analyst',team: 'operations', position: 'member', color: '#ef4444' },
   { id: 'sanmugam', name: 'Sanmugam',  role: 'Security Analyst', team: 'deployment', position: 'parser', color: '#06b6d4' },
@@ -5111,6 +5351,7 @@ async function initAuth() {
   }
 }
 
+let _deliveryPlayed = false;
 function showAuthOverlay(){
   const ov=document.getElementById('auth-overlay');
   if(ov){ ov.classList.remove('hidden'); showPanel('panel-login'); }
@@ -5118,9 +5359,11 @@ function showAuthOverlay(){
   const navUserInfo=document.getElementById('nav-user-info');
   if(navUserInfo) navUserInfo.style.display='none';
   const navLoginBtn=document.getElementById('nav-login-btn');
-  if(navLoginBtn) navLoginBtn.style.display='none'; // hidden while overlay is shown
+  if(navLoginBtn) navLoginBtn.style.display='none';
   const banner=document.getElementById('readonly-banner');
   if(banner) banner.classList.remove('show');
+  // Run delivery animation only on first show
+  if(!_deliveryPlayed){ _deliveryPlayed=true; runDeliverySequence(); }
 }
 
 /* ── LOGIN ── */
@@ -5247,11 +5490,19 @@ function applyLoginState(session){
   const sr=document.getElementById('strip-role');
   if(sr) sr.textContent=session.role;
 
-  // Set avatar initials
+  // Set avatar — photo if stored, else initials
   const av=document.getElementById('nav-avatar');
   if(av){
     const parts=(session.name||session.username).split(' ');
-    av.textContent=parts.length>1?(parts[0][0]+parts[1][0]).toUpperCase():session.username.slice(0,2).toUpperCase();
+    const initials=parts.length>1?(parts[0][0]+parts[1][0]).toUpperCase():session.username.slice(0,2).toUpperCase();
+    const db=loadDB();
+    const photoKey='photo_'+(session.username||'');
+    const photo=db[session.username]&&db[session.username].profilePhoto ? db[session.username].profilePhoto : null;
+    if(photo){
+      av.innerHTML=`<img src="${photo}" alt="${initials}" draggable="false"/>`;
+    } else {
+      av.textContent=initials;
+    }
   }
 
   // Admin button
@@ -5260,6 +5511,59 @@ function applyLoginState(session){
 
   // Apply role-based permissions
   unlockAllEditing(session.role);
+}
+
+/* ── PROFILE PHOTO UPLOAD ── */
+function handleAvatarUpload(e){
+  const file = e.target.files && e.target.files[0];
+  if(!file || !file.type.startsWith('image/')) return;
+  // Reset input so same file can be re-selected
+  e.target.value = '';
+
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const src = ev.target.result;
+    const img = new Image();
+    img.onload = function(){
+      // Smart crop: take a centered square from top-third for headshot focus
+      const canvas = document.createElement('canvas');
+      const SIZE = 200; // output px — crisp but compact stored size
+      canvas.width = SIZE; canvas.height = SIZE;
+      const ctx = canvas.getContext('2d');
+
+      // Determine crop: centered horizontally, top-biased vertically (face area)
+      const srcMin = Math.min(img.width, img.height);
+      const sx = (img.width  - srcMin) / 2;
+      // Bias toward top 60% of image for headshots
+      const sy = Math.max(0, (img.height - srcMin) * 0.25);
+
+      ctx.beginPath();
+      ctx.arc(SIZE/2, SIZE/2, SIZE/2, 0, Math.PI*2);
+      ctx.clip();
+      ctx.drawImage(img, sx, sy, srcMin, srcMin, 0, 0, SIZE, SIZE);
+
+      const dataURL = canvas.toDataURL('image/jpeg', 0.88);
+
+      // Save to user DB
+      const session = getSession();
+      if(!session) return;
+      const db = loadDB();
+      if(db[session.username]){
+        db[session.username].profilePhoto = dataURL;
+        saveDB(db);
+      }
+
+      // Update nav avatar live
+      const av = document.getElementById('nav-avatar');
+      if(av){
+        const parts=(session.name||session.username).split(' ');
+        const initials=parts.length>1?(parts[0][0]+parts[1][0]).toUpperCase():session.username.slice(0,2).toUpperCase();
+        av.innerHTML=`<img src="${dataURL}" alt="${initials}" draggable="false"/>`;
+      }
+    };
+    img.src = src;
+  };
+  reader.readAsDataURL(file);
 }
 
 /* ── LOGOUT ── */
@@ -5639,6 +5943,75 @@ function copyTempPass(){
     const btn=document.querySelector('.copy-btn');
     if(btn){btn.innerHTML='<i class="fa-solid fa-check"></i> Copied!';setTimeout(()=>{btn.innerHTML='<i class="fa-solid fa-copy"></i> Copy Password';},2000);}
   });
+}
+
+/* ════════════════════════════════════════════
+   DELIVERY SEQUENCE — fires once from showAuthOverlay()
+   Timeline from overlay show:
+     0.0s  — road fades in, dust starts
+     0.5s  — bike starts riding in (CSS delay)
+     5.0s  — bike arrives center (0.5 + 4.5)
+     5.0s  — dust off, bounce-stop (1.0s)
+     6.0s  — bounce done, pause (1.5s)
+     7.5s  — form zoom-out (1.0s)
+     8.5s  — form settled, pause (1.2s)
+     9.7s  — bike exits slowly (2.5s)
+    12.2s  — cleanup
+════════════════════════════════════════════ */
+function runDeliverySequence() {
+  const scene = document.getElementById('delivery-scene');
+  const card  = document.getElementById('auth-card');
+  const road  = document.querySelector('.delivery-road');
+  const dust  = document.getElementById('delivery-dust');
+
+  if (!scene || !card) return;
+
+  // Reset to start
+  scene.style.display = '';
+  scene.style.animation = 'none';
+  scene.style.left = '-760px';
+  scene.style.transform = 'translateY(-50%)';
+  card.classList.remove('delivered');
+  road && road.classList.remove('visible');
+  dust && dust.classList.remove('active');
+  void scene.offsetWidth;
+
+  // t=0: Road + dust appear, bike starts riding in
+  road && road.classList.add('visible');
+  dust && dust.classList.add('active');
+  scene.style.animation = 'bikeRideIn 4.5s cubic-bezier(.08,.6,.2,1) 0.5s forwards';
+
+  // t=5.0s: Bike arrives at center
+  setTimeout(() => {
+
+    // Stop dust, pin bike at center, bounce
+    dust && dust.classList.remove('active');
+    scene.classList.add('stopped');
+    scene.style.animation = 'none';
+    scene.style.left = 'calc(50% - 360px)';
+    void scene.offsetWidth;
+    scene.style.animation = 'bikeStop 0.9s cubic-bezier(.36,.07,.19,.97) forwards';
+
+    // ✅ Form appears IMMEDIATELY when bike hits center (no extra wait)
+    card.classList.add('delivered');
+
+    // t=6.5s: bounce done (0.9s) + short pause (0.6s) → bike exits
+    setTimeout(() => {
+      dust && dust.classList.add('active');
+      scene.style.animation = 'none';
+      void scene.offsetWidth;
+      scene.style.animation = 'bikeRideOut 2.5s cubic-bezier(.4,0,.7,.4) forwards';
+
+      // Cleanup after exit
+      setTimeout(() => {
+        scene.style.display = 'none';
+        dust && dust.classList.remove('active');
+        road && road.classList.remove('visible');
+      }, 2550);
+
+    }, 1500); // 0.9s bounce + 0.6s pause then exit
+
+  }, 4400); // 0.5s form delay + 4.5s ride-in
 }
 
 /* ── Auth Background Canvas (MSP style) ── */
