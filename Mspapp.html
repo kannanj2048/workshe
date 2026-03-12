@@ -2803,6 +2803,17 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 }
 .copy-btn:hover { background: rgba(16,185,129,.18); }
 
+/* ── Admin: Reset password button inside user detail drawer ── */
+.admin-reset-pass-btn {
+  display: flex; align-items: center; justify-content: center; gap: .45rem;
+  width: 100%; margin-top: .75rem; padding: .42rem 1rem;
+  background: rgba(139,92,246,.1); border: 1px solid rgba(139,92,246,.28);
+  border-radius: var(--radius-sm); color: #8b5cf6;
+  font-size: .72rem; font-weight: 700; font-family: inherit;
+  cursor: pointer; transition: all .2s; text-transform: uppercase; letter-spacing: .06em;
+}
+.admin-reset-pass-btn:hover { background: rgba(139,92,246,.2); border-color: #8b5cf6; }
+
 /* ── Change Password Modal ── */
 #change-pass-modal {
   position: fixed; inset: 0; z-index: 99998;
@@ -3095,9 +3106,10 @@ input[type="month"]::-webkit-calendar-picker-indicator {
         <label>New Password</label>
         <div class="auth-input-wrap">
           <i class="fa-solid fa-lock field-icon"></i>
-          <input type="password" id="reset-new" placeholder="Minimum 8 characters"/>
+          <input type="password" id="reset-new" placeholder="Min 8 chars, A-Z, a-z, 0-9, symbol" oninput="renderStrength('reset-strength',this.value)"/>
           <button class="toggle-pass" onclick="togglePass('reset-new',this)" tabindex="-1"><i class="fa-solid fa-eye"></i></button>
         </div>
+        <div id="reset-strength"></div>
       </div>
       <div class="auth-field">
         <label>Confirm New Password</label>
@@ -3152,9 +3164,10 @@ input[type="month"]::-webkit-calendar-picker-indicator {
       <label>New Password</label>
       <div class="auth-input-wrap">
         <i class="fa-solid fa-key field-icon"></i>
-        <input type="password" id="cp-new" placeholder="Minimum 8 characters"/>
+        <input type="password" id="cp-new" placeholder="Min 8 chars, A-Z, a-z, 0-9, symbol" oninput="renderStrength('cp-strength',this.value)"/>
         <button class="toggle-pass" onclick="togglePass('cp-new',this)" tabindex="-1"><i class="fa-solid fa-eye"></i></button>
       </div>
+      <div id="cp-strength"></div>
     </div>
     <div class="auth-field">
       <label>Confirm New Password</label>
@@ -3198,7 +3211,7 @@ input[type="month"]::-webkit-calendar-picker-indicator {
       <label>Full Name</label>
       <div class="auth-input-wrap">
         <i class="fa-solid fa-id-card field-icon"></i>
-        <input type="text" id="new-user-name" placeholder="Display Name"/>
+        <input type="text" id="new-user-name" placeholder="Dispaly Name"/>
       </div>
     </div>
     <div class="auth-field">
@@ -5305,9 +5318,63 @@ function setSession(u) { sessionStorage.setItem(SESSION_KEY, JSON.stringify(u));
 function clearSession() { sessionStorage.removeItem(SESSION_KEY); }
 
 /* ── Helpers ── */
-function genTemp() {
-  const c='ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#!';
-  return Array.from({length:14},()=>c[Math.floor(Math.random()*c.length)]).join('');
+/* ── Cryptographically secure temp password (CSPRNG, not Math.random) ──
+   Guarantees ≥1 uppercase, ≥1 lowercase, ≥1 digit, ≥1 symbol.
+   Fisher-Yates shuffle also uses crypto.getRandomValues.          ── */
+function genTemp(){
+  const upper  = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const lower  = 'abcdefghjkmnpqrstuvwxyz';
+  const digits = '23456789';
+  const syms   = '@#!$%&*';
+  const all    = upper + lower + digits + syms;
+  const rand   = charset => { const a=new Uint32Array(1); crypto.getRandomValues(a); return charset[a[0]%charset.length]; };
+  const required = [rand(upper), rand(lower), rand(digits), rand(syms)];
+  const rest = Array.from({length:12}, ()=>rand(all));
+  const combined = [...required, ...rest];
+  for(let i=combined.length-1;i>0;i--){
+    const a=new Uint32Array(1); crypto.getRandomValues(a);
+    const j=a[0]%(i+1); [combined[i],combined[j]]=[combined[j],combined[i]];
+  }
+  return combined.join('');
+}
+
+/* ── Password strength validator ──
+   Rules: min 8 chars, uppercase, lowercase, digit, symbol.
+   Returns { ok, errors[], strength } ── */
+function validatePassword(pass){
+  const errors=[];
+  if(pass.length<8)               errors.push('At least 8 characters');
+  if(!/[A-Z]/.test(pass))         errors.push('One uppercase letter (A–Z)');
+  if(!/[a-z]/.test(pass))         errors.push('One lowercase letter (a–z)');
+  if(!/[0-9]/.test(pass))         errors.push('One number (0–9)');
+  if(!/[@#!$%&*\-_+=?]/.test(pass)) errors.push('One symbol (@#!$%&*-_+=?)');
+  const score=5-errors.length;
+  const strength=score<=1?'weak':score<=3?'fair':score===4?'strong':'very-strong';
+  return {ok:errors.length===0, errors, strength};
+}
+
+/* ── Live password strength bar ──
+   Call with containerId = a <div> right after the input-wrap.   ── */
+function renderStrength(containerId, pass){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  if(!pass){el.innerHTML='';return;}
+  const {errors,strength}=validatePassword(pass);
+  const cols={'weak':'#ef4444','fair':'#f59e0b','strong':'#3b82f6','very-strong':'#10b981'};
+  const wids={'weak':'25%','fair':'50%','strong':'75%','very-strong':'100%'};
+  const lbls={'weak':'Weak','fair':'Fair','strong':'Strong','very-strong':'Very Strong'};
+  const col=cols[strength];
+  const hint=errors.length
+    ?`${errors[0]}${errors.length>1?' <span style="opacity:.65">+${errors.length-1} more</span>':''}`
+    :'<span style="color:#10b981">✓ All requirements met</span>';
+  el.innerHTML=`
+    <div style="height:3px;background:rgba(255,255,255,.08);border-radius:100px;margin-top:.4rem;overflow:hidden">
+      <div style="height:100%;width:${wids[strength]};background:${col};border-radius:100px;transition:width .3s,background .3s"></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.22rem">
+      <span style="font-size:.6rem;font-family:monospace;color:${col};letter-spacing:.06em;font-weight:600">${lbls[strength]}</span>
+      <span style="font-size:.58rem;color:var(--text-muted);font-family:monospace">${hint}</span>
+    </div>`;
 }
 function showMsg(id,type,text){
   const el=document.getElementById(id);
@@ -5423,7 +5490,8 @@ async function handleReset(){
   hideMsg('reset-msg');
   if(!tempPass||!newPass||!confirmPass){showMsg('reset-msg','error','All fields are required.');return;}
   if(newPass!==confirmPass){showMsg('reset-msg','error','Passwords do not match.');return;}
-  if(newPass.length<8){showMsg('reset-msg','error','Password must be at least 8 characters.');return;}
+  const {ok,errors}=validatePassword(newPass);
+  if(!ok){showMsg('reset-msg','error','Password too weak: '+errors[0]+(errors.length>1?' (+'+(errors.length-1)+' more)':''));return;}
 
   const db=loadDB();
   const user=db[username];
@@ -5437,6 +5505,7 @@ async function handleReset(){
   user.mustReset=false;
   user.tempExpiry=null;
   saveDB(db);
+  renderStrength('reset-strength','');
 
   const sessionData={username:user.username,name:user.name,role:user.role};
   setSession(sessionData);
@@ -5714,6 +5783,7 @@ function openChangePassModal(){
 function closeChangePassModal(){
   document.getElementById('change-pass-modal').classList.remove('open');
   hideMsg('cp-msg');
+  renderStrength('cp-strength','');
 }
 async function handleChangePassword(){
   const s=getSession();
@@ -5723,7 +5793,8 @@ async function handleChangePassword(){
   const confirm=document.getElementById('cp-confirm').value;
   hideMsg('cp-msg');
   if(!current||!newPass||!confirm){ showMsg('cp-msg','error','All fields are required.'); return; }
-  if(newPass.length<8){ showMsg('cp-msg','error','New password must be at least 8 characters.'); return; }
+  const {ok,errors}=validatePassword(newPass);
+  if(!ok){ showMsg('cp-msg','error','Password too weak: '+errors[0]+(errors.length>1?' (+'+(errors.length-1)+' more)':'')); return; }
   if(newPass!==confirm){ showMsg('cp-msg','error','New passwords do not match.'); return; }
   if(current===newPass){ showMsg('cp-msg','error','New password must be different from current.'); return; }
   const db=loadDB();
@@ -5736,6 +5807,7 @@ async function handleChangePassword(){
   user.mustReset=false;
   user.tempExpiry=null;
   saveDB(db);
+  renderStrength('cp-strength','');
   showMsg('cp-msg','success','Password changed successfully!');
   setTimeout(()=>closeChangePassModal(), 1500);
   showToast('Password updated successfully','success','fa-check-circle');
@@ -5832,6 +5904,9 @@ function refreshUserList(){
             <span class="user-detail-val ${expired?'status-expired':''}">${expiryText}</span>
           </div>`:''}
         </div>
+        ${!isAdmin?`<button class="admin-reset-pass-btn" onclick="adminResetPassword('${u.username}','${u.name}')">
+          <i class="fa-solid fa-rotate-right"></i> Reset Password &amp; Issue New Temp
+        </button>`:''}
       </div>
       <div class="remove-confirm" id="remove-confirm-${u.username}">
         <span class="remove-confirm-text">Remove <strong>${u.name}</strong>? This cannot be undone.</span>
@@ -5909,6 +5984,25 @@ function confirmRemoveUser(username){
   const countEl=document.getElementById('users-count');
   if(countEl) countEl.textContent=parseInt(countEl.textContent||'1')-1;
   showMsg('admin-msg','success','User removed successfully.');
+}
+
+/* ── ADMIN: Reset a user's password & issue new temp ── */
+async function adminResetPassword(username, displayName){
+  if(!confirm('Reset password for "'+displayName+'"?\nA new 24-hour temporary password will be generated.'))return;
+  const db=loadDB();
+  if(!db[username]){showToast('User not found','error','fa-circle-xmark');return;}
+  const tempPass=genTemp();
+  const hash=await sha256(tempPass);
+  db[username].passwordHash=hash;
+  db[username].mustReset=true;
+  db[username].tempExpiry=Date.now()+24*60*60*1000;
+  saveDB(db);
+  refreshUserList();
+  // Show temp password in the existing admin temp-pass box
+  document.getElementById('admin-temp-pass').textContent=tempPass;
+  document.getElementById('admin-temp-result').style.display='block';
+  showMsg('admin-msg','success','Password reset for '+displayName+'. New temp password shown below.');
+  showToast('Password reset for '+displayName,'success','fa-check-circle');
 }
 
 async function handleCreateUser(){
