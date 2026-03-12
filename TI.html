@@ -562,16 +562,510 @@ footer p{font-size:.76rem;color:var(--t-muted);font-family:var(--font-mono);}
 footer span{color:var(--primary-color);}
 
 /* LOADING */
-.loading-overlay{position:fixed;inset:0;background:#ffffff;z-index:10000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1.25rem;transition:opacity .5s;}
-.loading-overlay.hide{opacity:0;pointer-events:none;}
-.loader-logo{width:64px;height:64px;background:linear-gradient(135deg,var(--primary-color),var(--secondary-color));border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:#fff;animation:loaderP 1.2s ease infinite;}
-@keyframes loaderP{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(59,130,246,.4)}50%{transform:scale(1.05);box-shadow:0 0 0 16px rgba(59,130,246,0)}}
-.loader-text{font-family:var(--font-mono);font-size:.82rem;color:#94a3b8;letter-spacing:.15em;text-transform:uppercase;}
-.loader-bar{width:280px;height:3px;background:#d5d7d8;border-radius:100px;overflow:hidden;}
-.loader-bar-fill{height:100%;background:linear-gradient(90deg,var(--primary-color),var(--accent-color));border-radius:100px;animation:loadFill 1.2s ease forwards;}
+.loading-overlay{
+  position:fixed;inset:0;
+  background:var(--bg,#020c1b);
+  display:flex;align-items:center;justify-content:center;
+  z-index:999999;
+  transition:opacity .5s ease,visibility .5s ease;
+}
+.loading-overlay.hide{opacity:0;visibility:hidden;pointer-events:none;}
+.loader-inner{text-align:center;display:flex;flex-direction:column;align-items:center;gap:1.5rem;}
+.loader-logo{display:flex;align-items:center;gap:.65rem;font-family:var(--font-heading,'Orbitron',sans-serif);font-size:1.75rem;font-weight:700;color:var(--primary-color,#3b82f6);letter-spacing:.08em;}
+.loader-icon{font-size:2.5rem;animation:tiLoaderPulse 1.2s ease-in-out infinite;}
+@keyframes tiLoaderPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 8px var(--primary-color,#3b82f6))}50%{transform:scale(1.15);filter:drop-shadow(0 0 24px var(--primary-color,#3b82f6))}}
+.loader-brand{display:flex;gap:.35em;}
+.loader-brand em{font-style:normal;color:var(--secondary-color,#8b5cf6);}
+.loader-bar-wrap{width:280px;height:4px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;}
+.loader-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--primary-color,#3b82f6),var(--secondary-color,#8b5cf6),var(--accent-color,#10b981));border-radius:99px;animation:tiLoaderFill 2s ease forwards;}
+@keyframes tiLoaderFill{0%{width:0%}60%{width:75%}80%{width:88%}100%{width:100%}}
+.loader-text{font-size:.78rem;color:var(--t-muted,#64748b);letter-spacing:.1em;font-family:var(--font-mono,'Courier New',monospace);animation:tiLoaderBlink 1.2s ease infinite;}
+@keyframes tiLoaderBlink{0%,100%{opacity:1}50%{opacity:.3}}
 @keyframes loadFill{from{width:0%}to{width:100%}}
 .fade-up{opacity:0;transform:translateY(18px);transition:opacity .5s,transform .5s;}
 .fade-up.visible{opacity:1;transform:translateY(0);}
+
+/* ═══════════════════════════════════════════
+   THREAD INTEL — AUTH OVERLAY SYSTEM
+   Same structure as MSP, TI cyber style
+═══════════════════════════════════════════ */
+
+/* ── Overlay fullscreen ── */
+#ti-auth-overlay {
+  position: fixed; inset: 0; z-index: 99999;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg);
+  overflow: hidden;
+  transition: opacity .5s ease, visibility .5s ease;
+}
+#ti-auth-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+/* ── Background canvas ── */
+#ti-auth-canvas {
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+}
+
+/* ── Cyber blobs ── */
+.ti-blob {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  filter: blur(80px); animation: tiBlobFloat 9s ease-in-out infinite alternate;
+}
+.ti-blob-1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(59,130,246,.14), transparent 70%); top: -160px; left: -160px; animation-delay: 0s; }
+.ti-blob-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(139,92,246,.1), transparent 70%); bottom: -120px; right: -120px; animation-delay: -3s; }
+.ti-blob-3 { width: 320px; height: 320px; background: radial-gradient(circle, rgba(16,185,129,.08), transparent 70%); top: 50%; left: 50%; transform: translate(-50%,-50%); animation-delay: -6s; }
+@keyframes tiBlobFloat { from { transform: scale(1) translate(0,0); } to { transform: scale(1.1) translate(18px,-18px); } }
+.ti-blob-3 { animation: tiBlobFloat3 9s ease-in-out infinite alternate; }
+@keyframes tiBlobFloat3 { from { transform: translate(-50%,-50%) scale(1); } to { transform: translate(-50%,-50%) scale(1.12); } }
+
+/* ── Scan line across overlay ── */
+.ti-auth-scan {
+  position: absolute; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(59,130,246,.35), rgba(16,185,129,.25), transparent);
+  animation: tiScanMove 6s linear infinite; pointer-events: none; z-index: 1;
+}
+@keyframes tiScanMove { 0% { top: -2px; opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+/* ── Auth card ── */
+.ti-auth-card {
+  position: relative; z-index: 10;
+  width: 440px; max-width: calc(100vw - 2rem);
+  background: rgba(10, 22, 40, 0.92);
+  border: 1px solid rgba(59,130,246,.25);
+  border-radius: 1.25rem;
+  padding: 2.5rem;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 0 0 1px rgba(59,130,246,.1), 0 0 60px rgba(59,130,246,.08), 0 40px 80px rgba(0,0,0,.6);
+  opacity: 0; transform: scale(1.3); pointer-events: none; transition: none;
+}
+[data-theme="light"] .ti-auth-card {
+  background: rgba(255,255,255,.94);
+  border-color: rgba(59,130,246,.2);
+  box-shadow: 0 20px 60px rgba(59,130,246,.1), 0 4px 20px rgba(0,0,0,.07);
+}
+.ti-auth-card.delivered {
+  animation: tiFormZoom 1.0s cubic-bezier(.25,.46,.45,.94) forwards;
+  pointer-events: all;
+}
+@keyframes tiFormZoom {
+  0%   { opacity: 0; transform: scale(1.3); filter: blur(5px); }
+  35%  { opacity: 1; transform: scale(1.1); filter: blur(1px); }
+  70%  { opacity: 1; transform: scale(0.98); filter: blur(0); }
+  100% { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
+/* ── Top accent bar ── */
+.ti-card-topbar {
+  position: absolute; top: 0; left: 10%; right: 10%; height: 2px;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+  border-radius: 0 0 4px 4px;
+}
+
+
+/* ── Logo area — exact MSP structure ── */
+.ti-auth-logo {
+  text-align: center; margin-bottom: 1.6rem;
+  display: flex; flex-direction: column; align-items: center; gap: .5rem;
+}
+
+/* Orbit icon wrap — 72px, exact MSP */
+.ti-auth-logo-icon {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 72px; height: 72px;
+  margin-bottom: .3rem;
+}
+/* Center icon */
+.ti-auth-logo-icon i {
+  font-size: 1.6rem;
+  color: var(--primary-color);
+  position: relative; z-index: 2;
+}
+/* Ring 1 — solid blue */
+.ti-auth-logo-icon .ti-r1 {
+  position: absolute;
+  width: 54px; height: 54px; border-radius: 50%;
+  border: 1px solid rgba(59,130,246,0.38);
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  pointer-events: none;
+}
+/* Ring 2 — dashed purple */
+.ti-auth-logo-icon .ti-r2 {
+  position: absolute;
+  width: 72px; height: 72px; border-radius: 50%;
+  border: 1px dashed rgba(139,92,246,0.28);
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  pointer-events: none;
+}
+/* Orbit dot 1 — blue, radius 27px */
+.ti-auth-logo-icon .ti-od1 {
+  position: absolute;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--primary-color);
+  top: 50%; left: 50%;
+  margin-top: -2.5px; margin-left: -2.5px;
+  animation: tiLogoDot1 4s linear infinite; z-index: 3;
+}
+/* Orbit dot 2 — green, radius 36px */
+.ti-auth-logo-icon .ti-od2 {
+  position: absolute;
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--accent-color);
+  top: 50%; left: 50%;
+  margin-top: -2px; margin-left: -2px;
+  animation: tiLogoDot2 7s linear infinite reverse; z-index: 3;
+}
+@keyframes tiLogoDot1 {
+  from { transform: rotate(0deg)   translateY(-27px); }
+  to   { transform: rotate(360deg) translateY(-27px); }
+}
+@keyframes tiLogoDot2 {
+  from { transform: rotate(0deg)   translateY(-36px); }
+  to   { transform: rotate(360deg) translateY(-36px); }
+}
+
+.ti-auth-title {
+  font-family: var(--font-heading); font-weight: 800; font-size: 1.55rem;
+  display: inline; letter-spacing: .04em;
+  color: var(--t-primary);
+}
+.ti-auth-title .ti-brand { color: var(--primary-color); }
+.ti-auth-sub {
+  font-size: .72rem; color: var(--t-muted); letter-spacing: .15em;
+  text-transform: uppercase; display: block; margin-top: .05rem;
+}
+
+/* ── 3D Lottie panel — floats to the LEFT of the card ── */
+/* ── Panel system ── */
+.ti-panel { display: none; }
+.ti-panel.active { display: block; animation: tiPanelIn .3s ease; }
+@keyframes tiPanelIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.ti-panel-title { font-family: var(--font-heading); font-weight: 700; font-size: 1rem; color: var(--t-primary); margin-bottom: .2rem; }
+.ti-panel-sub { font-size: .78rem; color: var(--t-muted); margin-bottom: 1.4rem; font-family: var(--font-mono); }
+
+/* ── Fields ── */
+.ti-field { margin-bottom: 1rem; }
+.ti-field label { display: block; font-size: .68rem; font-weight: 600; color: var(--t-muted); text-transform: uppercase; letter-spacing: .12em; margin-bottom: .4rem; font-family: var(--font-mono); }
+.ti-input-wrap { position: relative; }
+.ti-input-wrap i.fi { position: absolute; left: .9rem; top: 50%; transform: translateY(-50%); color: var(--primary-color); font-size: .78rem; pointer-events: none; z-index: 2; }
+.ti-field input, .ti-field select {
+  width: 100%; padding: .75rem 1rem .75rem 2.5rem;
+  background: rgba(255,255,255,.04);
+  border: 1.5px solid rgba(59,130,246,.2);
+  border-radius: .5rem; color: var(--t-primary);
+  font-size: .86rem; font-family: var(--font-mono); outline: none;
+  transition: all .2s;
+}
+[data-theme="light"] .ti-field input, [data-theme="light"] .ti-field select { background: var(--surface2); border-color: var(--b-color); }
+.ti-field input:focus, .ti-field select:focus { border-color: var(--primary-color); background: rgba(59,130,246,.05); box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
+.ti-field input::placeholder { color: var(--t-muted); }
+.ti-toggle-pass { position: absolute; right: .9rem; top: 50%; transform: translateY(-50%); color: var(--t-muted); cursor: pointer; font-size: .78rem; background: none; border: none; transition: color .2s; }
+.ti-toggle-pass:hover { color: var(--primary-color); }
+
+/* ── Buttons ── */
+.ti-btn {
+  width: 100%; padding: .85rem; border: none; border-radius: .5rem;
+  font-family: var(--font-heading); font-weight: 600; font-size: .86rem;
+  cursor: pointer; transition: all .25s; margin-top: .5rem;
+  display: flex; align-items: center; justify-content: center; gap: .5rem;
+}
+.ti-btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: #fff; box-shadow: 0 0 20px rgba(59,130,246,.3);
+}
+.ti-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(59,130,246,.45); }
+.ti-btn-ghost {
+  background: rgba(255,255,255,.04); color: var(--t-muted);
+  border: 1.5px solid rgba(59,130,246,.2); font-size: .8rem; padding: .65rem;
+}
+[data-theme="light"] .ti-btn-ghost { background: var(--surface2); }
+.ti-btn-ghost:hover { border-color: var(--primary-color); color: var(--primary-color); background: rgba(59,130,246,.06); }
+
+/* ── Spinner ── */
+.ti-spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: tiSpin .6s linear infinite; display: none; }
+@keyframes tiSpin { to { transform: rotate(360deg); } }
+
+/* ── Messages ── */
+.ti-msg { padding: .6rem .9rem; border-radius: .45rem; font-size: .76rem; margin-bottom: 1rem; display: none; align-items: center; gap: .45rem; font-family: var(--font-mono); }
+.ti-msg.show { display: flex; }
+.ti-msg.error  { background: rgba(239,68,68,.1);  border: 1px solid rgba(239,68,68,.25);  color: #f87171; }
+.ti-msg.success{ background: rgba(16,185,129,.1); border: 1px solid rgba(16,185,129,.25); color: #34d399; }
+.ti-msg.info   { background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.25); color: #60a5fa; }
+
+/* ── Divider ── */
+.ti-divider { display: flex; align-items: center; gap: .7rem; margin: .85rem 0; color: var(--t-muted); font-size: .68rem; font-family: var(--font-mono); }
+.ti-divider::before, .ti-divider::after { content: ''; flex: 1; height: 1px; background: rgba(59,130,246,.18); }
+
+/* ── Read-only banner ── */
+#ti-readonly-banner {
+  position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+  z-index: 9998; display: none; align-items: center; gap: .7rem;
+  padding: .6rem 1.5rem;
+  background: var(--surface); border: 1px solid var(--b-color);
+  border-radius: 100px; backdrop-filter: blur(20px);
+  font-size: .76rem; color: var(--t-muted); font-family: var(--font-mono);
+  box-shadow: 0 4px 24px rgba(0,0,0,.3); white-space: nowrap;
+  animation: tiBannerIn .4s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes tiBannerIn { from { opacity: 0; transform: translateX(-50%) translateY(14px); } }
+#ti-readonly-banner.show { display: flex; }
+#ti-readonly-banner i { color: var(--warning-color); }
+#ti-readonly-banner .ti-login-link { color: var(--primary-color); cursor: pointer; text-decoration: underline; font-weight: 600; }
+
+/* ── Success overlay ── */
+#ti-success-overlay {
+  position: fixed; inset: 0; z-index: 999999;
+  background: #04090f;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 0;
+  opacity: 0; pointer-events: none;
+  transition: opacity .5s ease;
+}
+#ti-success-overlay.show { opacity: 1; pointer-events: all; }
+#ti-success-overlay.hide { opacity: 0; }
+
+/* Top progress bar */
+#ti-success-overlay .ti-succ-bar {
+  position: absolute; top: 0; left: 0; height: 3px;
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--secondary-color));
+  width: 0; border-radius: 0 2px 2px 0;
+  transition: width 2.6s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 0 10px var(--accent-color);
+}
+#ti-success-overlay.show .ti-succ-bar { width: 100%; }
+
+/* Lottie wrapper */
+.ti-succ-lottie {
+  width: 300px; height: 300px;
+  filter: drop-shadow(0 0 40px rgba(16,185,129,.35)) drop-shadow(0 0 80px rgba(59,130,246,.2));
+  animation: tiSuccPop .6s cubic-bezier(.34,1.56,.64,1) forwards;
+  opacity: 0;
+}
+@keyframes tiSuccPop {
+  0%   { opacity: 0; transform: scale(.6); }
+  60%  { opacity: 1; transform: scale(1.06); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Text */
+.ti-succ-greeting {
+  font-family: var(--font-heading); font-size: 1.55rem; font-weight: 800;
+  color: var(--t-primary); letter-spacing: .04em;
+  margin-top: -12px;
+  animation: tiSuccFadeUp .5s ease .3s both;
+}
+.ti-succ-greeting span { color: var(--accent-color); }
+.ti-succ-sub {
+  font-family: var(--font-mono); font-size: .68rem;
+  color: var(--t-muted); letter-spacing: .2em; text-transform: uppercase;
+  margin-top: .4rem;
+  animation: tiSuccFadeUp .5s ease .5s both;
+}
+@keyframes tiSuccFadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Faint cyber grid */
+#ti-success-overlay::before {
+  content: ''; position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(16,185,129,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16,185,129,.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+/* ── Nav user pill — same as MSP pattern ── */
+#ti-nav-user { display: none; align-items: center; gap: 0; }
+.ti-user-pill {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .28rem .28rem .28rem .42rem;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(59,130,246,.18); border-radius: 100px;
+  cursor: default; transition: all .2s; max-width: 220px;
+}
+[data-theme="light"] .ti-user-pill { background: var(--surface2); border-color: var(--b-color); }
+.ti-user-pill:hover { border-color: var(--primary-color); background: rgba(59,130,246,.06); }
+.ti-user-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  display: flex; align-items: center; justify-content: center;
+  font-size: .63rem; font-weight: 700; color: #fff; flex-shrink: 0;
+  overflow: hidden; cursor: pointer; transition: box-shadow .2s; position: relative;
+}
+.ti-user-avatar:hover { box-shadow: 0 0 0 2px var(--primary-color); }
+.ti-user-avatar img { width:100%;height:100%;object-fit:cover;object-position:center top;border-radius:50%;display:block; }
+.ti-user-avatar::after { content:'📷';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);border-radius:50%;font-size:.65rem;opacity:0;transition:opacity .15s; }
+.ti-user-avatar:hover::after { opacity:1; }
+#ti-avatar-upload { display: none; }
+.ti-user-name { font-size: .76rem; font-weight: 600; color: var(--t-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px; font-family: var(--font-mono); }
+.ti-user-role { font-size: .58rem; font-weight: 600; color: var(--primary-color); text-transform: uppercase; letter-spacing: .07em; font-family: var(--font-mono); }
+.ti-user-text { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; overflow: hidden; }
+.ti-pill-divider { width: 1px; height: 14px; background: rgba(59,130,246,.18); margin: 0 .2rem; flex-shrink: 0; }
+.ti-nav-btn {
+  display: flex; align-items: center; justify-content: center;
+  gap: .3rem; padding: .28rem .5rem;
+  background: transparent; border: none; color: var(--t-muted);
+  border-radius: 100px; font-size: .7rem; font-weight: 500;
+  cursor: pointer; font-family: var(--font-primary); transition: all .2s;
+}
+.ti-nav-btn:hover { color: var(--primary-color); background: rgba(59,130,246,.1); }
+.ti-nav-btn.danger:hover { color: #ef4444; background: rgba(239,68,68,.08); }
+
+/* ── Admin panel ── */
+.ti-admin-panel {
+  position: fixed; inset: 0; z-index: 99998;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.6); backdrop-filter: blur(6px);
+  opacity: 0; pointer-events: none; transition: opacity .3s;
+}
+.ti-admin-panel.open { opacity: 1; pointer-events: all; }
+.ti-admin-card {
+  background: var(--surface); border: 1px solid var(--b-color);
+  border-radius: 1rem; padding: 2rem; width: 520px;
+  max-width: calc(100vw - 2rem); max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 40px 80px rgba(0,0,0,.5); animation: tiFormZoom .4s ease;
+}
+.ti-admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid var(--b-color); }
+.ti-admin-title { font-family: var(--font-heading); font-weight: 700; color: var(--t-primary); font-size: 1.05rem; display: flex; align-items: center; gap: .5rem; }
+.ti-admin-close { width: 30px; height: 30px; border-radius: .375rem; border: 1px solid var(--b-color); background: transparent; color: var(--t-muted); cursor: pointer; font-size: .82rem; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+.ti-admin-close:hover { border-color: rgba(239,68,68,.4); color: #ef4444; }
+.ti-section-title { font-family: var(--font-mono); font-size: .7rem; text-transform: uppercase; letter-spacing: .12em; color: var(--accent-color); margin: 1.25rem 0 .75rem; }
+/* User list */
+.ti-users-toggle { display:flex;align-items:center;justify-content:space-between;padding:.6rem .75rem;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:.5rem;cursor:pointer;margin-bottom:.5rem; }
+.ti-users-toggle:hover { background:rgba(59,130,246,.1); }
+.ti-toggle-label { font-family:var(--font-mono);font-size:.74rem;color:var(--t-primary); }
+.ti-toggle-right { display:flex;align-items:center;gap:.5rem; }
+.ti-toggle-count { font-family:var(--font-mono);font-size:.7rem;color:var(--t-muted);background:rgba(59,130,246,.1);padding:.15rem .45rem;border-radius:100px; }
+.ti-users-wrap { max-height: 0; overflow: hidden; transition: max-height .35s ease; }
+.ti-users-wrap.open { max-height: 400px; }
+.ti-user-list { list-style: none; display: flex; flex-direction: column; gap: .35rem; padding-bottom: .5rem; }
+.ti-user-item { display:flex;align-items:center;justify-content:space-between;padding:.55rem .8rem;background:rgba(255,255,255,.03);border:1px solid rgba(59,130,246,.12);border-radius:.45rem; }
+.ti-user-item-info { display:flex;flex-direction:column;gap:.15rem; }
+.ti-user-item-name { font-size:.78rem;font-weight:600;color:var(--t-primary);font-family:var(--font-mono); }
+.ti-user-item-meta { font-size:.64rem;color:var(--t-muted);font-family:var(--font-mono); }
+.ti-user-item-role { font-size:.6rem;font-weight:700;padding:.1rem .4rem;border-radius:100px;background:rgba(59,130,246,.12);color:var(--primary-color);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.06em; }
+.ti-remove-user-btn { background:none;border:none;color:rgba(239,68,68,.5);cursor:pointer;font-size:.75rem;padding:.2rem .4rem;border-radius:.3rem;transition:all .2s; }
+.ti-remove-user-btn:hover { color:#ef4444;background:rgba(239,68,68,.08); }
+/* Temp pass box */
+.ti-temp-box { background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2);border-radius:.6rem;padding:1rem;margin-top:.75rem; }
+.ti-temp-label { font-family:var(--font-mono);font-size:.65rem;color:var(--accent-color);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem; }
+.ti-temp-value { font-family:var(--font-mono);font-size:1rem;font-weight:700;color:var(--t-primary);letter-spacing:.08em;margin-bottom:.3rem;word-break:break-all; }
+.ti-temp-note { font-size:.68rem;color:var(--t-muted);font-family:var(--font-mono);margin-bottom:.6rem; }
+.ti-copy-btn { display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .85rem;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);border-radius:.375rem;color:var(--accent-color);font-size:.72rem;font-weight:600;cursor:pointer;font-family:var(--font-mono);transition:all .2s; }
+.ti-copy-btn:hover { background:rgba(16,185,129,.2); }
+
+/* ── Empty placeholder card — fills odd grid slot, all roles ── */
+.empty-slot-card {
+  background: var(--surface);
+  border: 1px solid var(--b-color);
+  border-radius: 1rem;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  opacity: .45;
+  pointer-events: none;
+  position: relative;
+  overflow: hidden;
+}
+.empty-slot-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  opacity: .5;
+}
+[data-theme="dark"] .empty-slot-card {
+  background: linear-gradient(145deg,rgba(14,32,64,.6),rgba(10,22,40,.75));
+  border-color: rgba(59,130,246,.22);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+}
+.empty-slot-card i { font-size: 1.4rem; color: var(--t-muted); }
+.empty-slot-card span { font-size: .72rem; color: var(--t-muted); font-family: var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
+body.ti-readonly .compact-date input[type="date"],
+body.ti-readonly .exp-date-field input[type="date"] {
+  pointer-events: none !important;
+  opacity: 0.45 !important;
+}
+body.ti-readonly .card-footer .manage-btn { display: none !important; }
+body.ti-readonly .card-icon-btns { display: none !important; }
+body.ti-readonly .add-member-card { display: none !important; }
+body.ti-readonly .btn-add-event { display: none !important; }
+body.ti-readonly .btn-remove-event { display: none !important; }
+body.ti-readonly .compact-label .rm { display: none !important; }
+body.ti-readonly .event-title,
+body.ti-readonly .event-desc,
+body.ti-readonly .event-tag-el {
+  cursor: default !important;
+  border-bottom: none !important;
+}
+body.ti-readonly .event-edit-hint { display: none !important; }
+body.ti-readonly .status-btn { cursor: default; }
+
+/* ── User Mode: hide only add member ── */
+body.ti-user-mode .add-member-card { display: none !important; }
+
+/* ── User action buttons (view/remove in admin list) ── */
+.ti-user-action-btn {
+  width: 28px; height: 28px; border-radius: .375rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: .68rem; transition: all .18s;
+  border: 1px solid var(--b-color); background: transparent;
+  color: var(--t-muted); flex-shrink: 0;
+}
+.ti-user-action-btn.view-btn:hover { border-color: rgba(59,130,246,.45); color: var(--primary-color); background: rgba(59,130,246,.1); }
+.ti-user-action-btn.view-btn.active-view { border-color: var(--primary-color); color: var(--primary-color); background: rgba(59,130,246,.12); }
+.ti-user-action-btn.remove-btn:hover { border-color: rgba(239,68,68,.4); color: #ef4444; background: rgba(239,68,68,.08); }
+
+/* ── User detail drawer ── */
+.ti-user-item-wrap { list-style: none; }
+.ti-user-detail-drawer {
+  display: none; margin: 0 .1rem .35rem;
+  padding: .75rem .875rem;
+  background: rgba(4,9,15,.7); border: 1px solid rgba(59,130,246,.15);
+  border-top: none; border-radius: 0 0 .5rem .5rem;
+  animation: tiPanelIn .2s ease;
+}
+.ti-user-detail-drawer.open { display: block; }
+.ti-user-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .3rem .75rem; }
+.ti-user-detail-row { display: flex; flex-direction: column; gap: .1rem; padding: .3rem 0; }
+.ti-user-detail-key { font-size: .62rem; color: var(--t-muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; font-family: var(--font-mono); }
+.ti-user-detail-val { font-size: .76rem; color: var(--t-primary); font-weight: 500; word-break: break-all; font-family: var(--font-mono); }
+.ti-user-detail-val.status-active { color: var(--accent-color); }
+.ti-user-detail-val.status-pending { color: var(--warning-color); }
+.ti-user-detail-val.status-expired { color: var(--danger-color); }
+.ti-admin-reset-btn {
+  display: inline-flex; align-items: center; gap: .4rem; margin-top: .65rem;
+  padding: .38rem .85rem; background: rgba(139,92,246,.12);
+  border: 1px solid rgba(139,92,246,.3); border-radius: .375rem;
+  color: var(--secondary-color); font-size: .72rem; font-weight: 600;
+  cursor: pointer; font-family: var(--font-mono); transition: all .2s; width: 100%; justify-content: center;
+}
+.ti-admin-reset-btn:hover { background: rgba(139,92,246,.22); border-color: var(--secondary-color); }
+
+/* ── Change Password Modal ── */
+#ti-change-pass-modal {
+  position: fixed; inset: 0; z-index: 99998;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.6); backdrop-filter: blur(8px);
+  opacity: 0; pointer-events: none; transition: opacity .3s;
+}
+#ti-change-pass-modal.open { opacity: 1; pointer-events: all; }
+.ti-cp-card {
+  background: var(--surface); border: 1px solid var(--b-color);
+  border-radius: 1rem; padding: 2rem; width: 420px;
+  max-width: calc(100vw - 2rem);
+  box-shadow: 0 40px 80px rgba(0,0,0,.5); animation: tiFormZoom .35s ease;
+}
+[data-theme="dark"] .ti-cp-card { background: linear-gradient(145deg,#0a1628,#0e2040); border-color: rgba(59,130,246,.25); }
+.ti-cp-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid var(--b-color); }
+.ti-cp-title { font-family: var(--font-heading); font-weight: 700; color: var(--t-primary); font-size: 1.05rem; display: flex; align-items: center; gap: .5rem; }
+.ti-cp-title i { color: var(--primary-color); }
 
 /* RESPONSIVE */
 @media(max-width:900px){.team-grid{grid-template-columns:1fr;}nav{display:none;}.hamburger{display:flex;}.hero-content{flex-direction:column;}.stats-grid{width:100%;grid-template-columns:repeat(4,1fr);}}
@@ -580,11 +1074,229 @@ footer span{color:var(--primary-color);}
 </head>
 <body>
 
-<!-- Loading -->
+
+<!-- ═══════════════ TI AUTH OVERLAY ═══════════════ -->
+<div id="ti-auth-overlay">
+  <div class="ti-blob ti-blob-1"></div>
+  <div class="ti-blob ti-blob-2"></div>
+  <div class="ti-blob ti-blob-3"></div>
+  <div class="ti-auth-scan"></div>
+  <canvas id="ti-auth-canvas"></canvas>
+
+
+  <div class="ti-auth-card" id="ti-auth-card">
+    <div class="ti-card-topbar"></div>
+
+    <!-- Logo — exact MSP structure -->
+    <div class="ti-auth-logo">
+      <div class="ti-auth-logo-icon">
+        <span class="ti-r1"></span>
+        <span class="ti-r2"></span>
+        <i class="fas fa-shield-halved"></i>
+        <span class="ti-od1"></span>
+        <span class="ti-od2"></span>
+      </div>
+      <span class="ti-auth-title">THREAD <span class="ti-brand">INTEL</span></span>
+      <span class="ti-auth-sub">Threat Intelligence Portal</span>
+    </div>
+
+    <!-- LOGIN PANEL -->
+    <div class="ti-panel active" id="ti-panel-login">
+      <div class="ti-panel-title">Secure Access</div>
+      <div class="ti-panel-sub">Sign in with your @insightz credentials</div>
+      <div class="ti-msg" id="ti-login-msg"></div>
+      <div class="ti-field">
+        <label>Username</label>
+        <div class="ti-input-wrap">
+          <i class="fas fa-user fi"></i>
+          <input type="text" id="ti-login-user" placeholder="your.name" autocomplete="username"/>
+        </div>
+      </div>
+      <div class="ti-field">
+        <label>Password</label>
+        <div class="ti-input-wrap">
+          <i class="fas fa-lock fi"></i>
+          <input type="password" id="ti-login-pass" placeholder="••••••••••" autocomplete="current-password"/>
+          <button class="ti-toggle-pass" onclick="tiTogglePass('ti-login-pass',this)" tabindex="-1"><i class="fas fa-eye"></i></button>
+        </div>
+      </div>
+      <button class="ti-btn ti-btn-primary" onclick="tiHandleLogin()">
+        <span id="ti-login-btn-text"><i class="fas fa-sign-in-alt"></i> Sign In</span>
+        <div class="ti-spinner" id="ti-login-spinner"></div>
+      </button>
+      <div class="ti-divider">or</div>
+      <button class="ti-btn ti-btn-ghost" onclick="tiShowPanel('ti-panel-readonly')">
+        <i class="fas fa-eye"></i> Continue as Read-Only Viewer
+      </button>
+    </div>
+
+    <!-- READ-ONLY PANEL -->
+    <div class="ti-panel" id="ti-panel-readonly">
+      <div class="ti-panel-title">View-Only Access</div>
+      <div class="ti-panel-sub">Browse the dashboard without making changes</div>
+      <button class="ti-btn ti-btn-primary" onclick="tiEnterReadOnly()">
+        <i class="fas fa-glasses"></i> Enter as Viewer
+      </button>
+      <div class="ti-divider">or</div>
+      <button class="ti-btn ti-btn-ghost" onclick="tiShowPanel('ti-panel-login')">
+        <i class="fas fa-arrow-left"></i> Back to Login
+      </button>
+    </div>
+
+    <!-- RESET PANEL -->
+    <div class="ti-panel" id="ti-panel-reset">
+      <div class="ti-panel-title">Set New Password</div>
+      <div class="ti-panel-sub">Create a permanent password to replace your temp one</div>
+      <div class="ti-msg" id="ti-reset-msg"></div>
+      <input type="hidden" id="ti-reset-username"/>
+      <div class="ti-field">
+        <label>Temporary Password</label>
+        <div class="ti-input-wrap">
+          <i class="fas fa-key fi"></i>
+          <input type="password" id="ti-reset-temp" placeholder="Enter temp password"/>
+          <button class="ti-toggle-pass" onclick="tiTogglePass('ti-reset-temp',this)" tabindex="-1"><i class="fas fa-eye"></i></button>
+        </div>
+      </div>
+      <div class="ti-field">
+        <label>New Password</label>
+        <div class="ti-input-wrap">
+          <i class="fas fa-lock fi"></i>
+          <input type="password" id="ti-reset-new" placeholder="Min 8 chars, A-Z, a-z, 0-9, symbol" oninput="tiRenderStrength('ti-reset-strength',this.value)"/>
+          <button class="ti-toggle-pass" onclick="tiTogglePass('ti-reset-new',this)" tabindex="-1"><i class="fas fa-eye"></i></button>
+        </div>
+        <div id="ti-reset-strength"></div>
+      </div>
+      <div class="ti-field">
+        <label>Confirm New Password</label>
+        <div class="ti-input-wrap">
+          <i class="fas fa-lock fi"></i>
+          <input type="password" id="ti-reset-confirm" placeholder="Re-enter new password"/>
+          <button class="ti-toggle-pass" onclick="tiTogglePass('ti-reset-confirm',this)" tabindex="-1"><i class="fas fa-eye"></i></button>
+        </div>
+      </div>
+      <button class="ti-btn ti-btn-primary" onclick="tiHandleReset()">
+        <i class="fas fa-save"></i> Save Password &amp; Continue
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SUCCESS OVERLAY ═══ -->
+<div id="ti-success-overlay">
+  <div class="ti-succ-bar"></div>
+  <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.3/dist/dotlottie-wc.js" type="module"></script>
+  <dotlottie-wc class="ti-succ-lottie" src="https://lottie.host/769636a6-1de5-4a8a-bbac-f6c60550df68/NCmhUrBd5A.lottie" style="width:300px;height:300px" autoplay></dotlottie-wc>
+  <p class="ti-succ-greeting">Access <span>Granted</span></p>
+  <p class="ti-succ-sub" id="ti-success-text">Welcome!</p>
+</div>
+
+<!-- ═══ READ-ONLY BANNER ═══ -->
+<div id="ti-readonly-banner">
+  <i class="fas fa-eye"></i>
+  <span>Read-only mode — <span class="ti-login-link" onclick="tiShowAuthOverlay()">Login to edit</span></span>
+</div>
+
+<!-- ═══ ADMIN PANEL ═══ -->
+<div class="ti-admin-panel" id="ti-admin-panel">
+  <div class="ti-admin-card">
+    <div class="ti-admin-header">
+      <div class="ti-admin-title"><i class="fas fa-user-gear" style="color:var(--secondary-color)"></i> User Management</div>
+      <button class="ti-admin-close" onclick="tiCloseAdmin()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="ti-users-toggle" onclick="tiToggleUsers()">
+      <span class="ti-toggle-label">Existing Users</span>
+      <div class="ti-toggle-right">
+        <span class="ti-toggle-count" id="ti-users-count">0</span>
+        <i class="fas fa-chevron-down" id="ti-users-chevron" style="font-size:.7rem;color:var(--t-muted);transition:transform .3s"></i>
+      </div>
+    </div>
+    <div class="ti-users-wrap" id="ti-users-wrap">
+      <ul class="ti-user-list" id="ti-user-list"></ul>
+    </div>
+    <div class="ti-section-title">Create New User</div>
+    <div class="ti-msg" id="ti-admin-msg"></div>
+    <div class="ti-field">
+      <label>Full Name</label>
+      <div class="ti-input-wrap"><i class="fas fa-id-card fi"></i><input type="text" id="ti-new-name" placeholder="Enter Display Name"/></div>
+    </div>
+    <div class="ti-field">
+      <label>Username (@insightz domain)</label>
+      <div class="ti-input-wrap"><i class="fas fa-at fi"></i><input type="text" id="ti-new-username" placeholder="Enter Login User Name"/></div>
+    </div>
+    <div class="ti-field">
+      <label>Role</label>
+      <div class="ti-input-wrap">
+        <i class="fas fa-user-tag fi"></i>
+        <select id="ti-new-role" style="padding-left:2.5rem;background:var(--surface2);border:1.5px solid rgba(59,130,246,.2);border-radius:.5rem;color:var(--t-primary);font-size:.86rem;font-family:var(--font-mono);padding:.75rem 1rem .75rem 2.5rem;width:100%;outline:none">
+          <option value="user">User (Editor)</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+    </div>
+    <button class="ti-btn ti-btn-primary" onclick="tiCreateUser()" style="margin-top:0">
+      <i class="fas fa-user-plus"></i> Create User &amp; Generate Temp Password
+    </button>
+    <div id="ti-temp-result" style="display:none">
+      <div class="ti-temp-box">
+        <div class="ti-temp-label">Temporary Password — valid 24 hours</div>
+        <div class="ti-temp-value" id="ti-temp-pass"></div>
+        <div class="ti-temp-note">⚠ Share this securely. User must reset on first login.</div>
+        <button class="ti-copy-btn" onclick="tiCopyTempPass()"><i class="fas fa-copy"></i> Copy Password</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CHANGE PASSWORD MODAL ═══ -->
+<div id="ti-change-pass-modal">
+  <div class="ti-cp-card">
+    <div class="ti-cp-header">
+      <div class="ti-cp-title"><i class="fas fa-lock-open"></i> Change Password</div>
+      <button class="ti-admin-close" onclick="tiCloseChangePass()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="ti-msg" id="ti-cp-msg"></div>
+    <div class="ti-field">
+      <label>Current Password</label>
+      <div class="ti-input-wrap">
+        <i class="fas fa-lock fi"></i>
+        <input type="password" id="ti-cp-current" placeholder="Enter your current password"/>
+        <button class="ti-toggle-pass" onclick="tiTogglePass('ti-cp-current',this)" tabindex="-1"><i class="fas fa-eye"></i></button>
+      </div>
+    </div>
+    <div class="ti-field">
+      <label>New Password</label>
+      <div class="ti-input-wrap">
+        <i class="fas fa-key fi"></i>
+        <input type="password" id="ti-cp-new" placeholder="Min 8 chars, A-Z, a-z, 0-9, symbol" oninput="tiRenderStrength('ti-cp-strength',this.value)"/>
+        <button class="ti-toggle-pass" onclick="tiTogglePass('ti-cp-new',this)" tabindex="-1"><i class="fas fa-eye"></i></button>
+      </div>
+      <div id="ti-cp-strength"></div>
+    </div>
+    <div class="ti-field">
+      <label>Confirm New Password</label>
+      <div class="ti-input-wrap">
+        <i class="fas fa-key fi"></i>
+        <input type="password" id="ti-cp-confirm" placeholder="Re-enter new password"/>
+        <button class="ti-toggle-pass" onclick="tiTogglePass('ti-cp-confirm',this)" tabindex="-1"><i class="fas fa-eye"></i></button>
+      </div>
+    </div>
+    <button class="ti-btn ti-btn-primary" onclick="tiHandleChangePassword()" style="margin-top:.25rem">
+      <i class="fas fa-floppy-disk"></i> Save New Password
+    </button>
+  </div>
+</div>
+
+
+<!-- ═══ LOADING OVERLAY ═══ -->
 <div class="loading-overlay" id="loadingOverlay">
-  <div class="loader-logo"><i class="fas fa-shield-halved"></i></div>
-  <div class="loader-text">Initializing Thread Intel...</div>
-  <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+  <div class="loader-inner">
+    <div class="loader-logo">
+      <span class="loader-icon"><i class="fas fa-shield-halved"></i></span>
+      <span class="loader-brand">THREAD <em>INTEL</em></span>
+    </div>
+    <div class="loader-bar-wrap"><div class="loader-bar-fill"></div></div>
+    <p class="loader-text">Initializing Secure Environment…</p>
+  </div>
 </div>
 <div class="scroll-progress" id="scrollProgress"></div>
 <div class="cyber-bg"></div>
@@ -640,6 +1352,24 @@ footer span{color:var(--primary-color);}
         <a href="#report">Reports</a>
       </nav>
       <div class="header-actions">
+        <!-- TI Nav User Pill -->
+        <div id="ti-nav-user">
+          <div class="ti-user-pill">
+            <div class="ti-user-avatar" id="ti-nav-avatar" onclick="document.getElementById('ti-avatar-upload').click()" title="Click to change photo">TI</div>
+            <input type="file" id="ti-avatar-upload" accept="image/*" onchange="tiHandleAvatarUpload(event)"/>
+            <div class="ti-user-text">
+              <span class="ti-user-name" id="ti-strip-name">User</span>
+              <span class="ti-user-role" id="ti-strip-role">user</span>
+            </div>
+            <div class="ti-pill-divider"></div>
+            <button class="ti-nav-btn" id="ti-admin-btn" onclick="tiOpenAdmin()" title="User Management" style="display:none"><i class="fas fa-user-gear"></i></button>
+            <button class="ti-nav-btn" onclick="tiOpenChangePass()" title="Change Password"><i class="fas fa-key"></i></button>
+            <button class="ti-nav-btn danger" onclick="tiHandleLogout()" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+          </div>
+        </div>
+        <button id="ti-nav-login-btn" onclick="tiShowAuthOverlay()" style="display:none;align-items:center;gap:.4rem;padding:.32rem .8rem;background:rgba(255,255,255,.05);border:1px solid rgba(59,130,246,.2);color:var(--t-muted);border-radius:100px;font-size:.76rem;font-weight:500;cursor:pointer;font-family:var(--font-mono);transition:all .2s" onmouseover="this.style.borderColor='var(--primary-color)';this.style.color='var(--primary-color)'" onmouseout="this.style.borderColor='rgba(59,130,246,.2)';this.style.color='var(--t-muted)'">
+          <i class="fas fa-lock" style="font-size:.7rem"></i> Login
+        </button>
         <button class="theme-toggle" id="themeToggle" title="Toggle theme"><i class="fas fa-moon" id="themeIcon"></i></button>
         <button class="btn-export" onclick="scrollToSection('report')"><i class="fas fa-file-csv"></i> Export CSV</button>
         <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
@@ -858,12 +1588,20 @@ function animNum(id,target){
 function renderTeam(){
   const grid=document.getElementById('teamGrid');grid.innerHTML='';
   state.members.forEach(m=>grid.appendChild(buildMemberCard(m)));
+
+  // Add Member card (shown only for admin, hidden for user/readonly via permissions)
   const add=document.createElement('div');add.className='add-member-card';
   add.innerHTML='<i class="fas fa-user-plus"></i> Add Team Member';add.onclick=openModal;
-  if(state.members.length%2===0&&state.members.length>0)add.style.gridColumn='span 2';
+  add.id='addMemberCard';
   grid.appendChild(add);
+
+  // Empty placeholder — always fills odd slot so grid is balanced for all roles
+  const empty=document.createElement('div');empty.className='empty-slot-card';empty.id='emptySlotCard';
+  empty.innerHTML='<i class="fas fa-user-slash"></i><span>No member assigned</span>';
+  empty.style.display='none';
+  grid.appendChild(empty);
+
   updateStats();
-  // re-observe fade-ups
   setTimeout(()=>document.querySelectorAll('.fade-up:not(.visible)').forEach(el=>{if(el.getBoundingClientRect().top<window.innerHeight)el.classList.add('visible');}),50);
 }
 
@@ -1531,17 +2269,695 @@ async function downloadXLSX() {
   showToast('Professional Excel report downloaded!','success');
 }
 
-/* AUTO SAVE */
-setInterval(saveState,60000);
+/* ═══════════════════════════════════════════════
+   ROLE-BASED PERMISSION SYSTEM
+   - admin    : full access to everything
+   - user     : all features EXCEPT Add Member
+   - readonly : view only, all editing locked
+═══════════════════════════════════════════════ */
+let _currentRole = 'readonly'; // default until login
 
-/* INIT */
+function tiApplyRolePermissions(role) {
+  _currentRole = role;
+
+  if (role === 'admin') {
+    // ── ADMIN: full access, unlock everything ──
+    setReadonlyMode(false);
+    setAddMemberVisible(true);
+
+  } else if (role === 'user') {
+    // ── USER: all features except Add Member ──
+    setReadonlyMode(false);
+    setAddMemberVisible(false);
+
+  } else {
+    // ── READONLY / VIEWER: lock everything ──
+    setReadonlyMode(true);
+    setAddMemberVisible(false);
+  }
+}
+
+function setAddMemberVisible(visible) {
+  // Toggle user-mode body class for CSS
+  if (!visible && _currentRole === 'user') {
+    document.body.classList.add('ti-user-mode');
+  } else {
+    document.body.classList.remove('ti-user-mode');
+  }
+
+  const addCard  = document.getElementById('addMemberCard')  || document.querySelector('.add-member-card');
+  const emptySlot = document.getElementById('emptySlotCard');
+  const memberCount = state.members.length;
+  const isOdd = memberCount % 2 !== 0;
+
+  if (visible) {
+    // ADMIN: show add-member card, hide empty slot
+    if (addCard)  addCard.style.display  = '';
+    if (emptySlot) emptySlot.style.display = 'none';
+    // If even members, add-member spans full row
+    if (addCard) addCard.style.gridColumn = (!isOdd && memberCount > 0) ? 'span 2' : '';
+  } else {
+    // USER / READONLY: hide add-member, show empty slot only when needed for grid balance
+    if (addCard) addCard.style.display = 'none';
+    if (emptySlot) {
+      // Show empty slot if odd number of members (to fill right column)
+      emptySlot.style.display = isOdd ? '' : 'none';
+    }
+  }
+}
+
+function setReadonlyMode(locked) {
+  // Toggle a body class that CSS will use to lock UI
+  document.body.classList.toggle('ti-readonly', locked);
+
+  // All date inputs
+  document.querySelectorAll('input[type="date"]').forEach(el => {
+    el.disabled = locked;
+    el.style.pointerEvents = locked ? 'none' : '';
+    el.style.opacity = locked ? '0.5' : '';
+  });
+
+  // All selects inside cards (work status, project status)
+  document.querySelectorAll('.work-select, .status-select').forEach(el => {
+    el.disabled = locked;
+    el.style.pointerEvents = locked ? 'none' : '';
+    el.style.opacity = locked ? '0.5' : '';
+  });
+
+  // Task inputs & add buttons
+  document.querySelectorAll('.task-input, .btn-add-task').forEach(el => {
+    el.disabled = locked;
+    el.style.pointerEvents = locked ? 'none' : '';
+    el.style.opacity = locked ? '0.5' : '';
+  });
+
+  // Remove task buttons (compact & expanded)
+  document.querySelectorAll('.remove-task, .compact-label .rm').forEach(el => {
+    el.style.display = locked ? 'none' : '';
+  });
+
+  // Edit & delete icon buttons on cards
+  document.querySelectorAll('.icon-btn').forEach(el => {
+    el.style.display = locked ? 'none' : '';
+  });
+
+  // Manage Tasks button
+  document.querySelectorAll('.manage-btn').forEach(el => {
+    el.style.display = locked ? 'none' : '';
+    // Also close any open expanded panels
+    if (locked) {
+      document.querySelectorAll('.card-expanded.open').forEach(p => p.classList.remove('open'));
+    }
+  });
+
+  // Add Member card (only hide/show via setAddMemberVisible, not here)
+  const addCard = document.getElementById('addMemberCard') || document.querySelector('.add-member-card');
+  if (addCard && locked) addCard.style.display = 'none';
+
+  // Add Event button
+  const addEvtBtn = document.querySelector('.btn-add-event');
+  if (addEvtBtn) addEvtBtn.style.display = locked ? 'none' : '';
+
+  // Event contenteditable fields
+  document.querySelectorAll('.event-title, .event-desc, .event-tag-el').forEach(el => {
+    el.contentEditable = locked ? 'false' : 'true';
+    el.style.cursor = locked ? 'default' : '';
+    el.style.borderBottom = locked ? 'none' : '';
+  });
+  document.querySelectorAll('.event-date-input').forEach(el => {
+    el.disabled = locked;
+    el.style.pointerEvents = locked ? 'none' : '';
+  });
+
+  // Remove event buttons
+  document.querySelectorAll('.btn-remove-event').forEach(el => {
+    el.style.display = locked ? 'none' : '';
+  });
+
+  // Report generate/download buttons — allow for all roles
+  // (read-only can still generate & download reports)
+
+  // Edit hints on event cards
+  document.querySelectorAll('.event-edit-hint').forEach(el => {
+    el.style.display = locked ? 'none' : '';
+  });
+}
+
+// Re-apply permissions whenever team or events are re-rendered
+const _origRenderTeam2 = renderTeam;
+renderTeam = function() {
+  _origRenderTeam2();
+  // Re-apply after render
+  setTimeout(() => tiApplyRolePermissions(_currentRole), 30);
+};
+const _origRenderEvents2 = renderEvents;
+renderEvents = function() {
+  _origRenderEvents2();
+  setTimeout(() => tiApplyRolePermissions(_currentRole), 30);
+};
+
+// Show a toast if a readonly viewer clicks on interactive elements
+document.addEventListener('click', function(e) {
+  if (_currentRole !== 'readonly') return;
+  const locked = e.target.closest(
+    'input[type="date"], .work-select, .status-select, .task-input, .btn-add-task, ' +
+    '.remove-task, .icon-btn, .manage-btn, .add-member-card, .btn-add-event, .btn-remove-event'
+  );
+  if (locked) {
+    e.preventDefault(); e.stopImmediatePropagation();
+    showToast('🔒 View-only mode — login to edit', 'info');
+  }
+}, true);
+
+/* ═══════════════════════════════════════════════
+   THREAD INTEL — AUTH SYSTEM
+   Same logic as MSP, TI-branded
+═══════════════════════════════════════════════ */
+const TI_AUTH_KEY = '__ti_auth_db__';
+const TI_SESS_KEY = '__ti_session__';
+function tiLoadDB(){ try{return JSON.parse(localStorage.getItem(TI_AUTH_KEY))||{};}catch{return{};} }
+function tiSaveDB(db){ localStorage.setItem(TI_AUTH_KEY,JSON.stringify(db)); }
+function tiGetSession(){ try{return JSON.parse(sessionStorage.getItem(TI_SESS_KEY));}catch{return null;} }
+function tiSetSession(u){ sessionStorage.setItem(TI_SESS_KEY,JSON.stringify(u)); }
+function tiClearSession(){ sessionStorage.removeItem(TI_SESS_KEY); }
+
+async function tiSha256(msg){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+/* ── Cryptographically secure temp password generator ──
+   Uses crypto.getRandomValues (CSPRNG) instead of Math.random.
+   Guarantees at least 1 uppercase, 1 lowercase, 1 digit, 1 symbol.
+   Length: 16 chars for strong entropy.                         ── */
+function tiGenTemp(){
+  const upper  = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const lower  = 'abcdefghjkmnpqrstuvwxyz';
+  const digits = '23456789';
+  const syms   = '@#!$%&*';
+  const all    = upper + lower + digits + syms;
+  const rand   = (charset) => {
+    const arr = new Uint32Array(1);
+    crypto.getRandomValues(arr);
+    return charset[arr[0] % charset.length];
+  };
+  // Guarantee at least 1 of each required class
+  const required = [rand(upper), rand(lower), rand(digits), rand(syms)];
+  // Fill remaining 12 chars from full charset
+  const rest = Array.from({length:12}, () => rand(all));
+  // Shuffle using Fisher-Yates with CSPRNG
+  const combined = [...required, ...rest];
+  for(let i = combined.length - 1; i > 0; i--){
+    const arr = new Uint32Array(1);
+    crypto.getRandomValues(arr);
+    const j = arr[0] % (i + 1);
+    [combined[i], combined[j]] = [combined[j], combined[i]];
+  }
+  return combined.join('');
+}
+
+/* ── Password strength validator ──
+   Rules: min 8 chars, uppercase, lowercase, digit, symbol.
+   Returns {ok:bool, errors:[string], strength:'weak'|'fair'|'strong'|'very-strong'} ── */
+function tiValidatePassword(pass){
+  const errors = [];
+  if(pass.length < 8)          errors.push('At least 8 characters');
+  if(!/[A-Z]/.test(pass))      errors.push('One uppercase letter (A-Z)');
+  if(!/[a-z]/.test(pass))      errors.push('One lowercase letter (a-z)');
+  if(!/[0-9]/.test(pass))      errors.push('One number (0-9)');
+  if(!/[@#!$%&*\-_+=?]/.test(pass)) errors.push('One symbol (@#!$%&*-_+=?)');
+  const score = 5 - errors.length;
+  const strength = score <= 1 ? 'weak' : score === 2 ? 'fair' : score === 3 ? 'fair' : score === 4 ? 'strong' : 'very-strong';
+  return { ok: errors.length === 0, errors, strength };
+}
+
+/* ── Render password strength bar under an input ──
+   containerId: id of a <div> placed right after the input wrap.  ── */
+function tiRenderStrength(containerId, pass){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  if(!pass){ el.innerHTML=''; return; }
+  const {errors, strength} = tiValidatePassword(pass);
+  const colors = {'weak':'#ef4444','fair':'#f59e0b','strong':'#3b82f6','very-strong':'#10b981'};
+  const widths  = {'weak':'25%','fair':'50%','strong':'75%','very-strong':'100%'};
+  const labels  = {'weak':'Weak','fair':'Fair','strong':'Strong','very-strong':'Very Strong'};
+  const col = colors[strength];
+  el.innerHTML = `
+    <div style="height:3px;background:rgba(255,255,255,.08);border-radius:100px;margin-top:.35rem;overflow:hidden;">
+      <div style="height:100%;width:${widths[strength]};background:${col};border-radius:100px;transition:width .3s,background .3s;"></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.2rem;">
+      <span style="font-size:.6rem;font-family:var(--font-mono);color:${col};letter-spacing:.06em;">${labels[strength]}</span>
+      ${errors.length?`<span style="font-size:.58rem;color:var(--t-muted);font-family:var(--font-mono);">${errors[0]}${errors.length>1?' +' + (errors.length-1)+' more':''}</span>`:'<span style="font-size:.58rem;color:#10b981;font-family:var(--font-mono);">✓ All requirements met</span>'}
+    </div>`;
+}
+function tiShowMsg(id,type,text){
+  const el=document.getElementById(id); if(!el)return;
+  el.className='ti-msg '+type+' show';
+  el.innerHTML='<i class="fas fa-'+(type==='error'?'times-circle':type==='success'?'check-circle':'info-circle')+'"></i> '+text;
+}
+function tiHideMsg(id){const el=document.getElementById(id);if(el){el.className='ti-msg';el.innerHTML='';}}
+function tiTogglePass(id,btn){
+  const inp=document.getElementById(id); if(!inp)return;
+  const show=inp.type==='password'; inp.type=show?'text':'password';
+  btn.querySelector('i').className='fas fa-eye'+(show?'-slash':'');
+}
+function tiShowPanel(id){
+  document.querySelectorAll('.ti-panel').forEach(p=>p.classList.remove('active'));
+  const p=document.getElementById(id); if(p)p.classList.add('active');
+}
+
+/* ── Init ── */
+async function tiInitAuth(){
+  const db=tiLoadDB();
+  if(!db['admin']){
+    const hash=await tiSha256('Admin@insightz2024!');
+    db['admin']={username:'admin',passwordHash:hash,role:'admin',domain:'insightz',
+      name:'System Admin',mustReset:false,tempExpiry:null,createdAt:Date.now()};
+    tiSaveDB(db);
+  }
+  const session=tiGetSession();
+  if(session){ tiApplyLogin(session); } else { tiShowAuthOverlay(); }
+}
+
+/* ── Show overlay ── */
+function tiShowAuthOverlay(){
+  const ov=document.getElementById('ti-auth-overlay');
+  if(ov){ ov.classList.remove('hidden'); tiShowPanel('ti-panel-login'); }
+  document.getElementById('ti-nav-user').style.display='none';
+  const lb=document.getElementById('ti-nav-login-btn'); if(lb)lb.style.display='none';
+  const bn=document.getElementById('ti-readonly-banner'); if(bn)bn.classList.remove('show');
+  const card=document.getElementById('ti-auth-card');
+  if(card){card.style.animation='none';card.style.transform='scale(1)';card.style.opacity='1';card.style.filter='none';card.classList.add('delivered');card.style.pointerEvents='all';}
+}
+
+/* ── Login ── */
+async function tiHandleLogin(){
+  const username=document.getElementById('ti-login-user').value.trim().toLowerCase();
+  const password=document.getElementById('ti-login-pass').value;
+  tiHideMsg('ti-login-msg');
+  if(!username||!password){tiShowMsg('ti-login-msg','error','Please enter username and password.');return;}
+  const btn=document.querySelector('#ti-panel-login .ti-btn-primary');
+  const spinner=document.getElementById('ti-login-spinner');
+  if(btn)btn.style.opacity='.7'; if(spinner)spinner.style.display='inline-block';
+  const db=tiLoadDB(); const user=db[username];
+  if(!user){if(spinner)spinner.style.display='none';if(btn)btn.style.opacity='';tiShowMsg('ti-login-msg','error','User not found. Contact your admin.');return;}
+  if(user.domain!=='insightz'){if(spinner)spinner.style.display='none';if(btn)btn.style.opacity='';tiShowMsg('ti-login-msg','error','Access restricted to @insightz domain.');return;}
+  if(user.tempExpiry&&Date.now()>user.tempExpiry){if(spinner)spinner.style.display='none';if(btn)btn.style.opacity='';tiShowMsg('ti-login-msg','error','Temp password expired. Contact admin.');return;}
+  const hash=await tiSha256(password);
+  if(hash!==user.passwordHash){if(spinner)spinner.style.display='none';if(btn)btn.style.opacity='';tiShowMsg('ti-login-msg','error','Incorrect password. Try again.');return;}
+  if(spinner)spinner.style.display='none';if(btn)btn.style.opacity='';
+  if(user.mustReset){
+    document.getElementById('ti-reset-username').value=username;
+    tiShowPanel('ti-panel-reset');
+    tiShowMsg('ti-reset-msg','info','Create a new password to continue.');
+    return;
+  }
+  const sess={username:user.username,name:user.name,role:user.role};
+  tiSetSession(sess); tiShowSuccess(user.name,()=>tiApplyLogin(sess));
+}
+
+/* ── Reset ── */
+async function tiHandleReset(){
+  const username=document.getElementById('ti-reset-username').value;
+  const tempPass=document.getElementById('ti-reset-temp').value;
+  const newPass=document.getElementById('ti-reset-new').value;
+  const confirmPass=document.getElementById('ti-reset-confirm').value;
+  tiHideMsg('ti-reset-msg');
+  if(!tempPass||!newPass||!confirmPass){tiShowMsg('ti-reset-msg','error','All fields required.');return;}
+  if(newPass!==confirmPass){tiShowMsg('ti-reset-msg','error','Passwords do not match.');return;}
+  const {ok,errors}=tiValidatePassword(newPass);
+  if(!ok){tiShowMsg('ti-reset-msg','error','Password too weak: '+errors[0]+(errors.length>1?' (+'+(errors.length-1)+' more)':''));return;}
+  const db=tiLoadDB(); const user=db[username];
+  if(!user){tiShowMsg('ti-reset-msg','error','User not found.');return;}
+  const tempHash=await tiSha256(tempPass);
+  if(tempHash!==user.passwordHash){tiShowMsg('ti-reset-msg','error','Incorrect temporary password.');return;}
+  const newHash=await tiSha256(newPass);
+  user.passwordHash=newHash; user.mustReset=false; user.tempExpiry=null;
+  tiSaveDB(db);
+  tiRenderStrength('ti-reset-strength','');
+  const sess={username:user.username,name:user.name,role:user.role};
+  tiSetSession(sess); tiShowSuccess(user.name,()=>tiApplyLogin(sess));
+}
+
+/* ── Read only ── */
+function tiEnterReadOnly(){
+  tiApplyRolePermissions('readonly');
+  document.getElementById('ti-auth-overlay').classList.add('hidden');
+  document.getElementById('ti-readonly-banner').classList.add('show');
+  const lb=document.getElementById('ti-nav-login-btn');if(lb){lb.style.display='flex';}
+  document.getElementById('ti-nav-user').style.display='none';
+}
+
+/* ── Success animation ── */
+function tiShowSuccess(name,cb){
+  const ov=document.getElementById('ti-success-overlay');
+  const txt=document.getElementById('ti-success-text');
+  if(txt)txt.textContent='Welcome, '+name+'!';
+  // Reset lottie so animation plays fresh every time
+  const lottieSlot=ov.querySelector('.ti-succ-lottie');
+  if(lottieSlot){
+    const fresh=document.createElement('dotlottie-wc');
+    fresh.className='ti-succ-lottie';
+    fresh.setAttribute('src','https://lottie.host/769636a6-1de5-4a8a-bbac-f6c60550df68/NCmhUrBd5A.lottie');
+    fresh.setAttribute('autoplay','');
+    fresh.style.width='300px';
+    fresh.style.height='300px';
+    lottieSlot.replaceWith(fresh);
+  }
+  if(ov)ov.classList.add('show');
+  setTimeout(()=>{
+    if(ov){ ov.classList.remove('show'); }
+    document.getElementById('ti-auth-overlay').classList.add('hidden');
+    if(cb)cb();
+  },3200);
+}
+
+/* ── Apply login state ── */
+function tiApplyLogin(session){
+  // Apply role permissions first
+  tiApplyRolePermissions(session.role || 'user');
+  document.getElementById('ti-auth-overlay').classList.add('hidden');
+  const bn=document.getElementById('ti-readonly-banner');if(bn)bn.classList.remove('show');
+  const lb=document.getElementById('ti-nav-login-btn');if(lb)lb.style.display='none';
+  document.getElementById('ti-nav-user').style.display='flex';
+  document.getElementById('ti-strip-name').textContent=session.name||session.username;
+  document.getElementById('ti-strip-role').textContent=session.role;
+  const adminBtn=document.getElementById('ti-admin-btn');
+  if(adminBtn)adminBtn.style.display=session.role==='admin'?'flex':'none';
+  // Avatar
+  const av=document.getElementById('ti-nav-avatar');
+  if(av){
+    const parts=(session.name||session.username).split(' ');
+    const initials=parts.length>1?(parts[0][0]+parts[1][0]).toUpperCase():session.username.slice(0,2).toUpperCase();
+    const db=tiLoadDB();
+    const photo=db[session.username]&&db[session.username].profilePhoto?db[session.username].profilePhoto:null;
+    if(photo){ av.innerHTML=`<img src="${photo}" alt="${initials}" draggable="false"/>`; }
+    else { av.textContent=initials; }
+  }
+}
+
+/* ── Logout ── */
+function tiHandleLogout(){
+  tiClearSession();
+  document.getElementById('ti-nav-user').style.display='none';
+  const lb=document.getElementById('ti-nav-login-btn');if(lb)lb.style.display='flex';
+  tiShowAuthOverlay();
+}
+
+/* ── Avatar upload ── */
+function tiHandleAvatarUpload(e){
+  const file=e.target.files&&e.target.files[0];
+  if(!file||!file.type.startsWith('image/'))return;
+  e.target.value='';
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const img=new Image();
+    img.onload=function(){
+      const canvas=document.createElement('canvas');
+      const SIZE=200; canvas.width=SIZE;canvas.height=SIZE;
+      const ctx=canvas.getContext('2d');
+      const srcMin=Math.min(img.width,img.height);
+      const sx=(img.width-srcMin)/2;
+      const sy=Math.max(0,(img.height-srcMin)*0.25);
+      ctx.beginPath();ctx.arc(SIZE/2,SIZE/2,SIZE/2,0,Math.PI*2);ctx.clip();
+      ctx.drawImage(img,sx,sy,srcMin,srcMin,0,0,SIZE,SIZE);
+      const dataURL=canvas.toDataURL('image/jpeg',.88);
+      const session=tiGetSession();if(!session)return;
+      const db=tiLoadDB();
+      if(db[session.username]){db[session.username].profilePhoto=dataURL;tiSaveDB(db);}
+      const av=document.getElementById('ti-nav-avatar');
+      if(av){
+        const parts=(session.name||session.username).split(' ');
+        const initials=parts.length>1?(parts[0][0]+parts[1][0]).toUpperCase():session.username.slice(0,2).toUpperCase();
+        av.innerHTML=`<img src="${dataURL}" alt="${initials}" draggable="false"/>`;
+      }
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ── Admin panel ── */
+function tiOpenAdmin(){
+  tiRefreshUsers();
+  document.getElementById('ti-admin-panel').classList.add('open');
+}
+function tiCloseAdmin(){
+  document.getElementById('ti-admin-panel').classList.remove('open');
+  document.getElementById('ti-new-name').value='';
+  document.getElementById('ti-new-username').value='';
+  document.getElementById('ti-temp-result').style.display='none';
+  tiHideMsg('ti-admin-msg');
+  // Close all open detail drawers
+  document.querySelectorAll('.ti-user-detail-drawer.open').forEach(d=>d.classList.remove('open'));
+}
+function tiToggleUsers(){
+  const wrap=document.getElementById('ti-users-wrap');
+  const chev=document.getElementById('ti-users-chevron');
+  const open=wrap.classList.toggle('open');
+  if(chev)chev.style.transform=open?'rotate(180deg)':'';
+}
+function tiRefreshUsers(){
+  const db=tiLoadDB();
+  const list=document.getElementById('ti-user-list');
+  const countEl=document.getElementById('ti-users-count');
+  const users=Object.values(db);
+  if(countEl)countEl.textContent=users.length;
+  if(!list)return;
+  list.innerHTML='';
+  users.forEach(u=>{
+    const isAdmin=u.username==='admin';
+    const expired=u.tempExpiry&&Date.now()>u.tempExpiry;
+    const statusClass=u.mustReset?(expired?'status-expired':'status-pending'):'status-active';
+    const statusText=u.mustReset?(expired?'Expired — must re-issue':'Pending Reset'):'Active';
+    const created=u.createdAt?new Date(u.createdAt).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'—';
+    let expiryText='—';
+    if(u.tempExpiry){
+      const exp=new Date(u.tempExpiry);
+      expiryText=expired?'Expired '+exp.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}):exp.toLocaleDateString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+    }
+    const roleColor=u.role==='admin'?'var(--secondary-color)':'var(--primary-color)';
+    const wrap=document.createElement('li');
+    wrap.className='ti-user-item-wrap';
+    wrap.id='ti-user-wrap-'+u.username;
+    wrap.innerHTML=`
+      <div class="ti-user-item" id="ti-user-item-${u.username}" style="border-radius:.45rem;">
+        <div class="ti-user-item-info">
+          <span class="ti-user-item-name">${u.name||u.username}</span>
+          <span class="ti-user-item-meta">@${u.username} · ${u.domain} · ${created}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:.4rem">
+          <span class="ti-user-item-role" style="color:${roleColor}">${u.role}</span>
+          <button class="ti-user-action-btn view-btn" title="View details" onclick="tiToggleUserDetail('${u.username}')"><i class="fas fa-eye"></i></button>
+          ${!isAdmin?`<button class="ti-user-action-btn remove-btn" title="Remove" onclick="tiRemoveUser('${u.username}')"><i class="fas fa-trash-alt"></i></button>`:''}
+        </div>
+      </div>
+      <div class="ti-user-detail-drawer" id="ti-user-detail-${u.username}">
+        <div class="ti-user-detail-grid">
+          <div class="ti-user-detail-row">
+            <span class="ti-user-detail-key">Full Name</span>
+            <span class="ti-user-detail-val">${u.name||'—'}</span>
+          </div>
+          <div class="ti-user-detail-row">
+            <span class="ti-user-detail-key">Username</span>
+            <span class="ti-user-detail-val">@${u.username}</span>
+          </div>
+          <div class="ti-user-detail-row">
+            <span class="ti-user-detail-key">Role</span>
+            <span class="ti-user-detail-val">${u.role.charAt(0).toUpperCase()+u.role.slice(1)}</span>
+          </div>
+          <div class="ti-user-detail-row">
+            <span class="ti-user-detail-key">Domain</span>
+            <span class="ti-user-detail-val">${u.domain}</span>
+          </div>
+          <div class="ti-user-detail-row">
+            <span class="ti-user-detail-key">Account Status</span>
+            <span class="ti-user-detail-val ${statusClass}">${statusText}</span>
+          </div>
+          <div class="ti-user-detail-row">
+            <span class="ti-user-detail-key">Created</span>
+            <span class="ti-user-detail-val">${created}</span>
+          </div>
+          ${u.tempExpiry?`<div class="ti-user-detail-row" style="grid-column:1/-1">
+            <span class="ti-user-detail-key">Temp Password Expiry</span>
+            <span class="ti-user-detail-val ${expired?'status-expired':''}">${expiryText}</span>
+          </div>`:''}
+        </div>
+        ${!isAdmin?`<button class="ti-admin-reset-btn" onclick="tiAdminResetPassword('${u.username}','${u.name||u.username}')">
+          <i class="fas fa-rotate-right"></i> Reset Password &amp; Issue New Temp
+        </button>`:''}
+      </div>`;
+    list.appendChild(wrap);
+  });
+}
+
+function tiToggleUserDetail(username){
+  const drawer=document.getElementById('ti-user-detail-'+username);
+  const btn=document.querySelector('#ti-user-item-'+username+' .view-btn');
+  const item=document.getElementById('ti-user-item-'+username);
+  if(!drawer)return;
+  // Close all other open drawers
+  document.querySelectorAll('.ti-user-detail-drawer.open').forEach(d=>{
+    if(d.id!=='ti-user-detail-'+username){
+      d.classList.remove('open');
+      const u=d.id.replace('ti-user-detail-','');
+      const b=document.querySelector('#ti-user-item-'+u+' .view-btn');
+      const it=document.getElementById('ti-user-item-'+u);
+      if(b)b.classList.remove('active-view');
+      if(it){it.style.borderRadius='.45rem';it.style.borderBottomColor='';}
+    }
+  });
+  const open=drawer.classList.toggle('open');
+  if(btn)btn.classList.toggle('active-view',open);
+  if(item){item.style.borderRadius=open?'.45rem .45rem 0 0':'.45rem';item.style.borderBottomColor=open?'transparent':'';}
+}
+
+async function tiAdminResetPassword(username,displayName){
+  if(!confirm('Reset password for "'+displayName+'"?\nA new temporary password will be generated.'))return;
+  const db=tiLoadDB();
+  if(!db[username]){showToast('User not found','info');return;}
+  const tempPass=tiGenTemp();
+  const hash=await tiSha256(tempPass);
+  db[username].passwordHash=hash;
+  db[username].mustReset=true;
+  db[username].tempExpiry=Date.now()+24*60*60*1000;
+  tiSaveDB(db);
+  tiRefreshUsers();
+  const passEl=document.getElementById('ti-temp-pass');
+  const result=document.getElementById('ti-temp-result');
+  if(passEl)passEl.textContent=tempPass;
+  if(result)result.style.display='block';
+  const msg=document.getElementById('ti-admin-msg');
+  if(msg){msg.className='ti-msg success show';msg.innerHTML='<i class="fas fa-check-circle"></i> Password reset for '+displayName+'! New temp password shown below.';}
+  showToast('Password reset for '+displayName,'success');
+}
+
+function tiRemoveUser(username){
+  if(!confirm('Remove user "'+username+'"? This cannot be undone.'))return;
+  const db=tiLoadDB();
+  if(db[username]){delete db[username];tiSaveDB(db);tiRefreshUsers();}
+}
+async function tiCreateUser(){
+  const name=document.getElementById('ti-new-name').value.trim();
+  const username=document.getElementById('ti-new-username').value.trim().toLowerCase();
+  const role=document.getElementById('ti-new-role').value;
+  tiHideMsg('ti-admin-msg');
+  document.getElementById('ti-temp-result').style.display='none';
+  if(!name||!username){tiShowMsg('ti-admin-msg','error','Name and username are required.');return;}
+  const db=tiLoadDB();
+  if(db[username]){tiShowMsg('ti-admin-msg','error','Username already exists.');return;}
+  const tempPass=tiGenTemp();
+  const hash=await tiSha256(tempPass);
+  const expiry=Date.now()+24*60*60*1000;
+  db[username]={username,passwordHash:hash,role,domain:'insightz',name,mustReset:true,tempExpiry:expiry,createdAt:Date.now()};
+  tiSaveDB(db);
+  document.getElementById('ti-temp-pass').textContent=tempPass;
+  document.getElementById('ti-temp-result').style.display='block';
+  tiShowMsg('ti-admin-msg','success','User created successfully!');
+  tiRefreshUsers();
+  document.getElementById('ti-new-name').value='';
+  document.getElementById('ti-new-username').value='';
+}
+/* ── Change Password ── */
+function tiOpenChangePass(){
+  const s=tiGetSession();
+  if(!s){showToast('You must be logged in to change your password.','info');return;}
+  tiHideMsg('ti-cp-msg');
+  document.getElementById('ti-cp-current').value='';
+  document.getElementById('ti-cp-new').value='';
+  document.getElementById('ti-cp-confirm').value='';
+  document.getElementById('ti-change-pass-modal').classList.add('open');
+}
+function tiCloseChangePass(){
+  document.getElementById('ti-change-pass-modal').classList.remove('open');
+  tiHideMsg('ti-cp-msg');
+  tiRenderStrength('ti-cp-strength','');
+}
+async function tiHandleChangePassword(){
+  const s=tiGetSession();
+  if(!s){tiCloseChangePass();return;}
+  const current=document.getElementById('ti-cp-current').value;
+  const newPass=document.getElementById('ti-cp-new').value;
+  const confirm=document.getElementById('ti-cp-confirm').value;
+  tiHideMsg('ti-cp-msg');
+  if(!current||!newPass||!confirm){tiShowMsg('ti-cp-msg','error','All fields are required.');return;}
+  const {ok,errors}=tiValidatePassword(newPass);
+  if(!ok){tiShowMsg('ti-cp-msg','error','Password too weak: '+errors[0]+(errors.length>1?' (+'+(errors.length-1)+' more)':''));return;}
+  if(newPass!==confirm){tiShowMsg('ti-cp-msg','error','New passwords do not match.');return;}
+  if(current===newPass){tiShowMsg('ti-cp-msg','error','New password must be different from current.');return;}
+  const db=tiLoadDB();
+  const user=db[s.username];
+  if(!user){tiShowMsg('ti-cp-msg','error','User not found.');return;}
+  const currentHash=await tiSha256(current);
+  if(currentHash!==user.passwordHash){tiShowMsg('ti-cp-msg','error','Current password is incorrect.');return;}
+  const newHash=await tiSha256(newPass);
+  user.passwordHash=newHash;
+  user.mustReset=false;
+  user.tempExpiry=null;
+  tiSaveDB(db);
+  tiRenderStrength('ti-cp-strength','');
+  tiShowMsg('ti-cp-msg','success','Password changed successfully!');
+  setTimeout(()=>tiCloseChangePass(),1500);
+  showToast('Password updated successfully','success');
+}
+document.getElementById('ti-change-pass-modal').addEventListener('click',function(e){if(e.target===this)tiCloseChangePass();});
+
+function tiCopyTempPass(){
+  const p=document.getElementById('ti-temp-pass').textContent;
+  navigator.clipboard.writeText(p).then(()=>{
+    const btn=document.querySelector('.ti-copy-btn');
+    if(btn){btn.innerHTML='<i class="fas fa-check"></i> Copied!';setTimeout(()=>{btn.innerHTML='<i class="fas fa-copy"></i> Copy Password';},2000);}
+  });
+}
+
+/* ── Auth background canvas ── */
+function tiInitCanvas(){
+  const canvas=document.getElementById('ti-auth-canvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  let W,H;
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+  resize();
+  const nodes=Array.from({length:40},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35,r:Math.random()*2+1}));
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    nodes.forEach(n=>{n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>W)n.vx*=-1;if(n.y<0||n.y>H)n.vy*=-1;});
+    for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){
+      const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<130){ctx.beginPath();ctx.strokeStyle=`rgba(16,185,129,${0.12*(1-d/130)})`;ctx.lineWidth=.7;ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);ctx.stroke();}
+    }
+    nodes.forEach(n=>{ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fillStyle='rgba(59,130,246,.45)';ctx.fill();});
+    requestAnimationFrame(draw);
+  }
+  draw();
+  window.addEventListener('resize',resize);
+}
+
+/* ── Keyboard enter ── */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    const lp=document.getElementById('ti-panel-login');
+    if(lp&&lp.classList.contains('active'))tiHandleLogin();
+    const rp=document.getElementById('ti-panel-reset');
+    if(rp&&rp.classList.contains('active'))tiHandleReset();
+  }
+});
+
+/* ── INIT ── */
 function init(){
   loadState();applyTheme(state.theme);createParticles();
   renderTeam();renderEvents();populateMonths();renderReportMemberSelect();
   document.getElementById('generateReportBtn').addEventListener('click', generateReport);
   document.getElementById('footerYear').textContent=new Date().getFullYear();
   setTimeout(()=>{document.querySelectorAll('.fade-up').forEach(el=>{if(el.getBoundingClientRect().top<window.innerHeight)el.classList.add('visible');});},120);
-  setTimeout(()=>{const ol=document.getElementById('loadingOverlay');ol.classList.add('hide');setTimeout(()=>ol.remove(),500);},1400);
+  setTimeout(()=>{
+    const ol=document.getElementById('loadingOverlay');
+    ol.classList.add('hide');
+    setTimeout(()=>ol.remove(),600);
+  },1400);
+  // Run auth AFTER loader is gone so dashboard never flashes
+  setTimeout(()=>tiInitAuth().then(()=>tiInitCanvas()),1500);
 }
 // Refresh member dropdown whenever team is re-rendered
 const _basRT=renderTeam;
