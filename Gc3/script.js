@@ -138,14 +138,12 @@ function getWorkingHoursDisplay() {
 let availabilityOverrides = JSON.parse(localStorage.getItem("availabilityOverrides")) || {};
 // ---------- TEAM DATA ----------
 let teamData = JSON.parse(localStorage.getItem("teamData")) || {
-    SAs: [ "Selva", "Naveen", "Kannan", "Midhun", "Prem", "Logesh", "Linith"],
-    apprentices: [ "Sanjay", "Vishal", "Subash"],
+    SAs: [ "Selva", "Naveen", "Kannan", "Logesh", "Linith"],
+    apprentices: [ "Subash"],
     responsibilities: {
-        Selva: "Vishal",
-        Naveen: "Vishal",
-        Kannan: "Karl / Subash",
-        Midhun: "Sanjay",
-        Prem: "Karl / Subash",
+        Selva: " ",
+        Naveen: " ",
+        Kannan: "Subash",
     }
 };
 
@@ -167,14 +165,10 @@ let memberAvailabilitySettings = JSON.parse(localStorage.getItem('memberAvailabi
         "Selva": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
         "Naveen": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Kannan": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
-        "Midhun": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Prem": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] },
         "Logesh": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] }
     },
     apprentices: {
         "Linith": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Sanjay": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-        "Vishal": { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
         "Subash": { days: ["Monday", "Tuesday", "Wednesday", "Saturday", "Sunday"] }
     }
 };
