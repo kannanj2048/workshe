@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Under Maintenance</title>
+    <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.11/dist/dotlottie-wc.js" type="module"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* The main wrapper for everything */
+        .maintenance-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* This container holds the phone and the cat */
+        .phone-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* The Cat Animation - Positioned "Inside" the phone */
+        .cat-animation {
+            position: absolute;
+            bottom: 10px; /* cat up/down inside the phone */
+            width: 160px !important;
+            height: 170px !important;
+            z-index: 2;
+        }
+
+        .line {
+            position: absolute;
+            bottom: 70px; 
+            width: 89px;
+            height: 0.1px;
+            background-color: #ccc;
+            border-radius: 10px;
+            z-index: 2;
+        }
+
+        /* The Gray Home Bar (iOS/Mobile style line) */
+        .mobile-line {
+            position: absolute;
+            bottom: 40px; /* Positions it below the cat */
+            width: 80px;
+            height: 5px;
+            background-color: #ccc;
+            border-radius: 10px;
+            z-index: 3;
+            overflow: hidden;
+        }
+        /*h2 {
+            color: #4c4d4d;
+            font-size: 1.2rem;
+            margin-top: -70px;
+            z-index: 3;
+        }
+
+        .fade-in {
+            animation: fadeIn 1.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }*/
+    /* for the countdown text */
+        #timer {
+            position: absolute;
+            font-weight: bold;
+            color: #03b320;
+            font-size: 1.1rem;
+            bottom: 340px;
+            z-index: 0;
+        }
+
+        p { color: #666; margin-top: 5px; }
+
+        .fade-in { animation: fadeIn 1.5s ease-in; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /*.mobile-line::after {
+            content: "";
+            display: block;
+            width: 40px;
+            height: 100%;
+            background-color: #999;
+            border-radius: 10px;
+            animation: slide 2s infinite ease-in-out;
+        }
+
+        @keyframes slide {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }*/
+
+        h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-top: 10px;
+        }
+
+        p {
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .fade-in {
+            animation: fadeIn 1.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="maintenance-wrapper fade-in">
+        
+        <div class="phone-container">
+            <dotlottie-wc 
+                src="https://lottie.host/fe77f928-ae78-4dbc-bf27-f70f75e53275/KEz2Rg0Fah.lottie" 
+                style="width: 100%; height: 100%" 
+                autoplay 
+                loop>
+            </dotlottie-wc>
+
+            <dotlottie-wc 
+                class="cat-animation"
+                src="https://lottie.host/f6b9ba83-f587-4858-8228-20f708f23965/MGYUCSr7Da.lottie" 
+                autoplay 
+                loop>
+            </dotlottie-wc>
+
+            <div class="mobile-line"></div>
+            <div class="line"></div>
+        </div>
+
+        <h1>We'll Be Right Back!</h1>
+        <p>Our site is currently undergoing scheduled maintenance.</p>
+        <span id="timer">30:00</span>
+    </div>
+
+    <script>
+        // CONFIGURATION: Set your duration in minutes here
+        const MAINTENANCE_DURATION_MINUTES = 10;
+        const REDIRECT_URL = "index.html"; 
+
+        // Calculate the target end time (current time + 30 minutes)
+        const endTime = new Date().getTime() + (MAINTENANCE_DURATION_MINUTES * 60 * 1000);
+
+        const countdownTask = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = endTime - now;
+
+            // Calculations for minutes and seconds
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Display the result
+            document.getElementById("timer").innerHTML = 
+                (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+
+            // If the countdown is finished, redirect
+            if (distance < 0) {
+                clearInterval(countdownTask);
+                document.getElementById("timer").innerHTML = "Redirecting...";
+                window.location.href = REDIRECT_URL;
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
